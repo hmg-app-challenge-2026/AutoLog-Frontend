@@ -27,29 +27,31 @@ import kr.autolog.vehicle.ui.design.components.IconAvatar
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.ModalText
-import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
-import kr.autolog.vehicle.ui.design.components.TertiaryButton
 import kr.autolog.vehicle.ui.design.components.initialsOf
 
 /**
  * 스펙 7.1 [+ 새 운전자 추가] 팝업(F-24, origin=LOCAL). 가운데 카드(`ModalCard`), 위에서 아래로 한 흐름:
- * 제목 "새 운전자 추가" → 아바타 미리보기(이름을 치면 이니셜) → 이름·부서 → 안내 메시지 → [추가 및 시작하기] · 작은 [취소].
+ * 머리 줄(제목 "새 운전자 추가" 가운데 · 닫기 X 오른쪽) → 아바타 미리보기(이름을 치면 이니셜) → 이름·부서 → 안내 메시지 → [추가 및 시작하기].
  * 버튼·안내는 카드 하단에 고정(내용만 스크롤). 주 버튼은 전폭, 높이는 터치 하한 76 dp.
- * 아바타는 연락처·프로필 추가 화면 관례대로 입력 칸보다 한 단계 큰 정도 — TALL 136 dp, 그 외 96 dp. 높이 640 dp 창(WIDE·NARROW)은 세로로 다 쌓으면 넘쳐서 이름·부서를 한 줄에 나란히 둔다.
+ * 아바타 TALL 160 dp, 그 외 120 dp. 높이 640 dp 창(WIDE·NARROW)은 이름·부서를 한 줄에 나란히 둔다.
  */
 @Composable
 fun AddDriverDialog(form: AddDriverForm, onAction: (ProfilePickerAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    ModalCard(modifier, footer = { AddDriverButtons(form, onAction) }) {
-        ModalTitle(stringResource(R.string.picker_add))
-        Spacer(Modifier.height(Space.s5))
+    ModalCard(
+        modifier,
+        title = stringResource(R.string.picker_add),
+        footer = { AddDriverButtons(form, onAction) },
+        onClose = { onAction(ProfilePickerAction.CancelAdd) },
+    ) {
+        Spacer(Modifier.height(Space.s3))
         NewDriverAvatar(
             form.name,
             if (layout == WindowLayout.TALL) Size.avatarPreviewTall else Size.avatarPreview,
             Modifier.align(Alignment.CenterHorizontally),
         )
-        Spacer(Modifier.height(Space.s5))
+        Spacer(Modifier.height(Space.s6))
         AddDriverFields(form, onAction, sideBySide = layout != WindowLayout.TALL)
     }
 }
@@ -92,7 +94,7 @@ private fun AddDriverFields(form: AddDriverForm, onAction: (ProfilePickerAction)
 }
 
 /**
- * 안내 메시지(가운데) + 주 버튼 전폭 + 그 아래 작은 글자 [취소]. 취소는 기본 동작(추가)과 무게를 겹치지 않는다.
+ * 안내 메시지(가운데) + 주 버튼 전폭. 취소는 오른쪽 위 X.
  * 안내 메시지를 버튼 바로 위(고정 영역)에 두는 이유: 좁은 창에서 입력 칸 아래에 두면 스크롤 밖에 숨어 누른 결과가 안 보였다.
  */
 @Composable
@@ -109,7 +111,6 @@ private fun AddDriverButtons(form: AddDriverForm, onAction: (ProfilePickerAction
             enabled = form.canSubmit,
             loading = form.saving,
         )
-        TertiaryButton(stringResource(R.string.action_cancel), onClick = { onAction(ProfilePickerAction.CancelAdd) })
     }
 }
 

@@ -1,6 +1,8 @@
 package kr.autolog.vehicle.ui.home
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -61,6 +63,18 @@ class HomeScreenTest {
         compose.onNodeWithText("지우기").performClick()
 
         assertEquals(listOf<HomeAction>(HomeAction.Recover(RecoveryChoice.DELETE)), actions)
+    }
+
+    @Test
+    fun `삭제 확인에서 X를 누르면 지우지 않고 앞 단계로 돌아간다`() {
+        val actions = mutableListOf<HomeAction>()
+        compose.setContent { AutoLogTheme { HomeScreen(recovery, onAction = { actions += it }) } }
+
+        compose.onNodeWithText("삭제").performClick()
+        compose.onNodeWithContentDescription("닫기").performClick()
+
+        compose.onNodeWithText("기록하기").assertIsDisplayed()
+        assertEquals(emptyList<HomeAction>(), actions)
     }
 }
 

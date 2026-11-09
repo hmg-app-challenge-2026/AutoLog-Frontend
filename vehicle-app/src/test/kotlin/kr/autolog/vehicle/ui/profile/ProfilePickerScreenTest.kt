@@ -78,7 +78,7 @@ class ProfilePickerScreenTest {
     }
 
     @Test
-    fun `추가 팝업 — 중복 안내를 보여 주고 주 버튼과 그 아래 취소로 끝낸다`() {
+    fun `추가 팝업 — 중복 안내를 보여 주고 주 버튼, 오른쪽 위 X로 끝낸다`() {
         val actions = mutableListOf<ProfilePickerAction>()
         val form = AddDriverForm(name = "김영업", dept = "영업1팀", error = AddDriverResult.Duplicate)
         compose.setContent {
@@ -92,7 +92,7 @@ class ProfilePickerScreenTest {
 
         compose.onNodeWithText("이미 등록된 사용자에요").assertIsDisplayed()
         compose.onNodeWithText("추가 및 시작하기").performClick()
-        compose.onNodeWithText("취소").performClick()
+        compose.onNodeWithContentDescription("닫기").performClick()
 
         assertEquals(listOf(ProfilePickerAction.SubmitAdd, ProfilePickerAction.CancelAdd), actions)
     }

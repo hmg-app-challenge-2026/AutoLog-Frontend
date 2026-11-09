@@ -28,7 +28,8 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     var confirmingDelete by rememberSaveable { mutableStateOf(false) }
-    ModalCard {
+    // 처음 단계는 반드시 하나를 골라야 해서 닫기가 없다. 삭제 확인 단계의 X는 앞 단계로 돌아간다
+    ModalCard(onClose = if (confirmingDelete) ({ confirmingDelete = false }) else null) {
         Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             if (!confirmingDelete) {
                 ModalTitle(stringResource(R.string.recovery_title))
@@ -55,11 +56,6 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
                 DangerButton(
                     text = stringResource(R.string.recovery_delete_yes),
                     onClick = { onChoice(RecoveryChoice.DELETE) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                SecondaryButton(
-                    text = stringResource(R.string.action_cancel),
-                    onClick = { confirmingDelete = false },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

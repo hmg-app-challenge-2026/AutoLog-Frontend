@@ -16,7 +16,6 @@ import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -115,7 +114,7 @@ class GalleryScreenshotTest {
                 color = AutoLogTheme.colors.textPrimary,
             )
             ModalCard(onClose = {}) {
-                ModalText("고르기만 하는 팝업은 제목 없이, 오른쪽 위 X로 닫아요.")
+                ModalText("목록처럼 제목이 필요 없는 팝업은 X만 둬요.")
             }
         }
     }
@@ -129,12 +128,10 @@ class GalleryScreenshotTest {
                 style = AutoLogTheme.type.display,
                 color = AutoLogTheme.colors.textPrimary,
             )
-            ModalCard(footer = {
+            ModalCard(title = "가운데 카드", onClose = {}, footer = {
                 PrimaryButton("확인", onClick = {}, modifier = Modifier.fillMaxWidth(), height = Size.buttonMd)
-                TertiaryButton("취소", onClick = {}, modifier = Modifier.align(Alignment.CenterHorizontally))
             }) {
-                ModalTitle("가운데 카드")
-                ModalText("모든 팝업은 이 모양이에요. 결정 버튼은 아래에 고정돼요.")
+                ModalText("제목은 X와 같은 줄 가운데, 취소는 오른쪽 위 X, 결정 버튼은 아래에 고정돼요.")
             }
         }
     }

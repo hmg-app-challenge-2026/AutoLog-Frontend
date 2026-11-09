@@ -296,7 +296,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | **Hero + Actions** (Home) | 맨 위 줄: 칩(전체 문구) · 배지. 동작 컬럼 45%(운전자 쪽, `ActionCard` 2×2) + hero 55% | 맨 위 줄: 축약 칩 · 배지 → hero(넘치면 스크롤 + 가장자리 흐림) → 보조 동작 → 하단 고정 주 버튼 | 맨 위 줄: 배지만 → 칩(전체 문구) → hero → 보조 동작 → 주 버튼 |
 | **Peek** (정차) | 가운데 카드(최대 폭 560 dp), 정보 늘리지 않음 | 세로 스택 가운데 정렬 — 기본 형태(사이드 창) | NARROW와 같음 |
 | **Countdown** (AutoEndPrompt) | 가운데 카드, 버튼 2개 가로(왼쪽 [기록 종료], 오른쪽 [계속 기록]) | 가운데 카드, 버튼 2개 세로(위 [기록 종료], 아래 [계속 기록]) | NARROW와 같음 |
-| **Form Dialog** (새 운전자 추가) | 위→아래: 제목 → 아바타(96 dp) → 이름·부서 한 줄에 나란히 → 주 버튼(전폭) → 작은 [취소]. 사이 간격 24 dp | WIDE와 같음 | 위→아래: 제목 → 아바타(136 dp) → 이름 → 부서 → 주 버튼 → [취소] |
+| **Form Dialog** (새 운전자 추가) | 머리 줄(제목 가운데 · X 오른쪽) → 아바타(120 dp) → 이름·부서 한 줄에 나란히 → 주 버튼(전폭) | WIDE와 같음 | 머리 줄 → 아바타(160 dp) → 이름 → 부서 → 주 버튼 |
 | **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
 | **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
 | **Master–Detail** (Settings) | 좌 목록 / 우 상세 | 목록 → 상세 push | NARROW와 같음 |
@@ -426,7 +426,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
 | `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 폭 720 dp 미만이면 버튼을 문장 아래로 내린다(문장이 3줄로 눌리지 않게). 놓친 운행 등 |
-| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **닫는 법은 팝업 종류로 정한다**: 결정·입력 팝업은 `footer` 버튼으로 끝내고, 고르기만 하는 목록 팝업은 `onClose`로 오른쪽 위 X(`CloseButton`)를 둔다(하단 [취소] 없음). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) |
+| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) |
 | `CloseButton` | 닫기 X. 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 영역 76 dp. 접근성 이름 "닫기" |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
@@ -506,4 +506,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 |---|---|---|
 | 1.0 | 2026-11-09 | 최초 확정 (사용 3단계·조작 최소화 포함) |
 | 1.1 | 2026-11-09 | 운전자 배지 오른쪽 위 고정(D-19) · `DriverBadge`·`IconAvatar`·`ActionTile` 추가 · `ActionCard` 세로 배치 · 축약 `StatusChip` · 오른쪽 위 예약 자리(`LocalTopEndReserved`) · 스크롤 가장자리 흐림 · Home WIDE 45:55 · 주유 기록 버튼 하나로(D-20) |
-| 1.2 | 2026-11-09 | 팝업을 가운데 카드 `ModalCard` 하나로 통일(D-21, `ScrimSheet` 삭제), 팝업 제목·설명 가운데 정렬(`ModalTitle`·`ModalText`) · 목록 팝업은 제목 없이 오른쪽 위 X(`CloseButton`, `ModalCard.onClose`) · `surfaceRaised` · 채움형 `InputField` · `AvatarFace` · 새 운전자 추가 팝업 고도화 |
+| 1.2 | 2026-11-09 | 팝업을 가운데 카드 `ModalCard` 하나로 통일(D-21, `ScrimSheet` 삭제), 팝업 제목·설명 가운데 정렬(`ModalTitle`·`ModalText`) · 취소·닫기는 모두 오른쪽 위 X(`CloseButton`, `ModalCard.onClose`), 제목은 X와 같은 줄(`ModalCard.title`) · `surfaceRaised` · 채움형 `InputField` · `AvatarFace` · 새 운전자 추가 팝업 고도화 |

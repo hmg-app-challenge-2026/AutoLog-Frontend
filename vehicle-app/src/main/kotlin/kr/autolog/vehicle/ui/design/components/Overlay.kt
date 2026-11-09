@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -51,7 +52,9 @@ private const val MODAL_ENTER_SCALE = 0.94f
  * - 등장: scrim은 투명도, 카드는 투명도 + 0.94→1 배율(`motion.standard`, 정적 모드면 즉시).
  * - 키보드가 올라오면 카드가 그 위로 올라가고(imePadding), 내용이 넘치면 카드 안에서 스크롤한다(가장자리 흐림).
  * - [footer]는 스크롤 밖 카드 하단에 고정된다 — 결정 버튼은 여기에 둔다(주 버튼은 스크롤해야 보이면 안 된다, 디자인 언어 7장).
- * - [onClose]가 있으면 카드 오른쪽 위에 X([CloseButton])가 고정된다 — 고르기만 하는 팝업(목록)용. 결정 팝업은 footer로 끝낸다.
+ * - **닫기·취소는 모두 [onClose] → 카드 오른쪽 위 X([CloseButton])**. 하단 [취소]·[닫기] 버튼은 두지 않는다.
+ *   닫을 수 없는 팝업(반드시 골라야 하는 결정)은 onClose를 주지 않는다.
+ * - [title]을 주면 X와 같은 머리 줄 가운데에 놓인다(iOS 시트 배치). X가 없는 팝업은 내용 첫 줄에 [ModalTitle]을 둬도 된다.
  * - 바깥 탭은 뒤 화면으로 새지 않게 삼킨다(클릭 의미론 없음 — Peek 입력 0개 검사에 걸리지 않는다). 닫기는 카드 안 버튼으로만.
  * 단계가 FULL에서 내려가면 루트가 화면째 지운다.
  */
@@ -59,6 +62,7 @@ private const val MODAL_ENTER_SCALE = 0.94f
 fun ModalCard(
     modifier: Modifier = Modifier,
     maxWidth: Dp = Size.dialogMaxWidth,
+    title: String? = null,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -89,13 +93,20 @@ fun ModalCard(
                     .background(c.surfaceRaised)
                     .border(Size.hairline, c.outline, shape),
             ) {
-                // X는 스크롤 밖 머리 줄에 고정 — 내용 위에 겹치지 않고, 스크롤해도 항상 닿는다
-                if (onClose != null) {
+                // 머리 줄(스크롤 밖 고정): 제목은 가운데, X는 오른쪽 — 스크롤해도 항상 닿고 내용 위에 겹치지 않는다.
+                // 제목 좌우를 X 폭만큼 똑같이 비워 제목이 카드 정중앙에 남는다
+                val header = title != null || onClose != null
+                if (header) {
                     Box(
-                        Modifier.fillMaxWidth().padding(top = Space.s3, end = Space.s3),
-                        contentAlignment = Alignment.TopEnd,
+                        Modifier.fillMaxWidth().padding(
+                            top = Space.s3,
+                            start = Space.s3,
+                            end = Space.s3,
+                        ).heightIn(min = Size.touchMin),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        CloseButton(onClose)
+                        title?.let { ModalTitle(it, Modifier.padding(horizontal = Size.touchMin)) }
+                        onClose?.let { CloseButton(it, Modifier.align(Alignment.CenterEnd)) }
                     }
                 }
                 val scroll = rememberScrollState()
@@ -108,13 +119,7 @@ fun ModalCard(
                             start = Space.s6,
                             end = Space.s6,
                             bottom = Space.s6,
-                            top = if (onClose !=
-                                null
-                            ) {
-                                Space.s1
-                            } else {
-                                Space.s6
-                            },
+                            top = if (header) Space.s2 else Space.s6,
                         ),
                     content = content,
                 )
