@@ -106,4 +106,20 @@ class FakeTripSessionTest {
         assertTrue(store.pendingReviews.first().isEmpty())
         assertTrue(s.state.value is SessionState.Idle)
     }
+
+    @Test
+    fun `목적 확인을 미뤄도 다음 운행은 시작된다 — 미룬 운행은 목적 확인 필요로 남는다`() = runTest {
+        val store = FakeLocalStore(AppClock { testScheduler.currentTime }, seed = false)
+        val s = FakeTripSession(backgroundScope, AppClock { testScheduler.currentTime }, store = store)
+        s.startSession()
+        s.finalize()
+        val deferred = (s.state.value as SessionState.PendingReview).trip.tripId
+        advanceTimeBy(1_000)
+
+        s.setMotion(VehicleMotion.MOVING) // 출발하면 자동으로 새 운행
+        runCurrent()
+
+        assertTrue(s.state.value is SessionState.Recording)
+        assertEquals(listOf(deferred), store.pendingReviews.first().map { it.tripId })
+    }
 }

@@ -68,6 +68,10 @@ interface TripSessionApi {
 
     suspend fun selectDriver(userId: String?)
 
+    /**
+     * Idle **또는 PendingReview**에서 시작할 수 있다. 목적 확인을 미룬("나중에") 운행은 저장소에 "목적 확인 필요"로 남고
+     * 새 운행이 시작된다 — 목적을 안 골랐다고 다음 운행이 기록되지 않으면 안 된다(스펙 6.6, R-2).
+     */
     suspend fun startSession(): StartResult
 
     /** [기록 종료] — StopCandidate에서도 즉시 종료. */
