@@ -223,7 +223,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 토큰 | 크기 | 굵기 | 행간 | 자간 | 용도 |
 |---|---|---|---|---|---|
 | `hero` | 140 sp | 300 | 1.0 | −2% | 이번 운행 거리 숫자(Home RecordingParked) |
-| `heroSmall` | 96 sp | 300 | 1.0 | −1.5% | Peek의 이번 운행 거리, 누적거리, 요약 숫자 |
+| `heroSmall` | 96 sp | 300 | 1.0 | −1.5% | Peek의 이번 운행 거리, 좁은 창의 이번 운행 거리, 요약 숫자 |
+| `heroCompact` | 72 sp | 300 | 1.0 | −1.5% | 자릿수가 많은 누적거리(18,420.5)를 좁은 창·Peek에 쓸 때 |
 | `display` | 56 sp | 600 | 1.15 | −1% | 화면 제목 ("누가 운전하나요?") |
 | `headline` | 44 sp | 600 | 1.2 | −0.5% | 섹션 제목, 다이얼로그 제목 |
 | `title` | 36 sp | 600 | 1.25 | 0 | **주요 정보 하한**: 목적지, 추천 목적, 카드 제목 |
@@ -231,6 +232,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `label` | 28 sp | 600 | 1.2 | 0 | 버튼, 칩 |
 | `caption` | 22 sp | 500 | 1.3 | +0.5% | **보조 하한**: 메타 정보. **Peek에 쓰지 않는다** |
 
+- 숫자와 단위는 **줄바꿈하지 않는다**("k / m" 방지). 넘치면 크기 단계를 `hero` → `heroSmall` → `heroCompact`로 낮춘다(`HeroMetric`의 `MetricSize`).
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
@@ -270,7 +272,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `size.touchMin` | 76 | 모든 터치 대상의 최소 높이·너비 |
 | `size.buttonMd` | 76 | 보조 버튼, 리스트 행 |
 | `size.buttonLg` | 96 | 주 버튼 |
-| `size.buttonXl` | 120 | Home의 [운행 시작]·[운행 종료] |
+| `size.buttonXl` | 120 | Home의 [운행 시작]·[기록 종료] (NARROW에서는 높이가 모자라 `buttonLg` 96) |
 | `size.iconButton` | 96 | 마이크, 키패드 키 |
 | `size.icon` | 36 | 버튼 안 아이콘 |
 | `size.iconLg` | 48 | 상태 아이콘 |
