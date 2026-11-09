@@ -68,7 +68,7 @@ class ComponentsScreenshotTest {
             SecondaryButton("기록 종료", onClick = {})
             TertiaryButton("나중에 선택", onClick = {})
             StatusChip("확인 필요 1건", ChipTone.WARNING, onClick = {})
-            HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", large = false)
+            HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             Banner("앱이 꺼진 동안 15.0 km를 달렸어요", listOf(BannerAction("추가") {}, BannerAction("무시") {}))
         }
     }

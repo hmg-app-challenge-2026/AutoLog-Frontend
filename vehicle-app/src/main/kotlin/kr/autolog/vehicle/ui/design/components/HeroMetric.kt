@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Space
 
+/** 숫자 크기 3단계: HERO 140 sp(이번 운행, 넓은 창) / MEDIUM 96 sp / COMPACT 72 sp(누적거리처럼 긴 숫자, 좁은 창). */
+enum class MetricSize { HERO, MEDIUM, COMPACT }
+
 /** 값이 바뀌었을 때 새 숫자가 이 투명도에서 1로 돌아온다(motion.fadeQuick). 정지형이면 즉시 교체. */
 private const val NUMBER_CHANGE_ALPHA = 0.4f
 
@@ -28,7 +31,7 @@ fun HeroMetric(
     label: String?,
     unavailableText: String,
     modifier: Modifier = Modifier,
-    large: Boolean = true,
+    size: MetricSize = MetricSize.HERO,
 ) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
@@ -50,14 +53,30 @@ fun HeroMetric(
                 }
             }
             Row {
+                val numberStyle =
+                    when (size) {
+                        MetricSize.HERO -> t.hero
+                        MetricSize.MEDIUM -> t.heroSmall
+                        MetricSize.COMPACT -> t.heroCompact
+                    }
+                // 숫자·단위는 줄바꿈하지 않는다("k / m" 방지). 넘치면 크기 단계를 낮춰 해결한다.
                 Text(
                     value,
-                    style = if (large) t.hero else t.heroSmall,
+                    style = numberStyle,
                     color = c.textPrimary,
+                    maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.alignByBaseline().graphicsLayer { this.alpha = alpha.value },
                 )
                 Spacer(Modifier.width(Space.s3))
-                Text(unit, style = t.headline, color = c.textTertiary, modifier = Modifier.alignByBaseline())
+                Text(
+                    unit,
+                    style = t.headline,
+                    color = c.textTertiary,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.alignByBaseline(),
+                )
             }
         }
     }

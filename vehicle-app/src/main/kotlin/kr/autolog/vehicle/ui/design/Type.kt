@@ -27,6 +27,7 @@ val AstaSans = FontFamily(astaSans(300), astaSans(400), astaSans(500), astaSans(
 data class AutoLogType(
     val hero: TextStyle,
     val heroSmall: TextStyle,
+    val heroCompact: TextStyle,
     val display: TextStyle,
     val headline: TextStyle,
     val title: TextStyle,
@@ -51,6 +52,7 @@ private fun style(sizeSp: Int, weight: Int, lineHeight: Float, trackingEm: Float
 fun autoLogType(): AutoLogType = AutoLogType(
     hero = style(140, 300, 1.0f, -0.02f, tnum = true),
     heroSmall = style(96, 300, 1.0f, -0.015f, tnum = true),
+    heroCompact = style(72, 300, 1.0f, -0.015f, tnum = true),
     display = style(56, 600, 1.15f, -0.01f),
     headline = style(44, 600, 1.2f, -0.005f),
     title = style(36, 600, 1.25f, 0f),

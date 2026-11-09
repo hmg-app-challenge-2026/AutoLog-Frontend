@@ -23,6 +23,7 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.ChipTone
 import kr.autolog.vehicle.ui.design.components.HeroMetric
+import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.StatusChip
 import kr.autolog.vehicle.ui.design.durationText
 
@@ -55,7 +56,7 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                         unit = stringResource(R.string.unit_km),
                         label = stringResource(R.string.peek_trip_label),
                         unavailableText = stringResource(R.string.distance_unavailable),
-                        large = false,
+                        size = MetricSize.MEDIUM,
                     )
                     Text(
                         state.destination ?: stringResource(R.string.peek_no_destination),
@@ -83,7 +84,7 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                         unit = stringResource(R.string.unit_km),
                         label = stringResource(R.string.odometer_label),
                         unavailableText = stringResource(R.string.distance_unavailable),
-                        large = false,
+                        size = MetricSize.COMPACT,
                     )
                 }
             }
