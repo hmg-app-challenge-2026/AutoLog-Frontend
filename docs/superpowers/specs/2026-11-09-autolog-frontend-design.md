@@ -176,7 +176,7 @@ AutoLog-Frontend/
 │   ├── src/vehicle/              # VehicleAppGraph
 │   ├── src/main/res/font/        # asta_sans.ttf (가변) + OFL.txt
 │   ├── src/test/                 # ViewModel·Navigator·토큰 테스트, Roborazzi
-│   └── src/test/screenshots/     # Roborazzi 기준 이미지(커밋)
+│   └── src/test/screenshots/     # Roborazzi 출력(로컬 검토용, .gitignore — 2026-11-09 사용자 결정)
 ├── web/
 │   ├── admin/                    # 운영 웹
 │   └── camera/index.html         # 폰 카메라 페이지
@@ -898,7 +898,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 
 ### 10.4 완료 정의
 
-기능 하나가 "완료"이려면: 화면 3레이아웃 × 2테마 스크린샷이 커밋돼 있고, ViewModel 테스트가 있고, 사용 단계(FULL 전용·PEEK·BACKGROUND) 규칙이 적용돼 있고, 1.2 조작 예산 안에 있고, `design-language.md` 13장 체크리스트를 통과하고, 맥 에뮬레이터에서 한 번 실행해 봤다(못 했으면 PR에 적는다).
+기능 하나가 "완료"이려면: 화면 3레이아웃 × 2테마 스크린샷을 로컬에 기록해 확인했고(현재 커밋하지 않음), ViewModel 테스트가 있고, 사용 단계(FULL 전용·PEEK·BACKGROUND) 규칙이 적용돼 있고, 1.2 조작 예산 안에 있고, `design-language.md` 13장 체크리스트를 통과하고, 맥 에뮬레이터에서 한 번 실행해 봤다(못 했으면 PR에 적는다).
 
 ---
 
