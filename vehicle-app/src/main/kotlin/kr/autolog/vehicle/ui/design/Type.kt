@@ -1,0 +1,58 @@
+package kr.autolog.vehicle.ui.design
+
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
+import kr.autolog.vehicle.R
+
+@OptIn(ExperimentalTextApi::class)
+private fun astaSans(weight: Int) =
+    Font(
+        R.font.asta_sans,
+        weight = FontWeight(weight),
+        variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
+    )
+
+/** Asta Sans (42dot, OFL, 가변 300–800). 디자인 언어 6.1. */
+val AstaSans = FontFamily(astaSans(300), astaSans(400), astaSans(500), astaSans(600), astaSans(700))
+
+/** 디자인 언어 6.2. */
+@Immutable
+data class AutoLogType(
+    val hero: TextStyle,
+    val heroSmall: TextStyle,
+    val display: TextStyle,
+    val headline: TextStyle,
+    val title: TextStyle,
+    val body: TextStyle,
+    val label: TextStyle,
+    val caption: TextStyle,
+)
+
+private fun style(sizeSp: Int, weight: Int, lineHeight: Float, trackingEm: Float, tnum: Boolean = false) =
+    TextStyle(
+        fontFamily = AstaSans,
+        fontWeight = FontWeight(weight),
+        fontSize = sizeSp.sp,
+        lineHeight = (sizeSp * lineHeight).sp,
+        letterSpacing = trackingEm.em,
+        fontFeatureSettings = if (tnum) "tnum" else null,
+    )
+
+fun autoLogType(): AutoLogType =
+    AutoLogType(
+        hero = style(140, 300, 1.0f, -0.02f, tnum = true),
+        heroSmall = style(96, 300, 1.0f, -0.015f, tnum = true),
+        display = style(56, 600, 1.15f, -0.01f),
+        headline = style(44, 600, 1.2f, -0.005f),
+        title = style(36, 600, 1.25f, 0f),
+        body = style(28, 400, 1.4f, 0f),
+        label = style(28, 600, 1.2f, 0f),
+        caption = style(22, 500, 1.3f, 0.005f),
+    )
