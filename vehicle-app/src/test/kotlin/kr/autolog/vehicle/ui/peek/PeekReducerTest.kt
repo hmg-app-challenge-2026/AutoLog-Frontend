@@ -8,17 +8,17 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class PeekReducerTest {
-    private val trip = LiveTrip("t-1", 0L, 18_420.5, "판교", "u-1")
+    private val trip = LiveTrip("t-1", 0L, 18_420.5, "판교", "u-1", originLabel = "본사")
 
     @Test
-    fun `기록 중이면 거리·목적지·저장 시각을 보여 준다`() {
+    fun `기록 중이면 거리와 출발지 → 목적지 경로를 보여 준다`() {
         val state =
             reducePeek(SessionState.Recording(trip, 23.4, lastSavedAt = 10_000), 18_443.9, "판교", now = 13_000)
 
         val r = state as PeekUiState.Recording
         assertEquals("23.4", r.tripKm)
+        assertEquals("본사", r.origin)
         assertEquals("판교", r.destination)
-        assertEquals(3, r.savedSecondsAgo)
         assertNull(r.autoEndInSec)
     }
 

@@ -343,6 +343,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 `tier != FULL`(잠금)인 동안 `AutoLogTheme.motion`은 **정지형 세트**로 바뀐다. 컴포넌트는 토큰만 쓰므로 자동으로 따라간다.
 
+반복 상태 표시(경로 화살표 흐름)는 화면 모션과 따로 `motion.ambient`가 정한다 — 정차에서도 켜지고, 시스템 "애니메이션 줄이기"·스크린샷에서만 꺼진다(`MotionTokens.Still`). 꺼지면 같은 자리에 방향이 읽히는 정지 그림을 그린다. 정차 중 허용은 Pleos 확인 대기(스펙 V-17).
+
 | 항목 | 주차 (FULL) | 정차 (PEEK) | 주행 (BACKGROUND) |
 |---|---|---|---|
 | 위치·크기 변화 | 스프링 | `snap()` (즉시) | 화면 없음 |
@@ -352,7 +354,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | shared-element | `motion.hero` | 사용 안 함 | — |
 | 로딩 | `motion.loading` | 정적 문구 | — |
 | 카운트다운 막대(AutoEndPrompt) | 선형 감소 허용(상태 설명) | Peek에서는 숫자만 | — |
-| 깜빡임·펄스·자동 스크롤 | 사용 안 함 | 사용 안 함 | — |
+| 흐름 표시(경로 화살표 `RouteFlow`) | 허용 | **허용(예외)** — 투명도만 바뀌고 위치 이동 없음, 주기 1.4초(`motion.flowPeriodMs`) | 화면 없음 |
+| 그 밖의 깜빡임·펄스·자동 스크롤 | 사용 안 함 | 사용 안 함 | — |
 
 ### 8.5 시스템 "애니메이션 줄이기"
 
@@ -434,7 +437,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
 | `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
-| `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중`. 운전자는 오른쪽 위 `DriverBadge`) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 목적지(`title`) ④ 기록 방식 한 줄(`body`, `textSecondary`: "계기판 거리 · 10초 전 저장") ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션 없음 |
+| `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중`. 운전자는 오른쪽 위 `DriverBadge`) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 경로(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
+| `RouteFlow` | 출발지(`body`, `textSecondary`) → 갈매기 3개 화살표(폭 28 dp, 칸 16 dp, 선 3 dp 둥근 끝, `accent`) → 목적지(`title`). 빛의 머리가 위에서 아래로 지나가며 가까운 갈매기를 밝힌다(꺼진 갈매기도 투명도 0.18로 남아 방향이 늘 읽힘), 한 바퀴 1.4초 뒤 짧은 쉼. `motion.ambient`가 꺼지면 위→아래로 짙어지는 정지 그림. 출발지를 모르면 목적지만 |
 | `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · 왼쪽 [기록 종료](`PrimaryButton`) · 오른쪽 [계속 기록](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.

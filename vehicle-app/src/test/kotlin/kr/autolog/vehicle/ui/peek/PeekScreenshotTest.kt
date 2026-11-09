@@ -14,12 +14,12 @@ import org.robolectric.annotation.GraphicsMode
 class PeekScreenshotTest {
     @Test
     fun recording() = captureAll("peek_recording", driver = PeekDriver) {
-        PeekScreen(PeekUiState.Recording("23.4", "판교 테크노밸리 거래처", 10, null))
+        PeekScreen(PeekUiState.Recording("23.4", "본사", "판교 테크노밸리 거래처", null))
     }
 
     @Test
     fun autoEnd() = captureAll("peek_autoend", driver = PeekDriver) {
-        PeekScreen(PeekUiState.Recording("23.4", null, 4, 161))
+        PeekScreen(PeekUiState.Recording("23.4", "본사", null, 161))
     }
 
     @Test

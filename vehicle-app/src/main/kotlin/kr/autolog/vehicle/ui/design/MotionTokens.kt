@@ -9,11 +9,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Immutable
 
 /**
- * 디자인 언어 8.2·8.4. [Static]은 tier != FULL(정차 Peek) 또는 시스템 "애니메이션 줄이기"일 때 쓴다.
- * 컴포넌트는 이 토큰만 쓰므로 단계가 바뀌면 자동으로 정지형이 된다.
+ * 디자인 언어 8.2·8.4. [isStatic]은 tier != FULL(정차 Peek) 또는 시스템 "애니메이션 줄이기"일 때 — 화면 전환·등장 모션이 멈춘다.
+ * [ambient]는 그와 별개인 **상태 표시용 반복 모션**(경로 화살표 흐름 등) 허용 여부. Peek에서도 켜지고,
+ * 시스템 "애니메이션 줄이기"이거나 스크린샷처럼 정지 화면이 필요할 때만 꺼진다.
+ * 컴포넌트는 이 토큰만 쓰므로 단계가 바뀌면 자동으로 맞는 형태가 된다.
  */
 @Immutable
-class MotionTokens private constructor(val isStatic: Boolean) {
+class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boolean) {
     fun <T> standard(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.9f, stiffness = 400f)
 
     fun <T> gentle(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 1.0f, stiffness = 200f)
@@ -28,8 +30,14 @@ class MotionTokens private constructor(val isStatic: Boolean) {
 
     val pressScale: Float get() = if (isStatic) 1f else 0.97f
 
+    /** 흐름 표시(경로 화살표) 한 바퀴 시간. 급하지 않게 — 숨 쉬는 속도보다 조금 빠른 정도. */
+    val flowPeriodMs: Int get() = 1_400
+
     companion object {
-        val Standard = MotionTokens(isStatic = false)
-        val Static = MotionTokens(isStatic = true)
+        val Standard = MotionTokens(isStatic = false, ambient = true)
+        val Static = MotionTokens(isStatic = true, ambient = true)
+
+        /** 반복 모션까지 모두 멈춤 — 시스템 "애니메이션 줄이기", 스크린샷. */
+        val Still = MotionTokens(isStatic = true, ambient = false)
     }
 }

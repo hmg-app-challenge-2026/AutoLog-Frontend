@@ -10,7 +10,6 @@
     <string name="peek_recording">기록 중</string>
         <string name="peek_trip_label">이번 운행</string>
     <string name="peek_no_destination">목적지 없음 — 도착 후 물어볼게요</string>
-    <string name="peek_source_saved">계기판 거리 · %1$d초 전 저장</string>
     <string name="peek_auto_end">멈춰 있으면 %1$s 후 기록이 자동 종료돼요</string>
     <string name="peek_no_trip">기록 중인 운행이 없어요</string>
     <string name="peek_no_trip_hint">출발하면 자동으로 기록해요</string>

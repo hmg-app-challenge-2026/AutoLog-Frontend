@@ -8,13 +8,9 @@ import kr.autolog.vehicle.ui.design.remainingSeconds
 sealed interface PeekUiState {
     data object Loading : PeekUiState
 
-    /** [tripKm] null = 계기판 미확정. [autoEndInSec] = 움직임 없음·내비 도착 자동 종료까지 남은 초. */
-    data class Recording(
-        val tripKm: String?,
-        val destination: String?,
-        val savedSecondsAgo: Int,
-        val autoEndInSec: Int?,
-    ) : PeekUiState
+    /** [tripKm] null = 계기판 미확정. [origin] null = 출발지 모름(경로 대신 목적지만). [autoEndInSec] = 움직임 없음·내비 도착 자동 종료까지 남은 초. */
+    data class Recording(val tripKm: String?, val origin: String?, val destination: String?, val autoEndInSec: Int?) :
+        PeekUiState
 
     data class NoTrip(val odometerKm: String?) : PeekUiState
 }
@@ -25,15 +21,15 @@ internal fun reducePeek(state: SessionState, odometerKm: Double?, destination: S
         is SessionState.Recording ->
             PeekUiState.Recording(
                 tripKm = formatKm(state.liveKm),
+                origin = state.trip.originLabel,
                 destination = destination,
-                savedSecondsAgo = ((now - state.lastSavedAt) / 1000).toInt().coerceAtLeast(0),
                 autoEndInSec = null,
             )
         is SessionState.StopCandidate ->
             PeekUiState.Recording(
                 tripKm = formatKm(state.liveKm),
+                origin = state.trip.originLabel,
                 destination = destination,
-                savedSecondsAgo = 0,
                 autoEndInSec = if (state.reason == StopReason.GEAR_P) null else remainingSeconds(state.deadlineAt, now),
             )
         else -> PeekUiState.NoTrip(formatKm(odometerKm))

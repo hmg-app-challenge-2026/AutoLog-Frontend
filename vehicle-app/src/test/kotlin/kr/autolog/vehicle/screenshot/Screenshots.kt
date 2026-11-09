@@ -36,7 +36,8 @@ fun captureAll(
             RuntimeEnvironment.setQualifiers("${size.qualifier}-${if (dark) "night" else "notnight"}-xhdpi")
             val theme = if (dark) "dark" else "light"
             captureRoboImage("src/test/screenshots/${name}_${size.name.lowercase()}_$theme.png") {
-                AutoLogTheme(darkTheme = dark) {
+                // 반복 상태 모션(경로 화살표 등)은 멈춘 그림으로 — 무한 애니메이션은 캡처를 끝나지 않게 한다
+                AutoLogTheme(darkTheme = dark, ambientMotion = false) {
                     Box(Modifier.fillMaxSize().background(AutoLogTheme.colors.bg)) {
                         WindowLayoutHost {
                             if (driver == null) {

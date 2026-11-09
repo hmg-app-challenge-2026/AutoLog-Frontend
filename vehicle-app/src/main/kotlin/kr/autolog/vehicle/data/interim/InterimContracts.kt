@@ -27,6 +27,8 @@ data class LiveTrip(
     val startOdometerKm: Double?,
     val destinationLabel: String?,
     val driverUserId: String?,
+    /** 출발지 이름(등록 장소 이름, 없으면 동 단위 주소). 모르면 null — 앱 A 요청 R-1. */
+    val originLabel: String? = null,
 )
 
 sealed interface SessionState {

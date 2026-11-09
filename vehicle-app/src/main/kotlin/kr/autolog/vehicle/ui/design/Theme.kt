@@ -83,11 +83,18 @@ private fun AutoLogColors.toMaterial() = if (isDark) {
 fun AutoLogTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     staticMotion: Boolean = false,
+    /** false면 반복 상태 모션까지 멈춘다(스크린샷 — 무한 애니메이션이 캡처를 막는다). */
+    ambientMotion: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val colors = if (darkTheme) DarkColors else LightColors
     val type = remember { autoLogType() }
-    val motion = if (staticMotion || systemAnimationsOff()) MotionTokens.Static else MotionTokens.Standard
+    val motion =
+        when {
+            !ambientMotion || systemAnimationsOff() -> MotionTokens.Still
+            staticMotion -> MotionTokens.Static
+            else -> MotionTokens.Standard
+        }
     CompositionLocalProvider(
         LocalAutoLogColors provides colors,
         LocalAutoLogType provides type,

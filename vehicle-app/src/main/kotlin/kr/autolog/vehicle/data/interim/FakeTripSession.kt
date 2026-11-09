@@ -46,7 +46,7 @@ class FakeTripSession(
     override suspend fun startSession(): StartResult {
         if (_state.value !is SessionState.Idle) return StartResult.Failed("이미 기록 중입니다")
         val now = clock.nowMs()
-        val trip = LiveTrip("trip-$now", now, _totalOdometerKm.value, "판교 테크노밸리 거래처", _currentDriver.value)
+        val trip = LiveTrip("trip-$now", now, _totalOdometerKm.value, "판교 테크노밸리 거래처", _currentDriver.value, "본사")
         _state.value =
             SessionState.Recording(trip, liveKm = if (_totalOdometerKm.value == null) null else 0.0, lastSavedAt = now)
         return StartResult.Started(trip.tripId)

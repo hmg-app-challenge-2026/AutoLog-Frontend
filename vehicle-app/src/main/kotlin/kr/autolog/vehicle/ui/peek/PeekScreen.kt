@@ -24,6 +24,7 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.ChipTone
 import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
+import kr.autolog.vehicle.ui.design.components.RouteFlow
 import kr.autolog.vehicle.ui.design.components.StatusChip
 import kr.autolog.vehicle.ui.design.durationText
 
@@ -35,7 +36,7 @@ fun PeekRoute() {
     PeekScreen(state)
 }
 
-/** 스펙 7.0. 클릭 가능한 요소 0개, 모션 없음. */
+/** 스펙 7.0. 클릭 가능한 요소 0개. 모션은 경로 화살표 흐름(반복 상태 표시)만. */
 @Composable
 fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
@@ -57,15 +58,11 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                         unavailableText = stringResource(R.string.distance_unavailable),
                         size = MetricSize.MEDIUM,
                     )
-                    Text(
-                        state.destination ?: stringResource(R.string.peek_no_destination),
-                        style = t.title,
-                        color = c.textPrimary,
-                    )
-                    Text(
-                        stringResource(R.string.peek_source_saved, state.savedSecondsAgo),
-                        style = t.body,
-                        color = c.textSecondary,
+                    // 출발지(작게) → 흐르는 화살표 → 목적지. 그 아래 줄(기록 방식 등)은 무엇을 둘지 정하는 중이라 비워 둔다
+                    RouteFlow(
+                        origin = state.origin,
+                        destination = state.destination ?: stringResource(R.string.peek_no_destination),
+                        destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
                     )
                     state.autoEndInSec?.let {
                         Text(

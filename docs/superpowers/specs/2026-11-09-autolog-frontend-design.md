@@ -640,10 +640,10 @@ sealed interface Route {
 | 목적 | 신호 대기처럼 잠깐 멈췄을 때, 사이드 창에서 **기록이 제대로 되고 있는지 한눈에 확인**만 한다. 조작은 하지 않는다 |
 | 진입 | 정차(PEEK) 중 사용자가 앱을 연다(런처·사이드 창·알림 탭). 앱이 PEEK 단계면 백스택과 무관하게 이 패널이 보인다 |
 | 이탈 | 다시 움직이면(BACKGROUND) 스스로 물러난다. 기어 P(FULL)면 전체 앱 Home으로 바뀐다(기록 중이면 7.2.1 자동 종료 안내가 함께 뜬다). 닫기는 시스템 창 조작으로 |
-| 내용 (위→아래) | ① 상태 줄: `● 기록 중`(운전자 이름은 오른쪽 위 배지 — D-19) ② **이번 운행 거리** `23.4 km`(`type.heroSmall`) ③ 목적지 `판교 테크노밸리 거래처`(`type.title`, 없으면 "목적지 없음 — 도착 후 물어볼게요") ④ 기록 방식 한 줄: "계기판 거리 · 10초 전 저장"(`type.body`, `textSecondary`) ⑤ 상황 줄(있을 때만): 움직임 없음 자동 종료 대기면 "멈춰 있으면 2분 41초 후 기록이 자동 종료돼요" |
+| 내용 (위→아래) | ① 상태 줄: `● 기록 중`(운전자 이름은 오른쪽 위 배지 — D-19) ② **이번 운행 거리** `23.4 km`(`type.heroSmall`) ③ **경로**(`RouteFlow`): 출발지 `본사`(`type.body`, `textSecondary`) → 위에서 아래로 빛이 흐르는 화살표(갈매기 3개, `accent`) → 목적지 `판교 테크노밸리 거래처`(`type.title`, 없으면 "목적지 없음 — 도착 후 물어볼게요"를 `textSecondary`로). 출발지를 모르면 화살표 없이 목적지만 ④ (비워 둠 — 무엇을 둘지 결정 대기. 예전 "계기판 거리 · 10초 전 저장"은 늘 같은 출처·초 단위로 깜빡이는 내부 정보라 뺐다, 2026-11-09) ⑤ 상황 줄(있을 때만): 움직임 없음 자동 종료 대기면 "멈춰 있으면 2분 41초 후 기록이 자동 종료돼요" |
 | 운행이 없을 때 | "기록 중인 운행이 없어요 · 출발하면 자동으로 기록해요" + 누적거리 |
 | 입력 요소 | **없다.** 버튼·스크롤·탭 반응 모두 없음. 한 화면에 다 들어가게 줄인다(넘치면 ⑤ → ④ 순으로 생략) |
-| 모션 | 없음. 숫자는 1초 스로틀로 즉시 교체(D-11) |
+| 모션 | 화면 모션은 없음. 숫자는 1초 스로틀로 즉시 교체(D-11). **예외: 경로 화살표의 흐름**(반복 상태 표시 — "이 경로를 가는 중", 현대·기아 하이브리드 회생 표시처럼 빛이 주기적으로 흐름). 위치 이동 없이 투명도만 바뀌고 주기 1.4초, 시스템 "애니메이션 줄이기"면 위→아래로 짙어지는 정지 그림(디자인 언어 8.4). 정차 중 표시 허용 여부는 V-17로 확인 |
 | 레이아웃 | 사이드 창(NARROW·TALL)이 기본. 세로 스택, 가운데 정렬, 최대 폭 560 dp. WIDE에서도 같은 카드를 가운데에 둔다(넓혀서 정보를 늘리지 않는다) |
 | 수용 기준 | 정차 상태에서 앱을 열면 1초 안에 Peek. 입력 노드 0개(UI 테스트). 출발하면 2초 안에 물러남 |
 
@@ -950,6 +950,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | R-6 | Backend `app/`·`web/` 삭제, CI `:app:assembleDebug` 제거, CONVENTIONS 1.2·기술명세 7·8장에 "화면은 AutoLog-Frontend" 반영 | 공동 | 같은 applicationId 앱이 두 곳에 있으면 혼란 | 11.30 |
 | R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
 | R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
+| R-9 | 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
 
 ---
 
@@ -975,6 +976,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | V-14 | Pleos DrivingMode SDK가 기어 P/D를 주는지(Backend sdk-findings #5) | 1.1.1 1순위 | Backend 검증 결과 확인 | 대기 |
 | V-15 | Pleos에서 AAOS `GEAR_SELECTION`·`CURRENT_GEAR`·`PARKING_BRAKE_ON`·`IGNITION_STATE`가 읽히는지(권한 `CAR_POWERTRAIN`), 에뮬레이터 VHAL로 값이 바뀌는지 | 1.1.1 2~4순위 | `CarPropertyManager.getProperty`·`registerCallback` 로그 | 대기 |
 | V-16 | 시동 OFF→ON 뒤 앱 프로세스가 살아 있는지 / 부팅 후 서비스를 다시 띄울 수 있는지(Backend sdk-findings #4b) | 1.1.1 최후 규칙의 처리 시점 | 에뮬레이터 전원 OFF→ON | 대기 |
+| V-17 | 정차(PEEK, CarUxRestrictions 적용 중)에 Peek 경로 화살표의 반복 투명도 애니메이션이 Pleos 운전자 주의 분산 기준에 맞는지(안 되면 정차 중엔 정지 그림, `MotionTokens.ambient` 한 곳만 바꾸면 됨) | 7.0 | 맥 에뮬레이터 + Pleos 가이드 확인 | 대기 |
 
 
 ### 13.1 알고 받아들인 사각지대

@@ -55,6 +55,7 @@ class GalleryScreenshotTest {
                 CloseButton(onClick = {})
             }
             HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
+            RouteFlow("본사", "판교 테크노밸리 거래처")
             Banner("앱이 꺼진 동안 15.0 km를 달렸어요", listOf(BannerAction("추가") {}, BannerAction("무시") {}))
         }
     }
