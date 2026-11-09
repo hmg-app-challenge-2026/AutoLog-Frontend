@@ -20,7 +20,7 @@
 
 ## 2. 브랜치·커밋·PR
 
-- 브랜치: `fe/<요약>`(영어 소문자 + `-`). 예: `fe/profile-picker`, `fe/admin-vehicles`. 설계 문서만 바꾸면 `docs/<요약>`.
+- 브랜치: **작업(계획의 Task) 하나 = 브랜치 하나**, `feat/<요약>`(영어 소문자 + `-`). 예: `feat/foundation`, `feat/main-screen`, `feat/review-trip`. 앞 작업 브랜치에서 갈라져 나와 이어 쌓는다. 버그만 고치면 `fix/<요약>`, 설계 문서만 바꾸면 `docs/<요약>`(2026-11-09 사용자 결정 — 예전 `fe/` 접두어는 쓰지 않는다).
 - `main`에 직접 push하지 않는다. PR + 리뷰 1명 + CI 통과 → **Squash merge**.
 - 커밋: `<type>(<scope>): <한국어 요약> (<기능ID>)`. type은 Backend와 같다(feat·fix·test·refactor·docs·build·chore).
 - scope: `app`(차량 앱 공통) `design` `nav` `repo` `profile` `home` `review` `receipt` `report` `history` `settings` `admin` `camera` `backend`(submodule 갱신) `build` `spec`
