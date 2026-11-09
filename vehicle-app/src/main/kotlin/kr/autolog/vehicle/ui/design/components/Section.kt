@@ -1,5 +1,7 @@
 package kr.autolog.vehicle.ui.design.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -21,4 +23,16 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier) {
         style = AutoLogTheme.type.section,
         color = AutoLogTheme.colors.textSecondary,
     )
+}
+
+/**
+ * 소제목 + 내용 한 묶음. Home(모든 창 크기)·Peek 등 같은 정보를 보여 주는 화면이 같은 소제목 문구와 모양을 쓰게 한다
+ * — 소제목 문구는 정보 종류마다 하나(`section_*` 문자열): 주행 거리 · 운행 경로 · 누적 거리 · 이번 달 운행 정보 · 최근 운행 기록.
+ */
+@Composable
+fun Section(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier.fillMaxWidth()) {
+        SectionHeader(title)
+        content()
+    }
 }

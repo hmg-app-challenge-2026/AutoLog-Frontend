@@ -2,9 +2,7 @@ package kr.autolog.vehicle.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,21 +16,21 @@ import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.RouteFlow
-import kr.autolog.vehicle.ui.design.components.SectionHeader
+import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.TripListRow
 
 /**
  * Home 가운데 두 섹션(D-25). 상태마다 "사용자가 지금 알고 싶은 것"을 왼쪽(값)·오른쪽(맥락)에 나눈다.
  * - 대기: 왼쪽 "이번 달 운행 정보"(누적 km + 보조 사실) · 오른쪽 "최근 운행 기록"(최신 3건 목록).
- * - 기록 중: 왼쪽 "이번 운행"(거리) · 오른쪽 "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
- * 모든 소제목은 같은 [SectionHeader], 거리 숫자는 72 sp(TALL만 96) — 계기판처럼 계속 보는 앱이 아니므로.
+ * - 기록 중: 왼쪽 "주행 거리" · 오른쪽 "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
+ * 모든 섹션은 공용 [Section](같은 소제목 모양·문구 — Peek도 같다), 거리 숫자는 72 sp(TALL만 96) — 계기판처럼 계속 보는 앱이 아니므로.
  */
 @Composable
 internal fun HomePrimarySection(state: HomeUiState) {
     when (state.phase) {
-        HomePhase.READY -> HomeSection(stringResource(R.string.section_month_trip)) { MonthSummary(state.month) }
+        HomePhase.READY -> Section(stringResource(R.string.section_month_trip)) { MonthSummary(state.month) }
         HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
-            HomeSection(stringResource(R.string.section_this_trip)) { TripDistance(state.tripKm) }
+            Section(stringResource(R.string.section_distance)) { TripDistance(state.tripKm) }
         HomePhase.NEEDS_RECOVERY -> Unit
     }
 }
@@ -41,9 +39,9 @@ internal fun HomePrimarySection(state: HomeUiState) {
 internal fun HomeSecondarySection(state: HomeUiState, onAction: (HomeAction) -> Unit) {
     when (state.phase) {
         HomePhase.READY ->
-            HomeSection(stringResource(R.string.section_recent_trips)) { RecentTrips(state.recentTrips, onAction) }
+            Section(stringResource(R.string.section_recent_trips)) { RecentTrips(state.recentTrips, onAction) }
         HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
-            HomeSection(stringResource(R.string.section_route)) {
+            Section(stringResource(R.string.section_route)) {
                 val c = AutoLogTheme.colors
                 RouteFlow(
                     origin = state.origin,
@@ -52,15 +50,6 @@ internal fun HomeSecondarySection(state: HomeUiState, onAction: (HomeAction) -> 
                 )
             }
         HomePhase.NEEDS_RECOVERY -> Unit
-    }
-}
-
-/** 소제목 + 내용. 모든 섹션이 같은 모양. */
-@Composable
-private fun HomeSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxWidth()) {
-        SectionHeader(title)
-        content()
     }
 }
 
@@ -108,7 +97,7 @@ private fun TripDistance(tripKm: String?) {
     HeroMetric(
         value = tripKm,
         unit = stringResource(R.string.unit_km),
-        label = null, // 소제목 "이번 운행"이 이미 말한다
+        label = null, // 소제목 "주행 거리"가 이미 말한다
         unavailableText = stringResource(R.string.distance_unavailable),
         size = metricSize(),
     )

@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Space
 
-/** 숫자 크기 3단계: HERO 140 sp(이번 운행, 넓은 창) / MEDIUM 96 sp / COMPACT 72 sp(누적거리처럼 긴 숫자, 좁은 창). */
+/** 숫자 크기 3단계: HERO 140 sp(가장 큰 값) / MEDIUM 96 sp / COMPACT 72 sp(누적거리처럼 긴 숫자, 좁은 창). */
 enum class MetricSize { HERO, MEDIUM, COMPACT }
 
 /** 값이 바뀌었을 때 새 숫자가 이 투명도에서 1로 돌아온다(motion.fadeQuick). 정지형이면 즉시 교체. */

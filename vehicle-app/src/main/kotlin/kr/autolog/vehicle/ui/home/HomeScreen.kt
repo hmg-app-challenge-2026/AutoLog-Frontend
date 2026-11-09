@@ -120,12 +120,12 @@ private fun HomeStatus(state: HomeUiState) {
     val recording = state.phase == HomePhase.RECORDING_PARKED || state.phase == HomePhase.AUTO_ENDING
     if (recording) {
         StatusLine(
-            text = stringResource(R.string.home_status_recording),
+            text = stringResource(R.string.status_recording),
             dot = c.success,
             detail = stringResource(R.string.home_status_elapsed, state.elapsedMin ?: 0),
         )
     } else {
-        StatusLine(text = stringResource(R.string.home_status_ready), dot = c.textTertiary)
+        StatusLine(text = stringResource(R.string.status_ready), dot = c.textTertiary)
     }
 }
 

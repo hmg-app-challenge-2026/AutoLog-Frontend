@@ -22,6 +22,7 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.RouteFlow
+import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.durationText
 
@@ -44,20 +45,24 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                 PeekUiState.Loading -> Unit
                 is PeekUiState.Recording -> {
                     // Home과 같은 상태 줄(점 + 글자). 운전자는 오른쪽 위 배지에만
-                    StatusLine(text = stringResource(R.string.peek_recording), dot = c.success)
-                    HeroMetric(
-                        value = state.tripKm,
-                        unit = stringResource(R.string.unit_km),
-                        label = stringResource(R.string.peek_trip_label),
-                        unavailableText = stringResource(R.string.distance_unavailable),
-                        size = MetricSize.MEDIUM,
-                    )
-                    // 출발지(작게) → 흐르는 화살표 → 목적지. 그 아래 줄(기록 방식 등)은 무엇을 둘지 정하는 중이라 비워 둔다
-                    RouteFlow(
-                        origin = state.origin,
-                        destination = state.destination ?: stringResource(R.string.peek_no_destination),
-                        destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
-                    )
+                    StatusLine(text = stringResource(R.string.status_recording), dot = c.success)
+                    // Home과 같은 섹션·소제목("주행 거리", "운행 경로") — 같은 정보는 어느 화면에서나 같은 이름
+                    Section(stringResource(R.string.section_distance)) {
+                        HeroMetric(
+                            value = state.tripKm,
+                            unit = stringResource(R.string.unit_km),
+                            label = null,
+                            unavailableText = stringResource(R.string.distance_unavailable),
+                            size = MetricSize.MEDIUM,
+                        )
+                    }
+                    Section(stringResource(R.string.section_route)) {
+                        RouteFlow(
+                            origin = state.origin,
+                            destination = state.destination ?: stringResource(R.string.peek_no_destination),
+                            destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
+                        )
+                    }
                     state.autoEndInSec?.let {
                         Text(
                             stringResource(R.string.peek_auto_end, durationText(it)),
@@ -69,13 +74,15 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                 is PeekUiState.NoTrip -> {
                     Text(stringResource(R.string.peek_no_trip), style = t.title, color = c.textPrimary)
                     Text(stringResource(R.string.peek_no_trip_hint), style = t.body, color = c.textSecondary)
-                    HeroMetric(
-                        value = state.odometerKm,
-                        unit = stringResource(R.string.unit_km),
-                        label = stringResource(R.string.odometer_label),
-                        unavailableText = stringResource(R.string.distance_unavailable),
-                        size = MetricSize.COMPACT,
-                    )
+                    Section(stringResource(R.string.section_odometer)) {
+                        HeroMetric(
+                            value = state.odometerKm,
+                            unit = stringResource(R.string.unit_km),
+                            label = null,
+                            unavailableText = stringResource(R.string.distance_unavailable),
+                            size = MetricSize.COMPACT,
+                        )
+                    }
                 }
             }
         }

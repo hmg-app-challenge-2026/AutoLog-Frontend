@@ -56,7 +56,7 @@ class GalleryScreenshotTest {
                 DriverBadge(null, null, onClick = {})
                 CloseButton(onClick = {})
             }
-            HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
+            HeroMetric("23.4", "km", "주행 거리", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             RouteFlow("본사", "판교 테크노밸리 거래처")
             NoticeRow(Icons.Rounded.ErrorOutline, AutoLogTheme.colors.warning, "운행 1건 목적 확인", onClick = {})
             NoticeRow(Icons.Rounded.Info, AutoLogTheme.colors.accent, "꺼진 동안 15.0 km 주행", actions = {
