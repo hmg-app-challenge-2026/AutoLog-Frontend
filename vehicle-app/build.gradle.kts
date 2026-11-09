@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.lifecycle.vm.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(fe.compose.icons.extended)
+    implementation(fe.coil.compose) // 영수증 썸네일
+    implementation(fe.zxing.core) // 영수증 QR
 
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
