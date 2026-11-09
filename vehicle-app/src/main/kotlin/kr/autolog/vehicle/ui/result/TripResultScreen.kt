@@ -12,11 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,7 +54,8 @@ fun TripResultRoute(tripId: String) {
  * 스펙 7.3 운행 결과(D-27). **정렬축은 하나**: 화면 여백 안의 콘텐츠 폭을 좌우 반반으로 나누고, 아래 행동 줄도 같은 두 칸을 쓴다.
  * - 맨 위 줄 가운데: 제목 "운행 기록을 완료했어요"(운전자 배지 없음).
  * - 왼쪽 칸 = 운행 요약: "운행 거리 · 시간"(큰 거리 옆에 작은 시간) → "운행 경로"(○—● 경로선).
- * - 오른쪽 칸 = 운행 목적: 같은 폭 선택형 행 3개(8 dp 간격) → 바로 아래 "✓ 일반 업무용 거리 48.2 km로 분류돼요"(선택의 결과).
+ * - 오른쪽 칸 = 운행 목적: 같은 폭 선택형 행 3개(8 dp 간격).
+ * - 두 칸 아래 가운데 = "일반 업무용 거리 48.2 km로 분류돼요"(선택의 결과), 행동 버튼 바로 위.
  * - 아래 행동 줄: [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · 3초]를
  *   콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 자동으로 눌릴 주 버튼 글자 + 맨 위 가장자리 막대.
  * NARROW·TALL: 넓은 창 순서를 세로 한 칸에(넘치면 그 칸만 스크롤) + 하단 고정 행동 — NARROW는 짧은 이름 한 줄, TALL은 두 줄.
@@ -83,11 +80,15 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
     Column(
         Modifier.fillMaxSize().padding(
             start = margin,
-            top = margin,
+            top = if (layout == WindowLayout.WIDE) Space.s5 else margin,
             end = margin,
-            bottom = if (dense) Space.s2 else margin,
+            bottom = when (layout) {
+                WindowLayout.NARROW -> Space.s2
+                WindowLayout.WIDE -> Space.s5
+                WindowLayout.TALL -> margin
+            },
         ),
-        verticalArrangement = Arrangement.spacedBy(Space.s4),
+        verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {
         TopLine {
             Text(
@@ -115,11 +116,12 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                     ScrollColumn(Modifier.weight(1f).fillMaxHeight()) { TripSummary(state) }
                     ScrollColumn(Modifier.weight(1f).fillMaxHeight()) { Purpose(state, onAction) }
                 }
+                ClassificationSummary(state)
                 // 행동 줄: 버튼 3개를 콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 주 버튼 안에
                 WideActions(state, onAction)
             }
             else -> {
-                // 한 칸: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행) + 분류 문구.
+                // 한 칸: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행).
                 // 분할 화면(504×640)에선 다 들어가지 않아 이 칸만 스크롤되고 버튼은 늘 보인다
                 val scroll = rememberScrollState()
                 // [수정]을 누르면 아래에 있는 운행 목적이 보이게 끝까지 내린다(좁은 창에선 첫 화면 밖)
@@ -129,6 +131,7 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                     Spacer(Modifier.height(if (dense) Space.s4 else Space.s6))
                     Purpose(state, onAction, dense)
                 }
+                ClassificationSummary(state)
                 if (layout == WindowLayout.NARROW) NarrowActions(state, onAction) else CompactActions(state, onAction)
             }
         }
@@ -142,7 +145,7 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 }
 
 /**
- * 운행 요약: "운행 거리 · 시간" → "운행 경로". 넓은·세로 창은 위아래로(섹션 사이 32 dp).
+ * 운행 요약: "운행 거리 · 시간" → "운행 경로". 섹션 사이는 넓은·좁은 창 32 dp, 세로 창 48 dp.
  * 좁은 창에서는 거리·시간과 경로를 전폭으로 쌓아 커진 값이 잘리지 않게 한다. 아래 목적 선택은 같은 칸에서 스크롤한다.
  */
 @Composable
@@ -152,7 +155,7 @@ private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
             Section(stringResource(R.string.section_distance_time), dense = true) {
                 DistanceTime(state)
             }
-            Spacer(Modifier.height(Space.s3))
+            Spacer(Modifier.height(Space.s6))
             Section(stringResource(R.string.section_route), dense = true) {
                 Route(state)
             }
@@ -160,7 +163,7 @@ private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
         return
     }
     Section(stringResource(R.string.section_distance_time)) { DistanceTime(state) }
-    Spacer(Modifier.height(Space.s2))
+    Spacer(Modifier.height(if (LocalWindowLayout.current == WindowLayout.TALL) Space.s7 else Space.s6))
     Section(stringResource(R.string.section_route)) { Route(state) }
 }
 
@@ -193,10 +196,9 @@ private fun Route(state: TripResultUiState) {
     )
 }
 
-/** 오른쪽 칸: 운행 목적 — 같은 폭 선택형 행 3개(8 dp 간격, 보기 모드에선 누를 수 없음) + 바로 아래 분류 한 줄. */
+/** 운행 목적 — 같은 폭 선택형 행 3개(8 dp 간격, 보기 모드에선 누를 수 없음). */
 @Composable
 private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit, dense: Boolean = false) {
-    val c = AutoLogTheme.colors
     Section(stringResource(R.string.section_purpose), dense = dense) {
         // dense 행은 면 위아래가 이미 비어 있어 간격 없이 쌓는다(면 사이 틈 20 dp)
         Column(verticalArrangement = if (dense) Arrangement.Top else Arrangement.spacedBy(Space.s2)) {
@@ -209,29 +211,23 @@ private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Un
                 )
             }
         }
-        Spacer(Modifier.height(Space.s3))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s2)) {
-            Icon(
-                Icons.Rounded.CheckCircle,
-                contentDescription = null,
-                tint = c.success,
-                modifier = Modifier.size(Size.iconSm),
-            )
-            val kind = stringResource(classLabel(state.selected))
-            Text(
-                state.km?.let { stringResource(R.string.result_classified, kind, stringResource(R.string.trip_km, it)) }
-                    ?: stringResource(R.string.result_classified_no_km, kind),
-                style = if (LocalWindowLayout.current ==
-                    WindowLayout.WIDE
-                ) {
-                    AutoLogTheme.type.fine
-                } else {
-                    AutoLogTheme.type.caption
-                },
-                color = c.textSecondary,
-            )
-        }
     }
+}
+
+/** 선택한 운행 목적의 분류 결과를 하단 행동 버튼 바로 위, 화면 가운데에 표시한다. */
+@Composable
+private fun ClassificationSummary(state: TripResultUiState) {
+    val c = AutoLogTheme.colors
+    val t = AutoLogTheme.type
+    val kind = stringResource(classLabel(state.selected))
+    Text(
+        state.km?.let { stringResource(R.string.result_classified, kind, stringResource(R.string.trip_km, it)) }
+            ?: stringResource(R.string.result_classified_no_km, kind),
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        style = if (LocalWindowLayout.current == WindowLayout.WIDE) t.title else t.label,
+        color = c.textPrimary,
+    )
 }
 
 /**
