@@ -7,4 +7,13 @@
     <string name="distance_unavailable">계기판 거리를 읽지 못했어요</string>
     <string name="badge_scheduled">배차</string>
     <string name="badge_recent">최근</string>
+    <string name="peek_recording">기록 중</string>
+    <string name="peek_driver_unknown">운전자 미선택</string>
+    <string name="peek_trip_label">이번 운행</string>
+    <string name="peek_no_destination">목적지 없음 — 도착 후 물어볼게요</string>
+    <string name="peek_source_saved">계기판 거리 · %1$d초 전 저장</string>
+    <string name="peek_auto_end">멈춰 있으면 %1$s 뒤 기록을 마쳐요</string>
+    <string name="peek_no_trip">기록 중인 운행이 없어요</string>
+    <string name="peek_no_trip_hint">출발하면 자동으로 기록해요</string>
+    <string name="odometer_label">누적 거리</string>
 </resources>
