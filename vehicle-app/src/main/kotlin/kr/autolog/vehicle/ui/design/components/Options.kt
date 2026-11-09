@@ -3,6 +3,9 @@ package kr.autolog.vehicle.ui.design.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -47,5 +50,21 @@ fun OptionButton(text: String, selected: Boolean, onClick: () -> Unit, modifier:
             )
         }
         Text(text, style = AutoLogTheme.type.label, color = c.textPrimary)
+    }
+}
+
+/**
+ * 디자인 언어 11장 OptionGroup — 선택지 묶음 하나. 묶음 이름(`caption`, `textSecondary`) 아래 [OptionButton]들을 줄바꿈하며 놓는다.
+ * 목적 확인의 "일반 업무용 · 출퇴근용 · 비업무용"처럼 종류별로 나눌 때 쓴다.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun OptionGroup(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s2)) {
+        Text(title, style = AutoLogTheme.type.caption, color = AutoLogTheme.colors.textSecondary)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(Space.s3),
+            verticalArrangement = Arrangement.spacedBy(Space.s3),
+        ) { content() } // 실험 API(FlowRowScope)가 호출부로 새지 않게 일반 람다로 받는다
     }
 }

@@ -437,10 +437,11 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
-| `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
+| `OptionGroup` | 선택지 묶음 하나(예: 목적 확인의 일반 업무용·출퇴근용·비업무용). 묶음 이름(`caption`, `textSecondary`) 아래 `OptionButton`(`buttonMd`)들을 줄바꿈하며 놓는다. 선택되면 `accent` 링 + 체크. 고르면 바로 실행되는 곳에 쓴다 |
+| `TopLine` · `ScrollColumn` | 전체 화면 공용 뼈대. `TopLine` = 맨 위 76 dp 줄(상태 줄·화면 제목), 오른쪽은 운전자 배지 자리로 비운다. `ScrollColumn` = 위쪽 정렬 + 넘치면 스크롤 + 가장자리 흐림 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusLine`: 초록 점 + `기록 중`, 터치 불가. 운전자는 오른쪽 위 `DriverBadge`) ② 섹션 "주행 거리"(`HeroMetric`, `heroSmall`) ③ 섹션 "운행 경로"(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) — 소제목·모양은 Home과 같은 `Section` ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
-| `RouteFlow` | **경로 선**: 왼쪽 표시 칸(폭 28 dp)에 출발 ○(속 빈 원 12 dp, `textSecondary`) → 갈매기 3개 화살표(폭 24 dp, 칸 12 dp, 선 3 dp 둥근 끝, `accent`) → 도착 ●(채운 원 12 dp, `accent`)을 세로로, 오른쪽 글자 칸에 장소 이름. 위계는 소제목(`section` 22 굵게) → **목적지(`label` 28, `textPrimary`, 두 줄까지 + 말줄임 — 값)** → 출발지(`caption` 22 보통, `textSecondary`, 한 줄 — 보조). 표시는 첫 줄 글자 높이의 가운데에 맞춘다. 빛의 머리가 위에서 아래로 지나가며 가까운 갈매기를 밝힌다(꺼진 갈매기도 투명도 0.18로 남아 방향이 늘 읽힘), 한 바퀴 1.4초 뒤 짧은 쉼. `motion.ambient`가 꺼지면 위→아래로 짙어지는 정지 그림. 출발지를 모르면 ●과 목적지만 |
+| `RouteFlow` | **경로 선**: 왼쪽 표시 칸(폭 28 dp)에 출발 ○(속 빈 원 12 dp, `textSecondary`) → 갈매기 3개 화살표(폭 24 dp, 칸 12 dp, 선 3 dp 둥근 끝, `accent`) → 도착 ●(채운 원 12 dp, `accent`)을 세로로, 오른쪽 글자 칸에 장소 이름. 위계는 소제목(`section` 22 굵게) → **목적지(`label` 28, `textPrimary`, 두 줄까지 + 말줄임 — 값)** → 출발지(`caption` 22 보통, `textSecondary`, 한 줄 — 보조). 표시는 첫 줄 글자 높이의 가운데에 맞춘다. 빛의 머리가 위에서 아래로 지나가며 가까운 갈매기를 밝힌다(꺼진 갈매기도 투명도 0.18로 남아 방향이 늘 읽힘), 한 바퀴 1.4초 뒤 짧은 쉼. `motion.ambient`가 꺼지면 위→아래로 짙어지는 정지 그림. 출발지를 모르면 ●과 목적지만 `live = false`(끝난 운행 — 목적 확인·이력)면 흐름 모션 없이 정지 그림 |
 | `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · 왼쪽 [기록 종료](`PrimaryButton`) · 오른쪽 [계속 기록](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
@@ -521,3 +522,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.8 | 2026-11-09 | `RouteFlow`를 경로 선으로: 출발 ○ · 흐르는 화살표 · 도착 ● 표시 칸 + 글자 칸. 출발지 caption(보조) · 목적지 label(값)으로 위계를 되돌림(1.6의 "같은 스타일"은 좁은 창에서 출발지가 소제목보다 커 보이는 역전을 만들었다). 화살표 칸 16 → 12 dp로 줄여 504×640에서도 목적지까지 스크롤 없이. `Size.routeDot` 추가 |
 | 1.9 | 2026-11-09 | 앱 안 알림 없음(스펙 D-26): `NoticeRow`·`NoticePill`·`OverflowRow` 삭제, Home은 상태 줄 → 두 섹션 → 타일. `TripListRow` 경고색 제거(목적 없음은 회색 문장). 놓친 운행은 `ModalCard` 팝업(X = 무시, `ModalCard.closeLabel`로 접근성 이름을 그 뜻으로) |
 | 1.10 | 2026-11-09 | 누를 수 있는 요소의 공통 동작을 `Modifier.tappable` 하나로(입력 잠금·누름 0.97배·햅틱, 물결 없음) — `ConfidenceRow`도 누름 피드백·햅틱을 갖게 됨. 화면 바깥 여백 `screenMargin()` 하나로 |
+| 1.11 | 2026-11-09 | 목적 확인 화면(스펙 7.3): `IconButtonXL`(마이크) 구현, `SegmentedPurpose` → 범용 `OptionGroup`, 공용 뼈대 `TopLine`·`ScrollColumn`(Home에서 승격), `RouteFlow(live)`. 팝업 머리 줄 제목은 짧은 명사("거래처 등록"), 질문은 본문 첫 줄 |

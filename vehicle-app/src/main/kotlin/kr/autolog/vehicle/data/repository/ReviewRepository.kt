@@ -20,7 +20,14 @@ import kr.autolog.vehicle.data.interim.TripSessionApi
 interface ReviewRepository {
     fun review(tripId: String): Flow<TripReview?>
 
-    suspend fun confirm(tripId: String, detail: PurposeDetail, note: String?, byVoice: Boolean)
+    /** [destination]: 도착지를 모르던 운행에 사용자가 고른 도착지(없으면 null — 그대로 둔다). */
+    suspend fun confirm(
+        tripId: String,
+        detail: PurposeDetail,
+        note: String?,
+        byVoice: Boolean,
+        destination: String? = null,
+    )
 
     /** 목적지가 없을 때 고를 후보(내비 최근 목적지, 최대 3). */
     suspend fun destinationCandidates(): List<String>
@@ -62,8 +69,13 @@ class DefaultReviewRepository(
         )
     }
 
-    override suspend fun confirm(tripId: String, detail: PurposeDetail, note: String?, byVoice: Boolean) =
-        session.confirmPurpose(tripId, detail, note, if (byVoice) InputMode.VOICE else InputMode.TAP)
+    override suspend fun confirm(
+        tripId: String,
+        detail: PurposeDetail,
+        note: String?,
+        byVoice: Boolean,
+        destination: String?,
+    ) = session.confirmPurpose(tripId, detail, note, if (byVoice) InputMode.VOICE else InputMode.TAP, destination)
 
     override suspend fun destinationCandidates(): List<String> = context.recentDestinations().map {
         it.label

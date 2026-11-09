@@ -56,6 +56,7 @@ private const val GLOW_SPREAD = 1.2f
  * 화살표는 하이브리드 회생 제동 표시처럼 갈매기(⌄) 3개에 빛이 위에서 아래로 주기적으로 흐른다([MotionTokens.flowPeriodMs]).
  * 반복 모션은 [kr.autolog.vehicle.ui.design.MotionTokens.ambient]일 때만 — 꺼지면 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
+ * [live] = 지금 달리는 운행(흐름 모션). 끝난 운행(목적 확인·이력)은 false — 흐름이 "진행 중"으로 잘못 읽히지 않게 정지 그림.
  */
 @Composable
 fun RouteFlow(
@@ -63,6 +64,7 @@ fun RouteFlow(
     destination: String,
     modifier: Modifier = Modifier,
     destinationColor: Color = AutoLogTheme.colors.textPrimary,
+    live: Boolean = true,
 ) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
@@ -75,7 +77,7 @@ fun RouteFlow(
             RouteRow(markerHeight = originLine, marker = { OriginMarker() }) {
                 Text(origin, style = t.caption, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            RouteRow(markerHeight = null, marker = { FlowChevrons() }) {}
+            RouteRow(markerHeight = null, marker = { FlowChevrons(live) }) {}
         }
         RouteRow(markerHeight = destinationLine, marker = { DestinationMarker() }) {
             // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
@@ -110,11 +112,11 @@ private fun DestinationMarker() {
 
 /** 아래를 향한 갈매기 3개. 칸 높이 `space.3`(12 dp), 폭 `space.5`, 선 `ring`(3 dp), 둥근 끝. */
 @Composable
-private fun FlowChevrons(modifier: Modifier = Modifier) {
+private fun FlowChevrons(live: Boolean, modifier: Modifier = Modifier) {
     val motion = AutoLogTheme.motion
     val accent = AutoLogTheme.colors.accent
     val phase: State<Float> =
-        if (motion.ambient) {
+        if (live && motion.ambient) {
             rememberInfiniteTransition(label = "routeFlow").animateFloat(
                 initialValue = 0f,
                 targetValue = 1f,

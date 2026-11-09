@@ -101,7 +101,7 @@ class FakeTripSessionTest {
         val tripId = (s.state.value as SessionState.PendingReview).trip.tripId
 
         assertEquals(listOf(tripId), store.pendingReviews.first().map { it.tripId })
-        s.confirmPurpose(tripId, PurposeDetail.MEETING, null, InputMode.TAP)
+        s.confirmPurpose(tripId, PurposeDetail.MEETING, null, InputMode.TAP, destinationLabel = null)
 
         assertTrue(store.pendingReviews.first().isEmpty())
         assertTrue(s.state.value is SessionState.Idle)

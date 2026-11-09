@@ -8,7 +8,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-09-autolog-frontend-design.md` 7.3~7.9, 8장 · `docs/design-language.md`
 
-**선행 상태:** 브랜치 `fe/vehicle-app-foundation`(디자인 게이트 리뷰는 사용자가 나중에). 이 계획은 그 위에 `fe/vehicle-app-screens`로 쌓는다.
+**선행 상태:** 브랜치 `feat/foundation`(옛 이름 `fe/vehicle-app-foundation`)(디자인 게이트 리뷰는 사용자가 나중에). 이 계획은 그 위에 `fe/vehicle-app-screens`로 쌓는다.
 
 ## Global Constraints
 
@@ -91,6 +91,8 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 ---
 
 ## Task 4: ReviewTrip — 목적 확인 (F-06, F-08, F-09, F-17)
+
+> 2026-11-09 구현(브랜치 `feat/review-trip`). 계획과 달라진 점: 목적지 없음 칩 선택은 확정 때 함께 저장(R-10, interim `confirmPurpose`에 `destinationLabel`), 거래처 등록은 시트가 아니라 `ModalCard`(X = 아니요), 화면별 ViewModel 저장소(`RouteViewModelStores`) 추가, 제목 "목적 확인".
 
 **Files:** Create `ui/review/ReviewUiState.kt`, `ReviewViewModel.kt`, `ReviewScreen.kt` · Test `ReviewReducerTest`, `ReviewViewModelTest`, `ReviewScreenTest`(조작 예산), `ReviewScreenshotTest`
 

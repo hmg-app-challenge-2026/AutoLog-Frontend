@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -138,5 +139,24 @@ fun CloseButton(
                 modifier = Modifier.size(Size.iconSm),
             )
         }
+    }
+}
+
+/**
+ * 디자인 언어 11장 IconButtonXL — 96 dp 원형(`surface2`), 아이콘 36 dp(`accent`). 마이크처럼 글자 없이도 뜻이 분명한 동작에만.
+ * [label]은 접근성 이름(화면에 안 보임) — 보이는 이름이 필요하면 옆에 글자를 따로 둔다.
+ */
+@Composable
+fun IconButtonXL(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val c = AutoLogTheme.colors
+    Box(
+        modifier
+            .size(Size.iconButton)
+            .tappable(onClick)
+            .clip(CircleShape)
+            .background(c.surface2),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = label, tint = c.accent, modifier = Modifier.size(Size.icon))
     }
 }

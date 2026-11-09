@@ -529,7 +529,7 @@ interface TripSessionApi {
     suspend fun startSession(): StartResult
     suspend fun finalize()                     // [기록 종료] — StopCandidate에서도 즉시 종료
     suspend fun resume()                       // [계속 기록] — StopCandidate → Recording, 카운트다운 취소
-    suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode)
+    suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode, destinationLabel: String?)  // R-10
     suspend fun assignDriver(tripId: String, userId: String, source: DriverSource)
     suspend fun acceptMissedTrip(); suspend fun ignoreMissedTrip()
     suspend fun resolveRecovery(choice: RecoveryChoice)   // RECORD / CONTINUE / DELETE
@@ -615,12 +615,12 @@ sealed interface Route {
     data object ProfilePicker : Route; data object Home : Route
     data class ReviewTrip(val tripId: String) : Route
     data object ReceiptQr : Route; data class FuelEntry(val receiptId: String? = null) : Route  // D-20
-    data class FuelEntry(val tripId: String?) : Route
     data object Report : Route; data object History : Route; data object Settings : Route
 }
 ```
 
 - `Navigator`는 `StateFlow<List<Route>>` 백스택과 `push/pop/replaceAll`을 가진다. 시스템 뒤로 가기는 `BackHandler`로 `pop`.
+- **화면마다 ViewModel 저장소 하나**(`ui/root/RouteViewModelStores`, Navigation 라이브러리의 NavBackStackEntry 역할): 화면의 `viewModel {}`은 그 화면이 백스택에 있는 동안만 살고, 스택에서 빠지면 지워진다. 같은 운행의 목적 확인을 다시 열면 새 상태로 시작한다. 저장소 묶음은 Activity 범위 ViewModel 안에 있어 창 크기 변경(분할 화면 전환)에도 화면 상태가 유지된다.
 - 백스택의 모든 화면은 **주차(FULL) 전용**이다. `tier != FULL`이면 `push`가 무시된다. (PEEK은 Route가 아니라 루트가 그리는 별도 층이다.)
 - 앱 시작 경로(FULL일 때): `ProfilePicker`(운전자 미선택 또는 앱 새로 시작) → `Home`. 이미 운행 중이면 바로 `Home`. PEEK·BACKGROUND로 시작하면 6.9 2번을 따른다.
 - 알림 탭 딥링크: 앱 A의 `TripRecordingService` 알림이 `MainActivity`를 열 때 extra `autolog.route=review`, `autolog.tripId=<id>`를 넣는다(키 상수는 R-3 요청). `onNewIntent`에서 `Navigator.handleDeepLink`.
@@ -717,12 +717,14 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 
 | 항목 | 내용 |
 |---|---|
-| 진입 | 운행 종료(PendingReview) 자동 진입, 시스템 알림 탭 딥링크, History 미확정 행(목적을 나중에 고치는 곳은 여기 하나 — D-26) |
-| 상단 요약 | `09:00 → 09:35 · 23.4 km` / 출발 → 도착 라벨. 도착지가 없으면 후보 선택(최근 목적지 3 → 등록 장소 → 직접 입력) |
-| 추천 | `Suggestion.isConfident`(≥ 0.8)면 **큰 추천 버튼 1개** "거래처 방문으로 기록"(`button.primary.xl`) + 아래 "다른 목적" 펼침. 아니면 추천 없이 선택지를 먼저 보여 준다(기획: 확신이 낮으면 반드시 묻는다) |
-| 선택지 | `PurposeCategory` 3그룹: 일반 업무용(거래처 방문·외근·출장·회의·지점 이동) / 출퇴근용(출근·퇴근) / 비업무용(개인 이동) + "나중에" |
-| 음성 | `VoiceRepository.available`이면 마이크 버튼(`button.icon.xl`). 듣는 중: 파형 대신 **정적** "듣고 있어요…" 표시(최대 8초). 결과: 인식 원문을 보여 주고 매칭된 목적을 선택 상태로 → [저장]. 실패 → "다시 말하기" · 탭으로 선택 |
-| 확정 후 | `shouldProposePlace`면 시트 "이곳을 거래처로 등록할까요?" 라벨 입력(프리셋: 내비 목적지명) → [등록] · [아니요] |
+| 진입 | 운행 종료(PendingReview) 자동 진입, 시스템 알림 탭 딥링크, History 미확정 행(목적을 나중에 고치는 곳은 여기 하나 — D-26). 확정·나중에·등록 뒤에는 **들어온 화면으로 돌아간다**(Home 또는 History, 뒤가 없으면 Home) |
+| 제목 | 맨 위 줄 "목적 확인"(`type.title`) — 좁은 창에서도 운전자 배지 옆 한 줄 |
+| 상단 요약 | 섹션 "운행 요약": `09:00 → 09:35 · 23.4 km`(`label`) + 경로선(`RouteFlow(live = false)` — 끝난 운행이라 흐름 모션 없음). 도착지가 없으면 경로선 끝이 회색 "도착지를 골라 주세요" + **최근 목적지 칩(최대 3)**, 고른 칩은 경로선에 바로 보이고 목적과 함께 저장된다(R-10). 등록 장소·직접 입력은 이번 범위에서 뺐다 |
+| 추천 | `Suggestion.isConfident`(≥ 0.8)이고 "확인 필요"가 아니면 섹션 "추천 목적" + **큰 추천 버튼 1개** "거래처 방문으로 기록"(`PrimaryButton` 120 dp, 조사 "(으)로"는 `withRo`), 아래 [다른 목적] · [나중에]가 한 줄. 아니면 추천 없이 선택지를 먼저 보여 준다(기획: 확신이 낮으면 반드시 묻는다) |
+| 선택지 | `OptionGroup` 3묶음: 일반 업무용(거래처 방문·외근·출장·회의·지점 이동) / 출퇴근용(출근·퇴근) / 비업무용(개인 이동). 묶음 이름이 소제목이라 위에 소제목을 더 두지 않는다. **1탭 = 바로 확정** |
+| 음성 | `ReviewRepository.voiceAvailable`이면 마이크(`IconButtonXL` 96 dp) + 옆에 상태 한 줄: "말로 입력" → 듣는 중 **정적** "듣고 있어요…"(최대 8초, `VOICE_TIMEOUT_MS`) → 알아들음: 인식 원문 “…” + 아래 선택지에 매칭 목적이 체크 + [저장](원문은 메모로). 못 알아들음·실패·시간 초과: 이유 한 줄 + 선택지가 펴진다. 마이크를 다시 누르면 다시 듣는다 |
+| 확정 후 | `shouldProposePlace`면 팝업(`ModalCard`) 제목 "거래처 등록" · 본문 "이곳을 거래처로 등록할까요?" · 이름 칸(프리셋: 고른 도착지 또는 운행 도착지) → 하단 [등록], 오른쪽 위 X = 아니요. 목적은 이미 저장된 뒤다 |
+| 레이아웃 | WIDE: 좌 요약 40% / 우 결정 60%(각각 넘치면 그 칸만 스크롤). NARROW·TALL: 요약 → 결정 세로 한 칸 |
 | 수용 기준 | 1탭 확정(CONFIRMED). 음성 "판교 A고객사 미팅" → 거래처 방문 + note. 주행 시작 시 2초 안에 닫힘 |
 
 ### 7.4 ReceiptQr — 주유 기록 추가의 기본 경로 (F-30, D-20) · 주차 전용
@@ -957,6 +959,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | R-6 | Backend `app/`·`web/` 삭제, CI `:app:assembleDebug` 제거, CONVENTIONS 1.2·기술명세 7·8장에 "화면은 AutoLog-Frontend" 반영 | 공동 | 같은 applicationId 앱이 두 곳에 있으면 혼란 | 11.30 |
 | R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
 | R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
+| R-10 | 목적 확정 때 도착지 함께 저장: `TripSessionApi.confirmPurpose(..., destinationLabel: String?)`. 도착지를 모르던 운행에 사용자가 최근 목적지를 고르면 같이 저장한다(null이면 그대로). 지금은 interim에 프론트가 추가해 둠 | A | 7.3 목적 확인 | 11.13 |
 | R-9 | 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
 
 ---
@@ -1031,3 +1034,4 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 1.0 | 2026-11-09 | 최초 확정 (사용 3단계·조작 최소화, 리포 구조, 스택, MVVM·Repository, 가변 레이아웃, 사용 단계 잠금, 화면 명세(Peek·AutoEndPrompt 포함), 사내 서버 취합, 웹, 품질 게이트, 일정) |
 | 1.1 | 2026-11-09 | D-26 앱 안 알림 없음(시스템 알림만): Home 알림 띠·목록 삭제, 놓친 운행은 대기 Home 팝업, 목적 없는 운행은 운행 기록 조회에서 직접, 미확정 영수증은 [주유 기록 추가] 진입 때 바로 입력 창 |
 | 1.2 | 2026-11-09 | 구조 점검: `SessionRepository`가 화면용 세션 타입을 내보내 `ui/`의 interim 의존 제거(6.5·6.6), Home·Peek 상태 계산을 `XxxReducer.kt`로 분리 |
+| 1.3 | 2026-11-09 | 7.3 목적 확인 구현 반영(제목·요약·추천·선택지·음성·거래처 등록·레이아웃), R-10(확정 때 도착지 저장), 6.10 화면별 ViewModel 저장소 |
