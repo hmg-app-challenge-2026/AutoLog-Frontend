@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
@@ -34,38 +34,51 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /**
- * 디자인 언어 11장 ActionCard: 넓은 창의 보조 동작 타일. 아이콘(왼쪽 위) + 이름(아래), 카드 전체가 터치 대상.
- * 세로 배치라 2열 격자에서도 이름이 한 줄을 온전히 쓴다(가로 배치는 아이콘 몫만큼 이름 폭이 줄어 글자 단위로 꺾였다).
+ * 디자인 언어 11장 DockButton — 화면 맨 아래 독(넓은 창)의 동작. `surface1` 알약, 높이 76 dp, 아이콘(`accent`) + 이름(`label`).
+ * [showLabel]이 false면 아이콘만 있는 정사각(76 dp) — 자주 쓰지 않는 동작(설정). 이름은 접근성 설명으로 남긴다.
  */
 @Composable
-fun ActionCard(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier, badge: Int = 0) {
+fun DockButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showLabel: Boolean = true,
+) {
     val c = AutoLogTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val view = LocalView.current
-    Column(
+    Row(
         modifier
-            .heightIn(min = Size.buttonLg)
+            .heightIn(min = Size.touchMin)
+            .widthIn(min = Size.touchMin)
             .pressFeedback(interaction)
-            .clip(RoundedCornerShape(Radius.md))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(c.surface1)
             .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
                 view.confirmHaptic()
                 onClick()
-            }.padding(Space.s4),
-        verticalArrangement = Arrangement.spacedBy(Space.s3),
+            }.then(
+                if (showLabel) {
+                    Modifier.padding(horizontal = Space.s5)
+                } else {
+                    Modifier.semantics {
+                        contentDescription =
+                            label
+                    }
+                },
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Space.s3, Alignment.CenterHorizontally),
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-            Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
-            Spacer(Modifier.weight(1f))
-            if (badge > 0) CountBadge(badge)
-        }
-        Text(title, style = AutoLogTheme.type.label, color = c.textPrimary, maxLines = 2)
+        Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
+        if (showLabel) Text(label, style = AutoLogTheme.type.label, color = c.textPrimary, maxLines = 1)
     }
 }
 
-/** 좁은 창의 보조 동작: 원형 아이콘 버튼(96 dp) + 아래 글자. */
+/** 좁은 창 독의 동작: 원형 아이콘(76 dp, `surface2`) + 아래 이름(`caption`). */
 @Composable
-fun QuickAction(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier, badge: Int = 0) {
+fun QuickAction(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val view = LocalView.current
@@ -80,14 +93,11 @@ fun QuickAction(icon: ImageVector, title: String, onClick: () -> Unit, modifier:
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {
-        Box(contentAlignment = Alignment.TopEnd) {
-            Box(
-                Modifier.size(Size.touchMin).clip(CircleShape).background(c.surface2),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
-            }
-            if (badge > 0) CountBadge(badge)
+        Box(
+            Modifier.size(Size.touchMin).clip(CircleShape).background(c.surface2),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
         }
         Text(
             title,
@@ -97,18 +107,4 @@ fun QuickAction(icon: ImageVector, title: String, onClick: () -> Unit, modifier:
             maxLines = 1,
         )
     }
-}
-
-/** 숫자 배지(도착한 영수증 등). accentFill + 흰 글씨. */
-@Composable
-fun CountBadge(count: Int) {
-    val c = AutoLogTheme.colors
-    Text(
-        count.toString(),
-        style = AutoLogTheme.type.caption,
-        color = c.onAccent,
-        modifier = Modifier.clip(
-            CircleShape,
-        ).background(c.accentFill).padding(horizontal = Space.s3, vertical = Space.s1),
-    )
 }

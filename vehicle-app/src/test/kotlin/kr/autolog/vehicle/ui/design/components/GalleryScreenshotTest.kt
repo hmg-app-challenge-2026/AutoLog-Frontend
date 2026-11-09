@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocalGasStation
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
@@ -56,7 +57,11 @@ class GalleryScreenshotTest {
             }
             HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             RouteFlow("본사", "판교 테크노밸리 거래처")
-            Banner("앱이 꺼진 동안 15.0 km를 달렸어요", listOf(BannerAction("추가") {}, BannerAction("무시") {}))
+            NoticeRow(Icons.Rounded.ErrorOutline, AutoLogTheme.colors.warning, "운행 1건 목적 확인", onClick = {})
+            NoticeRow(Icons.Rounded.Info, AutoLogTheme.colors.accent, "꺼진 동안 15.0 km 주행", actions = {
+                TertiaryButton("추가", onClick = {})
+                TertiaryButton("무시", onClick = {})
+            })
         }
     }
 
@@ -79,12 +84,12 @@ class GalleryScreenshotTest {
                 IconAvatar(Icons.Rounded.Person, Size.avatarSmall)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                ActionCard(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {}, modifier = Modifier.weight(1f))
-                ActionCard(Icons.Rounded.History, "이력", onClick = {}, modifier = Modifier.weight(1f), badge = 2)
+                DockButton(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {})
+                DockButton(Icons.Rounded.Settings, "설정", onClick = {}, showLabel = false)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 QuickAction(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {})
-                QuickAction(Icons.Rounded.History, "이력", onClick = {})
+                QuickAction(Icons.Rounded.History, "운행 기록", onClick = {})
                 QuickAction(Icons.Rounded.Settings, "설정", onClick = {})
             }
         }

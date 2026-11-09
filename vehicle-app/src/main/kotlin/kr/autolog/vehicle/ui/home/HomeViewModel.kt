@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.common.currentMonth
 import kr.autolog.vehicle.common.tickerFlow
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.repository.ContextRepository
@@ -38,12 +39,13 @@ class HomeViewModel(
 
     val uiState: StateFlow<HomeUiState> =
         combine(
-            combine(session.state, session.totalOdometerKm, session.missedTrip, ::Triple),
-            context.destinationLabel,
+            combine(session.state, session.missedTrip, context.destinationLabel, ::Triple),
             combine(pendingIds, receiptIds, ::Pair),
+            // 대기 주인공 = 이번 달 요약(D-23). 화면이 열려 있는 동안 달이 바뀌는 경우는 다음 진입 때 맞춘다
+            trips.summary(clock.currentMonth()),
             ticker,
-        ) { (s, odo, missed), dest, (pending, receipts), now ->
-            reduceHome(s, odo, missed, dest, now, pending, receipts)
+        ) { (s, missed, dest), (pending, receipts), month, now ->
+            reduceHome(s, missed, dest, now, pending, receipts, month)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
@@ -72,8 +74,7 @@ class HomeViewModel(
                     navigator.push(Route.FuelEntry(receiptId = it))
                 }
                 HomeAction.AddFuelRecord -> navigator.push(Route.ReceiptQr)
-                HomeAction.OpenReport -> navigator.push(Route.Report)
-                HomeAction.OpenHistory -> navigator.push(Route.History)
+                HomeAction.OpenRecords -> navigator.push(Route.History)
                 HomeAction.OpenSettings -> navigator.push(Route.Settings)
             }
         }

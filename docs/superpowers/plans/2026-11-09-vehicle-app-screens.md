@@ -73,7 +73,7 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 // ReportRepository: fun summary(month): Flow<MonthSummary>; suspend fun build(month): ReportBuildResult; suspend fun send(file, to): MailResult; val smtpConfigured: Boolean; fun recipients(): Flow<List<RecipientInfo>>
 // SettingsRepository: DeviceApi·UploadApi·SettingsApi·MailApi 묶음 (connection, register, upload status/now, recipients CRUD, users add, autoMonthlySend, syncNow, saveSmtp)
 ```
-- Home: "확인 필요 N건" 칩 = `LocalStore.pendingReviews` 수, 탭 → 가장 최근 건 `ReviewTrip`. READY·RECORDING_PARKED 보조 동작 `ActionCard`(대기: 주유 기록 추가 · 운행기록부 · 이력 · 설정 / 운행 중: 주유 기록 추가 · 이력 · 설정), 영수증 inbox가 있으면 "영수증 도착 N" 칩 → `FuelEntry(receiptId)`(D-20).
+- Home: (2026-11-09 D-23으로 재구성 — 스펙 7.2가 기준) 상태 줄 · 주인공(이번 달 요약 / 이번 운행 + 경로) · 알림 목록(목적 확인 → 영수증 → 놓친 운행) · 하단 독([주유 기록 추가] [운행 기록] [⚙] + "직접 시작"/[기록 종료]).
 - 운행 종료(PendingReview)가 되면 Home이 `ReviewTrip`으로 바로 연다(스펙 7.3 진입 1번).
 
 **Tests:** 확인 필요 칩 탭 → `ReviewTrip(최근 id)` · PendingReview 진입 시 ReviewTrip push 1회 · FULL 아니면 push 무시(기존).
@@ -118,6 +118,8 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 ## Task 6: 운행기록부·보내기 (F-21, F-22)
 
+> 2026-11-09(D-23): Home에는 기록부 버튼이 없다. History(Task 7) 맨 위 [운행기록부 만들기·보내기]로 들어온다.
+
 **Files:** Create `ui/report/ReportUiState.kt`, `ReportViewModel.kt`, `ReportScreen.kt` · Test reducer·VM·screen(조작 예산 2탭)·screenshot
 
 - 스펙 7.7. `◀ 2026년 11월 ▶`(미래 비활성) · 요약 카드(건수 · km · 업무 비율 · 검토 N건) · [운행기록부 만들기] → [보내기](수신자 기본 전체 선택, 체크 해제 가능) · 결과 문구(MailError별) · SMTP 미설정이면 [설정에서 메일 계정 연결] · 사내 서버 연결 시 안내 한 줄.
@@ -130,7 +132,7 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 **Files:** Create `ui/history/*` · Test reducer·screen·screenshot
 
-- 스펙 7.8. 월 이동 · 상단 합계(건수·km, 거리 미확정 제외) · 행: 날짜·시각 · 운전자 · 출발 → 도착 · 거리 · 목적 · 상태 배지 · 사내 서버 전송 배지(전송 켜졌을 때만). 확인 필요 행 탭 → ReviewTrip.
+- 스펙 7.8. Home 독 [운행 기록]으로 들어온다(D-23). 맨 위 **[운행기록부 만들기·보내기]** → Task 6 Report. 월 이동 · 상단 합계(건수·km, 거리 미확정 제외) · 행: 날짜·시각 · 운전자 · 출발 → 도착 · 거리 · 목적 · 상태 배지 · 사내 서버 전송 배지(전송 켜졌을 때만). 확인 필요 행 탭 → ReviewTrip.
 
 ---
 

@@ -25,7 +25,8 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.confirmHaptic
 
-enum class ChipTone { NEUTRAL, ACCENT, SUCCESS, WARNING, DANGER }
+/** [MUTED] = 아무 일도 없는 상태(대기 중) — 보조 글자색으로 조용하게. */
+enum class ChipTone { NEUTRAL, MUTED, ACCENT, SUCCESS, WARNING, DANGER }
 
 /** [onClick]이 null이면 터치할 수 없는 표시용(Peek). */
 @Composable
@@ -41,6 +42,7 @@ fun StatusChip(
     val fg =
         when (tone) {
             ChipTone.NEUTRAL -> c.textPrimary
+            ChipTone.MUTED -> c.textSecondary
             ChipTone.ACCENT -> c.accent
             ChipTone.SUCCESS -> c.success
             ChipTone.WARNING -> c.warning

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kr.autolog.shared.ReceiptPayload
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.common.AppZone
 import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.core.PurposeDetail.BRANCH_MOVE
 import kr.autolog.vehicle.core.PurposeDetail.CLIENT_VISIT
@@ -17,13 +18,11 @@ import kr.autolog.vehicle.data.interim.UploadState.PENDING
 import kr.autolog.vehicle.fake.FakeReceiptApi
 import java.time.Instant
 import java.time.YearMonth
-import java.time.ZoneId
 
 /** 화면·엑셀의 날짜 기준(Backend CONVENTIONS 6.3). */
-val SEOUL: ZoneId = ZoneId.of("Asia/Seoul")
 
 fun YearMonth.containsEpoch(epochMs: Long): Boolean =
-    YearMonth.from(Instant.ofEpochMilli(epochMs).atZone(SEOUL)) == this
+    YearMonth.from(Instant.ofEpochMilli(epochMs).atZone(AppZone)) == this
 
 /**
  * 앱 A [LocalStore](Room)가 올 때까지 쓰는 가짜. [seed]면 최근 7일 운행 6건과 영수증 1건으로 시작한다:

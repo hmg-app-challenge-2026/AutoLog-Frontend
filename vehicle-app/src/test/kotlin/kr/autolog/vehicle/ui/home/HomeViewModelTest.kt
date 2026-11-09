@@ -76,12 +76,22 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `확인 필요 칩을 누르면 가장 최근 운행의 목적 확인이 열린다`() = runTest {
+    fun `알림 '목적 확인'을 누르면 가장 최근 운행의 목적 확인이 열린다`() = runTest {
         val g = graph()
         val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
 
         vm.onAction(HomeAction.OpenReview)
 
         assertEquals(Route.ReviewTrip("t-s1"), g.navigator.current)
+    }
+
+    @Test
+    fun `독의 운행 기록은 이력(기록부 포함)으로 간다`() = runTest {
+        val g = graph()
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
+
+        vm.onAction(HomeAction.OpenRecords)
+
+        assertEquals(Route.History, g.navigator.current)
     }
 }
