@@ -143,64 +143,53 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 
 /**
  * 운행 요약: "운행 거리 · 시간" → "운행 경로". 넓은·세로 창은 위아래로(섹션 사이 32 dp).
- * 좁은 창(dense)은 두 섹션을 **좌우 한 줄**에 — 위아래로 쌓으면 운행 목적이 첫 화면 밖으로 밀린다(높이 약 100 dp 절약).
- * 왼쪽 칸은 아래 운행 목적·버튼과 같은 왼쪽 선(화면 여백)을 지키고, 콘텐츠 폭을 같은 폭 두 칸으로 나눠 사이 간격은 여백 하나 —
- * 오른쪽 칸이 가운데 선 바로 옆(+16 dp)에서 시작해 가운데가 비지 않는다(여백 × 2는 가운데가 너무 비었다, 2026-11-09).
+ * 좁은 창에서는 거리·시간과 경로를 전폭으로 쌓아 커진 값이 잘리지 않게 한다. 아래 목적 선택은 같은 칸에서 스크롤한다.
  */
 @Composable
 private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
     if (dense) {
-        Row(horizontalArrangement = Arrangement.spacedBy(screenMargin())) {
-            Section(stringResource(R.string.section_distance_time), Modifier.weight(1f), dense = true) {
-                DistanceTime(state, stacked = true)
+        Column {
+            Section(stringResource(R.string.section_distance_time), dense = true) {
+                DistanceTime(state)
             }
-            Section(stringResource(R.string.section_route), Modifier.weight(1f), dense = true) {
-                Route(state, dense = true)
+            Spacer(Modifier.height(Space.s3))
+            Section(stringResource(R.string.section_route), dense = true) {
+                Route(state)
             }
         }
         return
     }
-    Section(stringResource(R.string.section_distance_time)) { DistanceTime(state, stacked = false) }
-    Spacer(Modifier.height(Space.s6))
+    Section(stringResource(R.string.section_distance_time)) { DistanceTime(state) }
+    Spacer(Modifier.height(Space.s2))
     Section(stringResource(R.string.section_route)) { Route(state) }
 }
 
 /**
- * 큰 거리 + 작은 시간(회색 — 보조 지표). 보통은 한 줄 같은 기준선(`headline` · `title`),
- * [stacked](좁은 창 반쪽 칸)이면 거리 아래 줄에 시간 — 같은 28 sp, 거리 `label`(굵게) · 시간 `body`(보통).
+ * 큰 거리 + 작은 시간(회색 — 보조 지표)을 같은 기준선에 놓는다(`resultDistance` · `resultTime`).
  */
 @Composable
-private fun DistanceTime(state: TripResultUiState, stacked: Boolean) {
+private fun DistanceTime(state: TripResultUiState) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val km = state.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown)
     val kmColor = if (state.km != null) c.textPrimary else c.textSecondary
-    if (stacked) {
-        // 좁은 창 반쪽 칸: 거리 아래 줄에 시간(사이 8 dp). 둘 다 28 sp·같은 글자색, 굵기로만 구분 — 거리 굵게(label), 시간 보통(body)
-        Column(verticalArrangement = Arrangement.spacedBy(Space.s2)) {
-            Text(km, style = t.label, color = kmColor)
-            state.minutes?.let { Text(minutesText(it), style = t.body, color = c.textPrimary) }
-        }
-        return
-    }
     Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-        Text(km, modifier = Modifier.alignByBaseline(), style = t.headline, color = kmColor)
+        Text(km, modifier = Modifier.alignByBaseline(), style = t.resultDistance, color = kmColor)
         state.minutes?.let {
-            Text(minutesText(it), modifier = Modifier.alignByBaseline(), style = t.title, color = c.textSecondary)
+            Text(minutesText(it), modifier = Modifier.alignByBaseline(), style = t.resultTime, color = c.textSecondary)
         }
     }
 }
 
 /** 경로선 — 끝난 운행이라 ○—● 가는 선(흐름 모션 없음). 도착지를 모르면 "위치 미상". */
 @Composable
-private fun Route(state: TripResultUiState, dense: Boolean = false) {
+private fun Route(state: TripResultUiState) {
     val c = AutoLogTheme.colors
     RouteFlow(
         origin = state.origin,
         destination = state.destination ?: stringResource(R.string.place_unknown),
         destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
         live = false,
-        dense = dense,
     )
 }
 
