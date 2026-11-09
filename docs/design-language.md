@@ -293,7 +293,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 | 패턴 | WIDE | NARROW | TALL |
 |---|---|---|---|
-| **Status · Sections · Tiles** (Home, 스펙 D-23·D-24) | 위 상태 줄 · 배지 / 가운데 좌우 반반 두 섹션(같은 `SectionHeader`, 내용 위쪽 정렬): 왼쪽 "최근 운행 정보"(대기)·"현재 운행 정보"(기록 중), 오른쪽 "알림" / 아래 같은 모양 타일 4개 한 줄([주유 기록 추가] [운행 기록 조회] [설정] [기록 시작 → 기록 중 기록 종료]). 단 사이 16 dp | 상태 줄 / 두 섹션 위아래(대기 중 알림이 있으면 알림 먼저) / 타일 2×2 | NARROW와 같음 |
+| **Status · Sections · Tiles** (Home, 스펙 D-23·D-24) | 위 상태 줄 · 배지 / 가운데 좌우 반반 두 섹션(같은 `SectionHeader`, 내용 위쪽 정렬): 왼쪽 "최근 운행 정보"(대기)·"현재 운행 정보"(기록 중), 오른쪽 "알림" / 아래 같은 모양 타일 4개 한 줄([주유 기록 추가] [운행 기록 조회] [설정] [기록 시작 → 기록 중 기록 종료]). 단 사이 16 dp | 상태 줄 / 두 섹션 위아래(대기 중 알림이 있으면 알림 먼저) / 타일 4개 한 줄(이름은 두 줄까지) | NARROW와 같음 |
 | **Peek** (정차) | 가운데 카드(최대 폭 560 dp), 정보 늘리지 않음 | 세로 스택 가운데 정렬 — 기본 형태(사이드 창) | NARROW와 같음 |
 | **Countdown** (AutoEndPrompt) | 가운데 카드, 버튼 2개 가로(왼쪽 [기록 종료], 오른쪽 [계속 기록]) | 가운데 카드, 버튼 2개 세로(위 [기록 종료], 아래 [계속 기록]) | NARROW와 같음 |
 | **Form Dialog** (새 운전자 추가) | 머리 줄(제목 가운데 · X 오른쪽) → 아바타(120 dp) → 이름·부서 한 줄에 나란히 → 주 버튼(전폭) | WIDE와 같음 | 머리 줄 → 아바타(160 dp) → 이름 → 부서 → 주 버튼 |
@@ -423,7 +423,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusChip` | `radius.full`, 높이 56 dp, 아이콘 + 글자(`label`). 의미색 글자 + `surface3` 바탕. 아무 일 없는 상태(대기 중)는 `MUTED`(`textSecondary`). **축약형**(NARROW 맨 위 줄): 아이콘 + 숫자만, 전체 문구는 접근성 설명 — 색·아이콘이 같아 같은 칩으로 읽힌다 |
-| `DockTile` | 화면 맨 아래 동작 타일. **모든 타일이 같은 모양** — `surface1`, `radius.lg`, 높이 96 dp, 아이콘(36 dp, `accent`) 위 · 이름(`label`) 아래 가운데. 다른 것은 아이콘과 이름뿐. 폭은 등분(`weight`), 사이 16 dp. 이름이 한 줄에 들어가는 최소 폭 208 dp(`dockTileMinWidth`) — 모자라면 2×2. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(파란 채움 `accentFill`)
+| `DockTile` | 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식). 모든 타일이 같은 모양: 네모 80 dp(`surface1`, `radius.lg`) 안에 아이콘 36 dp(`accent`), 아래 이름(`caption`, `textSecondary`, 가운데, 두 줄까지). 이름은 버튼 밖 설명 글씨라 버튼 글자 하한(28 sp) 대신 `caption`. 터치 영역은 네모 + 이름 칸 전체. 4칸 등분(`weight`) 한 줄 — 네모가 같은 간격. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(네모 `accentFill`, 이름 `accent`) |
 | `DriverBadge` | 화면 오른쪽 위 고정(넷플릭스식, 스펙 7.1.1·D-19). 네모 아바타(`avatarChip` 48 dp) + "○○님"(`label`). 미선택이면 `IconAvatar`(사람) + "운전자 선택"(`accent`). FULL은 누르면 운전자 선택, Peek은 표시만. 모달이 뜨면 숨는다. 운전자 이름은 앱 전체에서 **이 자리에만** 보인다 |
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
@@ -512,4 +512,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.1 | 2026-11-09 | 운전자 배지 오른쪽 위 고정(D-19) · `DriverBadge`·`IconAvatar`·`ActionTile` 추가 · `ActionCard` 세로 배치 · 축약 `StatusChip` · 오른쪽 위 예약 자리(`LocalTopEndReserved`) · 스크롤 가장자리 흐림 · Home WIDE 45:55 · 주유 기록 버튼 하나로(D-20) |
 | 1.2 | 2026-11-09 | 팝업을 가운데 카드 `ModalCard` 하나로 통일(D-21, `ScrimSheet` 삭제), 팝업 제목·설명 가운데 정렬(`ModalTitle`·`ModalText`) · 취소·닫기는 모두 오른쪽 위 X(`CloseButton`, `ModalCard.onClose`), 제목은 X와 같은 줄(`ModalCard.title`) · `surfaceRaised` · 채움형 `InputField` · `AvatarFace` · 새 운전자 추가 팝업 고도화 |
 | 1.3 | 2026-11-09 | Home 재구성(스펙 D-23): 상태 줄 · 주인공 하나(이번 달 요약 / 이번 운행 + 경로) · 알림 목록(`NoticeRow`) · 하단 독(`DockButton`). `ActionCard`·`Banner`·`CountBadge` 삭제, `StatusChip` `MUTED` 톤 추가. 경로 화살표 `RouteFlow`·반복 상태 모션(`motion.ambient`) |
-| 1.4 | 2026-11-09 | Home 위쪽 좌우 반반 두 섹션 + `SectionHeader`, 아래 같은 모양 타일 4개 `DockTile`(스펙 D-24). `DockButton`·`QuickAction` 삭제 |
+| 1.4 | 2026-11-09 | Home 위쪽 좌우 반반 두 섹션 + `SectionHeader`, 아래 같은 모양 타일 4개 `DockTile`(스펙 D-24) — 아이콘 네모 80 dp + 아래 `caption` 이름, 언제나 한 줄. `DockButton`·`QuickAction` 삭제 |

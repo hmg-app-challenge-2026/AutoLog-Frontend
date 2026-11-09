@@ -4,10 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -28,10 +28,11 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /**
- * 디자인 언어 11장 DockTile — 화면 맨 아래 동작 타일. 모든 타일이 같은 모양: `surface1`, `radius.lg`, 높이 96 dp,
- * 아이콘(36 dp, `accent`) 위 · 이름(`label`) 아래, 가운데 정렬. 다른 것은 아이콘과 이름뿐이다.
- * [emphasized]면 파란 채움(`accentFill` + `onAccent`) — 같은 자리에서 상태가 바뀐 주 동작(기록 중의 [기록 종료]).
- * 폭은 부모가 정한다(보통 `weight(1f)`로 등분). 이름이 한 줄에 들어가려면 최소 [Size.dockTileMinWidth].
+ * 디자인 언어 11장 DockTile — 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식).
+ * 모든 타일이 같은 모양: 네모 80 dp(`surface1`, `radius.lg`) 안에 아이콘 36 dp(`accent`), 아래 이름(`caption`, `textSecondary`, 가운데, 두 줄까지).
+ * 이름이 버튼 밖 설명 글씨라 버튼 글자 하한(28 sp) 대신 `caption`을 쓴다. 터치 영역은 네모 + 이름 칸 전체(76 dp 이상).
+ * [emphasized]면 네모가 파란 채움(`accentFill` + `onAccent` 아이콘), 이름은 `accent` — 같은 자리에서 상태가 바뀐 주 동작(기록 중의 [기록 종료]).
+ * 폭은 부모가 정한다(보통 `weight(1f)`로 등분 — 네모가 같은 간격으로 놓인다).
  */
 @Composable
 fun DockTile(
@@ -42,28 +43,40 @@ fun DockTile(
     emphasized: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
-    val fg = if (emphasized) c.onAccent else c.textPrimary
     val interaction = remember { MutableInteractionSource() }
     val view = LocalView.current
     Column(
         modifier
-            .heightIn(min = Size.buttonLg)
+            .widthIn(min = Size.touchMin)
             .pressFeedback(interaction)
-            .clip(RoundedCornerShape(Radius.lg))
-            .background(if (emphasized) c.accentFill else c.surface1)
+            .clip(RoundedCornerShape(Radius.md))
             .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
                 view.confirmHaptic()
                 onClick()
-            }.padding(horizontal = Space.s3, vertical = Space.s3),
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Space.s1, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = if (emphasized) c.onAccent else c.accent,
-            modifier = Modifier.size(Size.icon),
+        Box(
+            Modifier
+                .size(Size.dockIcon)
+                .clip(RoundedCornerShape(Radius.lg))
+                .background(if (emphasized) c.accentFill else c.surface1),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = if (emphasized) c.onAccent else c.accent,
+                modifier = Modifier.size(Size.icon),
+            )
+        }
+        Text(
+            label,
+            style = AutoLogTheme.type.caption,
+            color = if (emphasized) c.accent else c.textSecondary,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
         )
-        Text(label, style = AutoLogTheme.type.label, color = fg, textAlign = TextAlign.Center, maxLines = 1)
     }
 }

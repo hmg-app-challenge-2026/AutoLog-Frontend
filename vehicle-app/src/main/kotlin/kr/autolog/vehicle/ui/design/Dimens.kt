@@ -23,6 +23,7 @@ object Size {
     val buttonLg = 96.dp
     val buttonXl = 120.dp
     val iconButton = 96.dp
+    val dockIcon = 80.dp // DockTile 아이콘 네모
     val iconSm = 28.dp // 닫기(X)처럼 작은 원 안의 아이콘
     val icon = 36.dp
     val iconLg = 48.dp
@@ -37,7 +38,6 @@ object Size {
     val peekMaxWidth = 560.dp
     val sheetMaxWidth = 960.dp
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
-    val dockTileMinWidth = 208.dp // DockTile 이름(최장 "운행 기록 조회", label 28 sp)이 한 줄에 들어가는 폭
     val hairline = 1.dp
     val progressBar = 8.dp
     val ring = 3.dp
