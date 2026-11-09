@@ -28,7 +28,8 @@ object Size {
     val iconLg = 48.dp
     val avatarChip = 48.dp
     val avatarSmall = 64.dp
-    val avatarLarge = 96.dp // 팝업 머리 아바타(새 운전자 미리보기)
+    val avatarPreview = 96.dp // 팝업 아바타 미리보기(새 운전자 추가) — 입력 칸(76 dp)보다 한 단계 큰 정도
+    val avatarPreviewTall = 136.dp // 같은 미리보기, 세로가 넉넉한 TALL
     val chipHeight = 76.dp // StatusChip 터치 최소 높이(시각 높이 56 dp는 안쪽 여백으로)
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp

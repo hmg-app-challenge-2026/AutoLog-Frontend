@@ -35,8 +35,8 @@ import kr.autolog.vehicle.ui.design.components.initialsOf
 /**
  * 스펙 7.1 [+ 새 운전자 추가] 팝업(F-24, origin=LOCAL). 가운데 카드(`ModalCard`), 위에서 아래로 한 흐름:
  * 제목 "새 운전자 추가" → 아바타 미리보기(이름을 치면 이니셜) → 이름·부서 → 안내 메시지 → [추가 및 시작하기] · 작은 [취소].
- * 버튼·안내는 카드 하단에 고정(내용만 스크롤). WIDE(높이 640 dp)는 세로로 다 쌓으면 넘쳐서 이름·부서를 한 줄에 나란히 둔다.
- * 아바타는 TALL만 크게(96 dp), WIDE·NARROW는 64 dp.
+ * 버튼·안내는 카드 하단에 고정(내용만 스크롤). 주 버튼은 전폭, 높이는 터치 하한 76 dp.
+ * 아바타는 연락처·프로필 추가 화면 관례대로 입력 칸보다 한 단계 큰 정도 — TALL 136 dp, 그 외 96 dp. 높이 640 dp 창(WIDE·NARROW)은 세로로 다 쌓으면 넘쳐서 이름·부서를 한 줄에 나란히 둔다.
  */
 @Composable
 fun AddDriverDialog(form: AddDriverForm, onAction: (ProfilePickerAction) -> Unit, modifier: Modifier = Modifier) {
@@ -46,11 +46,11 @@ fun AddDriverDialog(form: AddDriverForm, onAction: (ProfilePickerAction) -> Unit
         Spacer(Modifier.height(Space.s5))
         NewDriverAvatar(
             form.name,
-            if (layout == WindowLayout.TALL) Size.avatarLarge else Size.avatarSmall,
+            if (layout == WindowLayout.TALL) Size.avatarPreviewTall else Size.avatarPreview,
             Modifier.align(Alignment.CenterHorizontally),
         )
         Spacer(Modifier.height(Space.s5))
-        AddDriverFields(form, onAction, sideBySide = layout == WindowLayout.WIDE)
+        AddDriverFields(form, onAction, sideBySide = layout != WindowLayout.TALL)
     }
 }
 

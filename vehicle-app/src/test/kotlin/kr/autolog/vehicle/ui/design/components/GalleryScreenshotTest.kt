@@ -74,9 +74,9 @@ class GalleryScreenshotTest {
                 ActionTile(Icons.Rounded.Add, "새 운전자 추가", onClick = {})
             }
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
-                Avatar("u-4", "정다은", Size.avatarLarge)
-                AvatarFace("최", Brush.linearGradient(listOf(c.accent, c.accentFill)), Size.avatarLarge)
-                IconAvatar(Icons.Rounded.Person, Size.avatarLarge, iconSize = Size.iconLg)
+                Avatar("u-4", "정다은", Size.avatarSmall)
+                AvatarFace("최", Brush.linearGradient(listOf(c.accent, c.accentFill)), Size.avatarSmall)
+                IconAvatar(Icons.Rounded.Person, Size.avatarSmall)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
                 ActionCard(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {}, modifier = Modifier.weight(1f))
