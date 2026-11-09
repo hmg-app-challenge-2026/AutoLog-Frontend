@@ -56,7 +56,8 @@ private const val GLOW_SPREAD = 1.2f
  * 화살표는 하이브리드 회생 제동 표시처럼 갈매기(⌄) 3개에 빛이 위에서 아래로 주기적으로 흐른다([MotionTokens.flowPeriodMs]).
  * 반복 모션은 [kr.autolog.vehicle.ui.design.MotionTokens.ambient]일 때만 — 꺼지면 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
- * [live] = 지금 달리는 운행(흐름 모션). 끝난 운행(목적 확인·이력)은 false — 흐름이 "진행 중"으로 잘못 읽히지 않게 정지 그림.
+ * [live] = 지금 달리는 운행(흐르는 화살표). 끝난 운행(운행 결과·이력)은 false — 화살표 대신 ○와 ●를 잇는 가는 선(지도 앱 경로 요약처럼),
+ * 흐름이 "진행 중"으로 잘못 읽히지 않게.
  */
 @Composable
 fun RouteFlow(
@@ -77,7 +78,7 @@ fun RouteFlow(
             RouteRow(markerHeight = originLine, marker = { OriginMarker() }) {
                 Text(origin, style = t.caption, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            RouteRow(markerHeight = null, marker = { FlowChevrons(live) }) {}
+            RouteRow(markerHeight = null, marker = { if (live) FlowChevrons() else StaticConnector() }) {}
         }
         RouteRow(markerHeight = destinationLine, marker = { DestinationMarker() }) {
             // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
@@ -98,6 +99,17 @@ private fun RouteRow(markerHeight: Dp?, marker: @Composable () -> Unit, text: @C
     }
 }
 
+/** 끝난 운행의 출발 → 도착 연결선: 굵기 `ring`(3 dp), `textTertiary`, 둥근 끝. 화살표 칸과 같은 높이라 경로선 전체 높이가 같다. */
+@Composable
+private fun StaticConnector() {
+    Box(
+        Modifier
+            .size(width = Size.ring, height = Space.s3 * CHEVRONS)
+            .clip(CircleShape)
+            .background(AutoLogTheme.colors.textTertiary),
+    )
+}
+
 /** 출발 ○ — 회색 테두리 원. */
 @Composable
 private fun OriginMarker() {
@@ -112,11 +124,11 @@ private fun DestinationMarker() {
 
 /** 아래를 향한 갈매기 3개. 칸 높이 `space.3`(12 dp), 폭 `space.5`, 선 `ring`(3 dp), 둥근 끝. */
 @Composable
-private fun FlowChevrons(live: Boolean, modifier: Modifier = Modifier) {
+private fun FlowChevrons(modifier: Modifier = Modifier) {
     val motion = AutoLogTheme.motion
     val accent = AutoLogTheme.colors.accent
     val phase: State<Float> =
-        if (live && motion.ambient) {
+        if (motion.ambient) {
             rememberInfiniteTransition(label = "routeFlow").animateFloat(
                 initialValue = 0f,
                 targetValue = 1f,

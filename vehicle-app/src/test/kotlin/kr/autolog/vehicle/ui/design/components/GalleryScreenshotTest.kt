@@ -93,9 +93,9 @@ class GalleryScreenshotTest {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
             InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
-            RadioOption("일반 업무", selected = true, onClick = {})
-            RadioOption("출퇴근", selected = false, onClick = {})
-            RadioOption("개인 용무", selected = false, onClick = null) // 보기 전용
+            ChoiceRow("일반 업무", selected = true, onClick = {})
+            ChoiceRow("출퇴근", selected = false, onClick = {})
+            ChoiceRow("개인 용무", selected = false, onClick = null) // 보기 전용
             CountdownBar(0.6f)
             ConfidenceRow("상호", "SK 판교주유소", 0.98, onClick = {})
             ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
