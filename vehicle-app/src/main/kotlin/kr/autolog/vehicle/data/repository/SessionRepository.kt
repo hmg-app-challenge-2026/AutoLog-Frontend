@@ -31,7 +31,7 @@ sealed interface TripSession {
         val deadlineAt: Long,
     ) : TripSession
 
-    /** 운행이 끝나 목적 확인을 기다린다 — Home이 ReviewTrip을 자동으로 연다. */
+    /** 운행이 끝나 목적 확인을 기다린다 — Home이 운행 결과 카드를 자동으로 연다. */
     data class PendingReview(val tripId: String) : TripSession
 
     /** 앱이 꺼진 사이 미종료 운행이 남았다(F-10 복구). [extraKm] = 마지막 저장 뒤 늘어난 거리. */

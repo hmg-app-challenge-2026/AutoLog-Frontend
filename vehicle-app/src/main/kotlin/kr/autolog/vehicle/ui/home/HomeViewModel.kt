@@ -40,14 +40,14 @@ class HomeViewModel(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
-        // 운행이 끝나 목적 확인 대기가 되면 바로 ReviewTrip을 연다(스펙 7.3 진입 1번). 같은 운행은 한 번만.
+        // 운행이 끝나 목적 확인 대기가 되면 바로 운행 결과 카드를 연다(스펙 7.3 진입 1번). 같은 운행은 한 번만.
         viewModelScope.launch {
             var opened: String? = null
             session.state
                 .filterIsInstance<TripSession.PendingReview>()
                 .map { it.tripId }
                 .distinctUntilChanged()
-                .collect { id -> if (id != opened && navigator.push(Route.ReviewTrip(id))) opened = id }
+                .collect { id -> if (id != opened && navigator.push(Route.TripResult(id))) opened = id }
         }
     }
 

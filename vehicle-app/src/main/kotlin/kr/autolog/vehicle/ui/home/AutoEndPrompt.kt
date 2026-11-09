@@ -1,22 +1,14 @@
 package kr.autolog.vehicle.ui.home
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
@@ -24,6 +16,7 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.CountdownBar
 import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.ModalText
 import kr.autolog.vehicle.ui.design.components.ModalTitle
@@ -39,12 +32,6 @@ import kr.autolog.vehicle.ui.design.durationText
 fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKeep: () -> Unit, onEnd: () -> Unit) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
-    val motion = AutoLogTheme.motion
-    val progress by animateFloatAsState(
-        targetValue = state.progress,
-        animationSpec = if (motion.isStatic) snap() else tween(durationMillis = 1_000, easing = LinearEasing),
-        label = "autoEndProgress",
-    )
     // 결정 버튼은 카드 하단에 고정 — 내용이 넘쳐도 [계속 기록]이 스크롤 밖으로 밀리지 않는다
     ModalCard(footer = {
         val end: @Composable (Modifier) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_end), onEnd, m) }
@@ -72,8 +59,6 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
         Spacer(Modifier.height(Space.s3))
         ModalText(stringResource(R.string.autoend_remaining, durationText(state.remainingSec)))
         Spacer(Modifier.height(Space.s4))
-        Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
-            Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
-        }
+        CountdownBar(state.progress)
     }
 }

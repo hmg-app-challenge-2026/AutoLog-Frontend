@@ -10,13 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LocalGasStation
-import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -57,17 +55,6 @@ class GalleryScreenshotTest {
             HeroMetric("23.4", "km", "주행 거리", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             RouteFlow("본사", "판교 테크노밸리 거래처")
             RouteFlow("본사", "판교 테크노밸리 거래처", live = false)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Space.s5),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButtonXL(Icons.Rounded.Mic, "말로 입력", onClick = {})
-            }
-            OptionGroup("일반 업무용") {
-                OptionButton("거래처 방문", selected = true, onClick = {})
-                OptionButton("외근", selected = false, onClick = {})
-                OptionButton("회의", selected = false, onClick = {})
-            }
         }
     }
 
@@ -106,8 +93,10 @@ class GalleryScreenshotTest {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
             InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
-            OptionButton("거래처 방문", selected = true, onClick = {})
-            OptionButton("외근", selected = false, onClick = {})
+            RadioOption("일반 업무", selected = true, onClick = {})
+            RadioOption("출퇴근", selected = false, onClick = {})
+            RadioOption("개인 용무", selected = false, onClick = null) // 보기 전용
+            CountdownBar(0.6f)
             ConfidenceRow("상호", "SK 판교주유소", 0.98, onClick = {})
             ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
             ConfidenceRow("금액", null, null, onClick = {})

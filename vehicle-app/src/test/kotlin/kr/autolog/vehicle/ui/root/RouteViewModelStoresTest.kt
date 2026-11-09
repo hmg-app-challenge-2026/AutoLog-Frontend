@@ -33,13 +33,13 @@ class RouteViewModelStoresTest {
     fun `스택에 남은 화면은 같은 ViewModel, 빠진 화면은 지워지고 다시 오면 새로 만든다`() {
         val stores = RouteViewModelStores()
         val home = stores.probe(Route.Home)
-        val review = stores.probe(Route.ReviewTrip("t-1"))
+        val review = stores.probe(Route.TripResult("t-1"))
 
         stores.retainOnly(listOf(Route.Home))
 
         assertSame(home, stores.probe(Route.Home))
         assertFalse(home.cleared)
         assertTrue(review.cleared)
-        assertNotSame(review, stores.probe(Route.ReviewTrip("t-1")))
+        assertNotSame(review, stores.probe(Route.TripResult("t-1")))
     }
 }

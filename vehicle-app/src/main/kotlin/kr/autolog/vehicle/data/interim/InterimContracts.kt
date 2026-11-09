@@ -80,14 +80,7 @@ interface TripSessionApi {
     /** [계속 기록] — StopCandidate → Recording. */
     suspend fun resume()
 
-    /** [destinationLabel]: 도착지를 모르던 운행에 사용자가 고른 도착지(스펙 7.3, R-10). null이면 도착지는 그대로. */
-    suspend fun confirmPurpose(
-        tripId: String,
-        detail: PurposeDetail,
-        note: String?,
-        inputMode: InputMode,
-        destinationLabel: String?,
-    )
+    suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode)
 
     suspend fun assignDriver(tripId: String, userId: String, source: DriverSource)
 

@@ -3,68 +3,46 @@ package kr.autolog.vehicle.ui.design.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 
-/** 디자인 언어 11장 SegmentedPurpose의 선택지 하나. 선택되면 accent 링 + 체크. 고르면 바로 실행되는 곳에 쓴다. */
+/**
+ * 디자인 언어 11장 RadioOption — 여러 개 중 하나를 고르는 한 줄(운행 결과의 "이번 운행의 목적").
+ * 왼쪽 원(28 dp): 선택이면 `accent` 테두리 + 가운데 `accent` 점, 아니면 `textTertiary` 테두리. 오른쪽 글자 `body`. 줄 전체가 터치 대상(76 dp).
+ * [onClick]이 null이면 **보기 전용**(누를 수 없고, 고르지 않은 줄은 흐리게) — 결과를 먼저 보여 주고 [수정하기]에서만 바꾸게 할 때.
+ */
 @Composable
-fun OptionButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun RadioOption(text: String, selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
-    val shape = RoundedCornerShape(Radius.lg)
+    val ring = if (selected) c.accent else c.textTertiary
     Row(
         modifier
-            .heightIn(min = Size.buttonMd)
-            .tappable(onClick, role = Role.RadioButton)
-            .clip(shape)
-            .background(if (selected) c.surface3 else c.surface2)
-            .then(if (selected) Modifier.border(Size.ring, c.accent, shape) else Modifier)
-            .padding(horizontal = Space.s5),
+            .fillMaxWidth()
+            .heightIn(min = Size.touchMin)
+            .semantics { this.selected = selected }
+            .tappable(onClick, role = Role.RadioButton),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Space.s2),
+        horizontalArrangement = Arrangement.spacedBy(Space.s4),
     ) {
-        if (selected) {
-            Icon(
-                Icons.Rounded.Check,
-                contentDescription = null,
-                tint = c.accent,
-                modifier = Modifier.size(Size.icon),
-            )
+        Box(Modifier.size(Size.iconSm).border(Size.ring, ring, CircleShape), contentAlignment = Alignment.Center) {
+            if (selected) Box(Modifier.size(Size.statusDot).clip(CircleShape).background(c.accent))
         }
-        Text(text, style = AutoLogTheme.type.label, color = c.textPrimary)
-    }
-}
-
-/**
- * 디자인 언어 11장 OptionGroup — 선택지 묶음 하나. 묶음 이름(`caption`, `textSecondary`) 아래 [OptionButton]들을 줄바꿈하며 놓는다.
- * 목적 확인의 "일반 업무용 · 출퇴근용 · 비업무용"처럼 종류별로 나눌 때 쓴다.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun OptionGroup(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s2)) {
-        Text(title, style = AutoLogTheme.type.caption, color = AutoLogTheme.colors.textSecondary)
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(Space.s3),
-            verticalArrangement = Arrangement.spacedBy(Space.s3),
-        ) { content() } // 실험 API(FlowRowScope)가 호출부로 새지 않게 일반 람다로 받는다
+        val readOnlyOther = onClick == null && !selected
+        Text(text, style = AutoLogTheme.type.body, color = if (readOnlyOther) c.textSecondary else c.textPrimary)
     }
 }

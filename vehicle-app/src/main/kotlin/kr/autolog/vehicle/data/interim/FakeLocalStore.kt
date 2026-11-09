@@ -51,16 +51,9 @@ class FakeLocalStore(clock: AppClock, seed: Boolean = true) : LocalStore {
         rows.value = rows.value.filterNot { it.tripId == row.tripId } + row
     }
 
-    fun confirm(tripId: String, detail: PurposeDetail, note: String?, destinationLabel: String? = null) {
+    fun confirm(tripId: String, detail: PurposeDetail, note: String?) {
         rows.value =
-            rows.value.map {
-                if (it.tripId != tripId) return@map it
-                it.copy(
-                    purpose = detail,
-                    note = note ?: it.note,
-                    destinationLabel = destinationLabel ?: it.destinationLabel,
-                )
-            }
+            rows.value.map { if (it.tripId == tripId) it.copy(purpose = detail, note = note ?: it.note) else it }
     }
 
     fun assignDriver(tripId: String, userId: String) {

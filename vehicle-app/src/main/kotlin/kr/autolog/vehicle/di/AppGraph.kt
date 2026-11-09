@@ -7,10 +7,10 @@ import kr.autolog.vehicle.data.repository.ContextRepository
 import kr.autolog.vehicle.data.repository.ProfileRepository
 import kr.autolog.vehicle.data.repository.ReceiptRepository
 import kr.autolog.vehicle.data.repository.ReportRepository
-import kr.autolog.vehicle.data.repository.ReviewRepository
 import kr.autolog.vehicle.data.repository.SessionRepository
 import kr.autolog.vehicle.data.repository.SettingsRepository
 import kr.autolog.vehicle.data.repository.TripRepository
+import kr.autolog.vehicle.data.repository.TripResultRepository
 import kr.autolog.vehicle.data.usage.VehicleUsageRepository
 import kr.autolog.vehicle.nav.Navigator
 
@@ -23,7 +23,7 @@ interface AppGraph {
     val profile: ProfileRepository
     val context: ContextRepository
     val trips: TripRepository
-    val review: ReviewRepository
+    val tripResults: TripResultRepository
     val receipts: ReceiptRepository
     val reports: ReportRepository
     val settings: SettingsRepository

@@ -12,10 +12,10 @@ import kr.autolog.vehicle.data.repository.DefaultContextRepository
 import kr.autolog.vehicle.data.repository.DefaultProfileRepository
 import kr.autolog.vehicle.data.repository.DefaultReceiptRepository
 import kr.autolog.vehicle.data.repository.DefaultReportRepository
-import kr.autolog.vehicle.data.repository.DefaultReviewRepository
 import kr.autolog.vehicle.data.repository.DefaultSessionRepository
 import kr.autolog.vehicle.data.repository.DefaultSettingsRepository
 import kr.autolog.vehicle.data.repository.DefaultTripRepository
+import kr.autolog.vehicle.data.repository.DefaultTripResultRepository
 import kr.autolog.vehicle.data.usage.CarUxSource
 import kr.autolog.vehicle.data.usage.DefaultVehicleUsageRepository
 import kr.autolog.vehicle.fake.FakeContext
@@ -62,10 +62,7 @@ open class FakeAppGraph(
         DefaultProfileRepository(sources.purpose, sources.settingsApi, sources.trip.currentDriver, { vehicleId }, clock)
     override val context = DefaultContextRepository(sources.context)
     override val trips = DefaultTripRepository(sources.store, sources.settingsApi)
-    override val review =
-        DefaultReviewRepository(sources.store, sources.trip, sources.purpose, sources.context, sources.voice) {
-            vehicleId
-        }
+    override val tripResults = DefaultTripResultRepository(sources.store, sources.trip, sources.purpose) { vehicleId }
     override val receipts =
         DefaultReceiptRepository(sources.receiptApi, sources.store, sources.voice, clock) {
             sources.store.ackReceipt(it)

@@ -71,10 +71,10 @@ class HomeViewModelTest {
         advanceTimeBy(1_100)
 
         val current = g.navigator.current
-        assertTrue(current is Route.ReviewTrip)
+        assertTrue(current is Route.TripResult)
         assertEquals(
             (g.trip.state.value as SessionState.PendingReview).trip.tripId,
-            (current as Route.ReviewTrip).tripId,
+            (current as Route.TripResult).tripId,
         )
     }
 

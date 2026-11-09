@@ -154,7 +154,8 @@ AutoLog는 **운전하는 동안 쓰는 앱이 아니다.** 기록은 차가 백
 | D-19 | **운전자 표시는 화면 오른쪽 위 한 곳**(넷플릭스식 `DriverBadge`: 네모 프로필 아이콘 + "○○님"). 주차(FULL)에선 누르면 운전자 선택, 정차(Peek)에선 표시만. 선택 화면은 사람 타일 끝에 **[+ 새 운전자 추가]**, 미확정 운행 질문은 선택 화면에서 빼고 History에서 1탭 지정(F-20) | 사용자 결정(2026-11-09). 이름이 상태 칩·hero와 섞이면 "누가 운전 중인가"를 매번 찾아야 한다. 고정 자리 하나면 시선이 학습된다. 선택 화면은 "지금 누가 타나"만 묻는다(질문 하나 = 조작 하나) | 기록 중 칩 옆에 이름(상태와 사람이 섞임) · 선택 화면에 이전 운행 질문(첫 화면이 두 질문이 됨) |
 | D-20 | **주유 기록 = QR이 기본, 직접 입력은 보조 분기.** Home [주유 기록 추가] → QR(7.4) → 폰으로 영수증 업로드 → OCR 값이 채워진 **입력 창 하나**(7.5 FuelEntry) → [추가하기]. QR 화면 아래 [직접 입력하기]는 같은 입력 창을 빈 칸으로 연다. 영수증 확인 화면과 주유 입력 화면을 따로 두지 않는다 | 사용자 결정(2026-11-09). 사람이 하는 일은 "주유 기록 하나 추가"로 같다 — 출처(영수증·손)가 달라도 같은 창이면 배울 것이 하나다. 영수증이 기본이라 입력 터치가 거의 없다(1.2) | 영수증 저장·주유 기록 버튼 두 개(같은 뜻의 버튼이 나란히) · 영수증 확인 화면과 직접 입력 화면 분리(필드·버튼 위치가 달라 두 번 배움) · 마이크 우선 입력(사용자 흐름에 없음 — 후속 결정으로 미룸) |
 | D-21 | **팝업은 화면 가운데 둥근 카드 하나(`ModalCard`)로 통일.** 아래에 붙는 시트는 쓰지 않는다. 결정 버튼은 카드 하단 고정 영역(footer)에 두고 내용만 스크롤한다. 취소·닫기는 모두 오른쪽 위 X(하단 [취소] 없음). 제목·설명 문구는 가운데 정렬. 입력 칸은 채움형 | 사용자 결정(2026-11-09): 아래에 붙는 시트와 테두리 입력 칸이 "옛 안드로이드 초기 앱"처럼 보였다. 가운데 카드는 시선이 화면 중앙(hero 자리)에서 크게 움직이지 않고, 운전석·조수석 어느 쪽에서도 같은 거리다 | 바텀 시트(팔이 닿기 쉽지만 낡아 보이고 가로 화면에서 넓게 퍼짐) · 팝업마다 다른 모양 |
-| D-26 | **앱 안 알림 없음 — 시스템 알림만.** Home의 알림 띠·알림 목록을 없앤다(D-25의 알림 띠 부분을 대체). 알려야 할 일은 앱 A의 시스템 알림(헤즈업 "기록을 마칠까요?" 등)만 맡는다. 옮긴 곳: 목적 없는 운행 → 운행 종료 시 ReviewTrip 자동 진입은 그대로, "나중에"면 사용자가 **[운행 기록 조회]에서 직접 고친다**(Home 최근 운행 줄도 누르면 운행 기록 조회, 목적 없음은 회색 "목적 미입력") · 영수증 도착 → QR 화면이 열려 있으면 자동 전환, 닫힌 뒤 도착분은 다음 [주유 기록 추가] 때 바로 그 입력 창 · 계기판 거리 못 읽음 → "주행 거리" 칸 안 한 줄 · 저장 지연 → 표시 안 함(앱 A 내부) · 사내 서버 전송 실패 → Settings "사내 서버"·History 전송 배지 · **놓친 운행(F-10) → 대기 Home에서 팝업 한 번**([운행으로 추가하기] · X=무시) | 사용자 결정(2026-11-09). 처리할 일을 늘 띄우면 Home이 할 일 목록이 되고 재촉하게 된다. 같은 정보가 이미 제자리(운행 기록 조회·설정)에 있다. 놓친 운행만은 기능명세 F-10(P0, 시연 4번 장면)이 [추가][무시]를 묻게 정해 팝업으로 남긴다 — 띠가 아니라 결정 팝업(복구 팝업과 같은 급) | 알림 띠 유지(가늘게 56 dp까지 시도) · 놓친 운행 자동 추가(명세의 [무시]가 사라지고 개인 이동이 일단 운행으로 쌓임) · 놓친 운행 미지원(P0 누락) |
+| D-27 | **목적 확인 화면 대신 "운행 결과" 카드.** 운행이 끝나면 게임 결과처럼 결과를 한 번 보여 준다: 맨 위 "운행 기록을 완료했어요" · 주행 거리 · 운행 시간 · 경로선 · **운행 목적 라디오 3개(일반 업무 · 출퇴근 · 개인 용무, 기본 일반 업무)** · "일반 업무용 거리 48.2 km로 분류돼요". 처음엔 보기 전용 + **5초 뒤 지금 선택으로 저장하고 메인 화면으로**. [수정하기] = 카운트다운을 멈추고 라디오를 바꿀 수 있게(버튼은 [저장]으로 — 저장하면 다시 5초), [메인 화면으로] = 언제든 저장하고 이동. 화면은 큰 분류만 고르고 **세부 목적은 저장소가 정한다**(같은 분류의 기존 값 → 엔진 추천 → 대표값: 외근 · 정오 전 출근/이후 퇴근 · 개인 이동). 기본 분류는 `DefaultPurposePolicy` 하나에서 — 지금은 항상 일반 업무, 캘린더·일정 서비스 연동은 이 구현만 바꿔 나중에 | 사용자 결정(2026-11-09). 운행이 끝날 때마다 질문 화면을 여는 것보다 결과를 보여 주고 아무것도 안 하면 끝나는 편이 조작 최소화(1.2)에 맞다. 운행기록부가 실제로 나누는 것은 업무용 · 출퇴근용 · 비업무용 세 가지다 | 목적 확인 화면(확신 추천 1탭 · 세부 목적 8개 · 말로 입력 · 도착지 칩 · 거래처 등록 팝업 — 구현했다가 걷어냄. 음성(F-09)·거래처 등록(F-17)은 결과 카드 확장 때 다시 검토) · 라디오를 처음부터 누를 수 있게(사용자가 [수정하기] 모드 선택) · 저장 전에 카운트다운 팝업에서 함께 묻기(5초에 두 결정) |
+| D-26 | **앱 안 알림 없음 — 시스템 알림만.** Home의 알림 띠·알림 목록을 없앤다(D-25의 알림 띠 부분을 대체). 알려야 할 일은 앱 A의 시스템 알림(헤즈업 "기록을 마칠까요?" 등)만 맡는다. 옮긴 곳: 목적 없는 운행 → 운행 종료 시 운행 결과 카드 자동 진입은 그대로(D-27), 저장하지 못한 운행은 사용자가 **[운행 기록 조회]에서 직접 고친다**(Home 최근 운행 줄도 누르면 운행 기록 조회, 목적 없음은 회색 "목적 미입력") · 영수증 도착 → QR 화면이 열려 있으면 자동 전환, 닫힌 뒤 도착분은 다음 [주유 기록 추가] 때 바로 그 입력 창 · 계기판 거리 못 읽음 → "주행 거리" 칸 안 한 줄 · 저장 지연 → 표시 안 함(앱 A 내부) · 사내 서버 전송 실패 → Settings "사내 서버"·History 전송 배지 · **놓친 운행(F-10) → 대기 Home에서 팝업 한 번**([운행으로 추가하기] · X=무시) | 사용자 결정(2026-11-09). 처리할 일을 늘 띄우면 Home이 할 일 목록이 되고 재촉하게 된다. 같은 정보가 이미 제자리(운행 기록 조회·설정)에 있다. 놓친 운행만은 기능명세 F-10(P0, 시연 4번 장면)이 [추가][무시]를 묻게 정해 팝업으로 남긴다 — 띠가 아니라 결정 팝업(복구 팝업과 같은 급) | 알림 띠 유지(가늘게 56 dp까지 시도) · 놓친 운행 자동 추가(명세의 [무시]가 사라지고 개인 이동이 일단 운행으로 쌓임) · 놓친 운행 미지원(P0 누락) |
 | D-25 | (알림 띠 부분은 **D-26으로 대체**) **Home은 "정상은 침묵, 필요한 것만"**: 알림은 칸이 아니라 상태 줄 아래 **알림 띠 — 있을 때만**(넘치면 "외 N건" → 목록 팝업). 기록 자체의 문제(계기판 거리 못 읽음 · 저장 지연 30초 초과 · 사내 서버 전송 실패)도 알림으로. 상태 표시는 **배경 없는 점 + 글자**(`● 기록 중 · 35분 경과`, Peek도 같음). 가운데 두 섹션 = 기록 중 "주행 거리"(72 sp) · "운행 경로"(경로 선: 출발 ○ → 흐르는 화살표 → 도착 ●, 목적지가 값·출발지는 작은 보조 글자, 목적지 두 줄까지), 대기 "이번 달 운행 정보" · **"최근 운행 기록"(최신 3건 목록, 목적 없으면 경고색 + 1탭 목적 확인)** | 사용자 결정(2026-11-09, 외부 리뷰 중 필요한 것만 수용). 주차 중 사용자가 궁금한 순서: 잘 기록되나 → 어디 가는 운행인가 → 얼마나 왔나 → 처리할 일. 거리는 계기판처럼 계속 볼 값이 아니다. 알림 없음은 늘 보여 줄 정보가 아니다 | 알림이 오른쪽 칸 전체 · 96 sp 거리 · 초록 알약 상태 배지(거리와 경쟁) · 하단 버튼 분리·주유 기록 제외·종료 확인(D-24·D-17과 충돌해 미수용) |
 | D-24 | **Home 위쪽 = 좌우 반반 두 섹션, 아래 = 같은 모양 타일 4개.** 왼쪽 섹션 "이번 달 운행 정보"(대기: 이번 달 요약) / "현재 운행 정보"(기록 중: 거리 + 경로), 오른쪽 섹션 "알림"(없으면 "새 알림이 없어요"로 칸 유지). 두 소제목은 같은 `SectionHeader`. 아래 타일: [기록 시작] · [주유 기록 추가] · [운행 기록 조회] · [설정](2026-11-09 사용자 결정 — 주 동작인 기록 시작·종료를 운전석 쪽 끝에) — 같은 크기·모양·간격, 아이콘만 다름. 아이콘 네모 위 · 이름 아래(이름은 작은 설명 글씨, 두 줄까지), 언제나 4칸 한 줄. 기록 중에는 첫 칸이 같은 자리에서 [기록 종료](파란 채움)로 바뀐다 | 사용자 결정(2026-11-09, D-23을 다듬음). 반반·같은 소제목·같은 타일이 정렬을 조화롭게 한다. 수동 시작은 드물지만 필요한 사람이 있어 남긴다. 위치가 고정된 [기록 시작/종료]는 손이 기억한다 | 주인공 55:45 + 알림 없으면 칸 사라짐 · 독 버튼 모양이 제각각(알약·아이콘만·글자 버튼) |
 | D-23 | **Home = 상태 한 줄 · 주인공 하나 · 알림 목록 · 하단 독.** 대기 주인공은 누적 거리 대신 **이번 달 요약**(운행 횟수·거리·업무 거리), 기록 중 주인공은 **이번 운행 거리 + 경로**(Peek과 같은 `RouteFlow`). 확인 필요·영수증 도착·놓친 운행은 **"알림" 목록 하나**로. [이력]+[운행기록부]는 **[운행 기록]** 하나(History 안에서 기록부 만들기·보내기). [운행 시작]은 독 끝의 작은 **"직접 시작"**으로 | 사용자 결정(2026-11-09). 누적 거리는 계기판에 이미 있고, 출발하면 자동으로 기록되므로 수동 시작이 가장 큰 버튼일 이유가 없다. 같은 성격(처리할 일)을 칩·칩·배너 세 모양으로 흩어 놓지 않는다. 독은 상태가 바뀌어도 자리가 같다(테슬라·CarPlay) | 누적 거리 hero + 보조 동작 4칸 + 큰 [운행 시작](주인공 다섯 개가 경쟁) |
@@ -444,7 +445,7 @@ ui/
   peek/                       Peek 패널 — 정차 중 읽기 전용 (1.1, 7.0)
   profile/                    ProfilePicker · AddDriverSheet (F-15, F-24)
   home/                       Home (F-02~05, F-10) + 자동 종료 안내 AutoEndPrompt (F-04, 7.2.1)
-  review/                     ReviewTrip (F-06, F-08, F-09, F-17)
+  result/                     운행 결과 TripResult (F-06, F-08, D-27)
   receipt/                    ReceiptQr (F-30), FuelEntry = 주유 입력 창 하나(영수증 OCR 채움 F-19 · 직접 입력 F-18) — D-20
   report/                     Report·보내기 (F-21, F-22)
   history/                    History (F-12)
@@ -501,12 +502,13 @@ class HomeViewModel(
 
 | Repository (인터페이스) | 감싸는 계약 | 화면 | 비고 |
 |---|---|---|---|
-| `SessionRepository` | `TripSessionApi`(A, interim) | Home, Peek, ReviewTrip, ProfilePicker | 운행 상태·시작/종료·자동 종료 카운트다운·목적 확정·운전자 지정·놓친 운행·복구. 화면에는 자기 값 타입(`TripSession`·`ActiveTrip`·`AutoEndReason`·`RecoveryAction`, 놓친 운행은 `missedKm`)만 내보내고, interim `SessionState`에서의 변환은 구현 안 한곳(`toTripSession`) |
+| `SessionRepository` | `TripSessionApi`(A, interim) | Home, Peek, TripResult, ProfilePicker | 운행 상태·시작/종료·자동 종료 카운트다운·목적 확정·운전자 지정·놓친 운행·복구. 화면에는 자기 값 타입(`TripSession`·`ActiveTrip`·`AutoEndReason`·`RecoveryAction`, 놓친 운행은 `missedKm`)만 내보내고, interim `SessionState`에서의 변환은 구현 안 한곳(`toTripSession`) |
 | `VehicleUsageRepository` | `TripSessionApi.motion`(기어·움직임) + AAOS `CarUxRestrictionsManager` | Root | `val tier: StateFlow<UsageTier>` (6.9) |
 | `ProfileRepository` | `PurposeEngine.orderedUsers`·`unassignedTrips`, `SettingsApi.users`·`addUser`, interim 운전자 선택 | ProfilePicker, Home 상단 칩 | |
-| `ContextRepository` | `ContextApi` | Home, ReviewTrip | 목적지·최근 목적지 |
-| `TripRepository` | `LocalStore.trips`(A, interim), `PurposeEngine.shouldProposePlace`·`registerClientPlace` | History, ReviewTrip | |
-| `VoiceRepository` | `VoiceApi` | ReviewTrip, FuelEntry | `available=false`면 마이크 버튼 숨김 |
+| `ContextRepository` | `ContextApi` | Home | 목적지 |
+| `TripRepository` | `LocalStore.trips`(A, interim) | Home, History | |
+| `TripResultRepository` | `LocalStore.trip`(A, interim), `TripSessionApi.confirmPurpose`, `PurposeEngine.suggest`, `DefaultPurposePolicy` | TripResult | 큰 분류 → 세부 목적(`detailFor`)은 여기 한곳(D-27) |
+| `VoiceRepository` | `VoiceApi` | FuelEntry(이번 범위 밖, D-20) | `available=false`면 마이크 버튼 숨김 |
 | `ReceiptRepository` | `ReceiptApi`, `LocalStore.receiptInbox`(A, interim) | ReceiptQr, FuelEntry | 입력 창이 넘긴 초안 하나를 출처에 따라 `confirm`(영수증) 또는 `saveFuel`(직접 입력)로 보낸다 — 화면은 저장 경로를 모른다 |
 | `ReportRepository` | `ReportApi`(A, interim), `MailApi.send`·`smtpConfigured` | Report | |
 | `SettingsRepository` | `SettingsApi`, `MailApi.saveSmtp`, `DeviceApi`(A, interim) | Settings | |
@@ -529,7 +531,7 @@ interface TripSessionApi {
     suspend fun startSession(): StartResult
     suspend fun finalize()                     // [기록 종료] — StopCandidate에서도 즉시 종료
     suspend fun resume()                       // [계속 기록] — StopCandidate → Recording, 카운트다운 취소
-    suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode, destinationLabel: String?)  // R-10
+    suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode)
     suspend fun assignDriver(tripId: String, userId: String, source: DriverSource)
     suspend fun acceptMissedTrip(); suspend fun ignoreMissedTrip()
     suspend fun resolveRecovery(choice: RecoveryChoice)   // RECORD / CONTINUE / DELETE
@@ -614,7 +616,7 @@ tier = minOf(fromVehicle, fromPlatform)   // BACKGROUND < PEEK < FULL, 더 제�
 ```kotlin
 sealed interface Route {
     data object ProfilePicker : Route; data object Home : Route
-    data class ReviewTrip(val tripId: String) : Route
+    data class TripResult(val tripId: String) : Route  // 운행 결과(D-27)
     data object ReceiptQr : Route; data class FuelEntry(val receiptId: String? = null) : Route  // D-20
     data object Report : Route; data object History : Route; data object Settings : Route
 }
@@ -624,7 +626,7 @@ sealed interface Route {
 - **화면마다 ViewModel 저장소 하나**(`ui/root/RouteViewModelStores`, Navigation 라이브러리의 NavBackStackEntry 역할): 화면의 `viewModel {}`은 그 화면이 백스택에 있는 동안만 살고, 스택에서 빠지면 지워진다. 같은 운행의 목적 확인을 다시 열면 새 상태로 시작한다. 저장소 묶음은 Activity 범위 ViewModel 안에 있어 창 크기 변경(분할 화면 전환)에도 화면 상태가 유지된다.
 - 백스택의 모든 화면은 **주차(FULL) 전용**이다. `tier != FULL`이면 `push`가 무시된다. (PEEK은 Route가 아니라 루트가 그리는 별도 층이다.)
 - 앱 시작 경로(FULL일 때): `ProfilePicker`(운전자 미선택 또는 앱 새로 시작) → `Home`. 이미 운행 중이면 바로 `Home`. PEEK·BACKGROUND로 시작하면 6.9 2번을 따른다.
-- 알림 탭 딥링크: 앱 A의 `TripRecordingService` 알림이 `MainActivity`를 열 때 extra `autolog.route=review`, `autolog.tripId=<id>`를 넣는다(키 상수는 R-3 요청, 그 전까지 `nav/DeepLink.kt`의 `DeepLinkKeys`). `onCreate`(새로 시작할 때만)·`onNewIntent`에서 `Navigator.handleDeepLink`. 주차(FULL)면 백스택을 `[Home, 목적 확인]`으로 바로 연다(뒤로 가면 Home). **주행·정차 중이거나 앱 시작 직후 단계를 모르면 기억해 두었다가 다음 주차 때 연다** — 운전 중에 화면을 띄우지 않으면서 사용자가 누른 알림을 잃지 않는다. 모르는 경로·빈 운행 id는 무시.
+- 알림 탭 딥링크: 앱 A의 `TripRecordingService` 알림이 `MainActivity`를 열 때 extra `autolog.route=review`(→ 운행 결과), `autolog.tripId=<id>`를 넣는다(키 상수는 R-3 요청, 그 전까지 `nav/DeepLink.kt`의 `DeepLinkKeys`). `onCreate`(새로 시작할 때만)·`onNewIntent`에서 `Navigator.handleDeepLink`. 주차(FULL)면 백스택을 `[Home, 운행 결과]`로 바로 연다(뒤로 가면 Home). **주행·정차 중이거나 앱 시작 직후 단계를 모르면 기억해 두었다가 다음 주차 때 연다** — 운전 중에 화면을 띄우지 않으면서 사용자가 누른 알림을 잃지 않는다. 모르는 경로·빈 운행 id는 무시.
 
 ### 6.11 스레딩
 
@@ -698,7 +700,7 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 | 앱 안 | 사람이 앱을 열었거나 이미 열려 있으면 Home 위에 가운데 카드(`ModalCard`, D-21)로 뜬다. [기록 종료]·[계속 기록]은 카드 하단 고정 영역(왼쪽·위 [기록 종료], 오른쪽·아래 [계속 기록]). 제목 "기록을 마칠까요?"(`type.headline`) · 이번 운행 요약 `23.4 km · 판교 테크노밸리 거래처`(`type.title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`type.body`, tnum) + 줄어드는 진행 막대 |
 | 대기 시간 | **5초**(사용자 결정). 기어 P는 "주차했다"는 강한 신호이므로 기다림을 짧게 한다. 5초 안에 [계속 기록]을 못 눌러도 손해가 작다: 다시 출발하면 새 운행이 자동으로 시작된다(F-02). 대신 짧은 주차(드라이브스루·승객 하차)마다 운행이 나뉘어 목적 확인이 늘 수 있다 — 사각지대 B-1 |
 | 버튼 | 왼쪽·위 **[기록 종료]**(`PrimaryButton` — 기다리지 않고 바로 끝내기) · 오른쪽·아래 [계속 기록](`SecondaryButton`) |
-| 결과 | 시간 만료 또는 [기록 종료] → `finalize()` → PendingReview → ReviewTrip으로 이동(앱이 보이고 있을 때). [계속 기록] → `resume()` → RecordingParked. 다시 출발하면 앱 A가 StopCandidate를 취소한다(Stop만 기록) |
+| 결과 | 시간 만료 또는 [기록 종료] → `finalize()` → PendingReview → 운행 결과 카드(7.3)로 이동(앱이 보이고 있을 때). [계속 기록] → `resume()` → RecordingParked. 다시 출발하면 앱 A가 StopCandidate를 취소한다(Stop만 기록) |
 | 시계 | 남은 시간은 `deadlineAt − clock.now()`. 화면이 별도 타이머를 돌리지 않는다(앱 A가 유일한 시계). 1초마다 숫자만 교체 |
 | 모션 | 주차 상태이므로 진행 막대의 선형 감소는 허용(상태 설명용, Pleos 애니메이션 원칙의 Linear). 카드 등장은 scrim 투명도 + 카드 0.94→1 배율(`motion.standard`) |
 | 다른 종료 신호 | `NO_MOVEMENT`(멈춤 지속)·`NAVI_ARRIVED`(내비 도착)도 같은 카드를 쓰되, 정차(PEEK) 중이면 버튼 없이 Peek ⑤ 줄로만 알린다 |
@@ -714,20 +716,19 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
   - 타일 순서는 `driverSide`를 따른다(우핸들 시장이면 좌우가 뒤집힌다).
 - 수용 기준: 출발(BACKGROUND) 2초 안에 앱이 물러나고 보조 화면이 닫힌다. 기어 P 후 Home(자동 종료 카드)과 시스템 알림에 같은 카운트다운이 보인다. 거리 표시(Peek·RecordingParked)는 Odometer 18,420.5 → 18,443.9 변경 시 2초 안에 "23.4".
 
-### 7.3 ReviewTrip — 목적 확인 (F-06, F-08, F-09, F-17) · 주차 전용
+### 7.3 TripResult — 운행 결과 (F-06, F-08, D-27) · 주차 전용
 
 | 항목 | 내용 |
 |---|---|
-| 진입 | 운행 종료(PendingReview) 자동 진입, 시스템 알림 탭 딥링크(6.10), History 행(목적을 나중에 고치는 곳은 여기 하나 — D-26). 확정·나중에·등록 뒤에는 **들어온 화면으로 돌아간다**(Home 또는 History, 뒤가 없으면 Home). "나중에"로 미뤄도 다음 운행은 시작된다(6.6) |
-| 고치기 | 이미 목적이 있는 운행(History에서 고치러 옴)은 추천 버튼 없이 선택지를 바로 펴고 **지금 목적에 체크**. 다른 목적 1탭이면 바뀐다 |
-| 제목 | 맨 위 줄 "목적 확인"(`type.title`) — 좁은 창에서도 운전자 배지 옆 한 줄 |
-| 상단 요약 | 섹션 "운행 요약": `09:00 → 09:35 · 23.4 km`(`label`) + 경로선(`RouteFlow(live = false)` — 끝난 운행이라 흐름 모션 없음). 도착지가 없으면 경로선 끝이 회색 "도착지를 골라 주세요" + **최근 목적지 칩(최대 3)**, 고른 칩은 경로선에 바로 보이고 목적과 함께 저장된다(R-10). 등록 장소·직접 입력은 이번 범위에서 뺐다 |
-| 추천 | `Suggestion.isConfident`(≥ 0.8)이고 "확인 필요"가 아니면 섹션 "추천 목적" + **큰 추천 버튼 1개** "거래처 방문으로 기록"(`PrimaryButton` 120 dp, 조사 "(으)로"는 `withRo`), 아래 [다른 목적] · [나중에]가 한 줄. 아니면 추천 없이 선택지를 먼저 보여 준다(기획: 확신이 낮으면 반드시 묻는다) |
-| 선택지 | `OptionGroup` 3묶음: 일반 업무용(거래처 방문·외근·출장·회의·지점 이동) / 출퇴근용(출근·퇴근) / 비업무용(개인 이동). 묶음 이름이 소제목이라 위에 소제목을 더 두지 않는다. **1탭 = 바로 확정** |
-| 음성 | `ReviewRepository.voiceAvailable`이면 마이크(`IconButtonXL` 96 dp) + 옆에 상태 한 줄: "말로 입력" → 듣는 중 **정적** "듣고 있어요…"(최대 8초, `VOICE_TIMEOUT_MS`) → 알아들음: 인식 원문 “…” + 아래 선택지에 매칭 목적이 체크 + [저장](원문은 메모로). 못 알아들음·실패·시간 초과: 이유 한 줄 + 선택지가 펴진다. 마이크를 다시 누르면 다시 듣는다 |
-| 확정 후 | `shouldProposePlace`면 팝업(`ModalCard`) 제목 "거래처 등록" · 본문 "이곳을 거래처로 등록할까요?" · 이름 칸(프리셋: 고른 도착지 또는 운행 도착지) → 하단 [등록], 오른쪽 위 X = 아니요. 목적은 이미 저장된 뒤다 |
-| 레이아웃 | WIDE: 좌 요약 40% / 우 결정 60%(각각 넘치면 그 칸만 스크롤). NARROW·TALL: 요약 → 결정 세로 한 칸 |
-| 수용 기준 | 1탭 확정(CONFIRMED). 음성 "판교 A고객사 미팅" → 거래처 방문 + note. 주행 시작 시 2초 안에 닫힘 |
+| 진입 | 운행 종료(PendingReview) 자동 진입, 시스템 알림 탭 딥링크(6.10), History 행. 저장하면 **들어온 화면으로 돌아간다**(Home 또는 History, 뒤가 없으면 Home). 저장하지 않고 화면이 닫히면(주행 시작 등) 그 운행은 "목적 미입력"으로 남는다. 미뤄도 다음 운행은 시작된다(6.6) |
+| 제목 | 맨 위 줄(운전자 배지 옆) "운행 기록을 완료했어요"(`type.title`) |
+| 결과 | "주행 거리" `48.2 km`(km 없으면 "거리 미확정") · "운행 시간" `52분`/`1시간 12분` · 경로선(`RouteFlow(live = false)`, 도착지 모르면 "위치 미상") |
+| 운행 목적 | `RadioOption` 3개: 일반 업무 · 출퇴근 · 개인 용무. 처음 선택 = 저장된 분류, 없으면 `DefaultPurposePolicy`(지금은 일반 업무). 아래 "✓ 일반 업무용 거리 48.2 km로 분류돼요"(km 없으면 "일반 업무용으로 분류돼요") |
+| 자동 | 보기 모드에서 **5초**(`AUTO_CLOSE_SEC`) 카운트다운 — "3초 후 메인 화면으로 돌아가요" + 줄어드는 막대(`CountdownBar`). 0이 되면 지금 선택으로 저장하고 돌아간다 |
+| 버튼 | 보기: [수정하기](보조) · [메인 화면으로](주). [수정하기] → 카운트다운 멈춤 · 라디오 활성 · 왼쪽이 [저장](주), 오른쪽 [메인 화면으로](보조). [저장] → 저장 후 보기 모드로, 카운트다운 다시 5초. [메인 화면으로] → 언제든 지금 선택으로 저장하고 이동 |
+| 저장 | `TripResultRepository.classify(tripId, 분류)` → 세부 목적은 저장소의 `detailFor`(D-27) → `confirmPurpose(..., TAP)` |
+| 레이아웃 | WIDE: 위 좌 결과(45%) | 우 운행 목적(55%) — 두 칸 소제목 높이가 같다. 아래 분류 한 줄 · 남은 시간 · 버튼을 화면 가운데(최대 폭 640 dp). NARROW(분할 화면): 목적이 첫 화면에 보이게 거리·시간 한 줄(`48.2 km · 52분`) → 운행 목적 → 경로선, 버튼은 하단 고정(왼쪽 버튼은 글자 폭, [메인 화면으로]가 나머지). TALL: 결과 → 운행 목적 세로 한 칸 |
+| 수용 기준 | 아무것도 안 누르면 5초 뒤 일반 업무로 저장되고 Home. [수정하기] → 출퇴근 → [저장]이면 출퇴근으로 저장되고 다시 5초 뒤 Home. 주행 시작 시 2초 안에 닫힘 |
 
 ### 7.4 ReceiptQr — 주유 기록 추가의 기본 경로 (F-30, D-20) · 주차 전용
 
@@ -777,7 +778,7 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 
 - 이번 달 목록(월 이동 가능). 행: 날짜·시각 · 운전자 · 출발 → 도착 · 거리 · 목적 · 상태 배지(확정/확인 필요/운전자 미확정/거리 미확정) · 사내 서버 전송 배지(8장).
 - **운전자 미확정 행**(F-20): 행 안에 후보 아바타(최근 운전자 최대 3명)를 두고 1탭으로 지정(`SessionRepository.assignDriver`). 선택 화면에서 옮겨 왔다 — D-19.
-- 미확정 행 탭 → ReviewTrip. 상단 합계: 건수 · km(엑셀 요약과 같은 계산 — `TripRepository`가 계산, 화면은 표시만).
+- 행 탭 → 운행 결과(7.3) — 목적 미입력 운행을 채우거나 목적을 고친다(D-26). 상단 합계: 건수 · km(엑셀 요약과 같은 계산 — `TripRepository`가 계산, 화면은 표시만).
 - 긴 목록은 `LazyColumn`. 자동 스크롤 없음.
 
 ### 7.9 Settings (F-24, F-01, 8장) · 주차 전용
@@ -924,7 +925,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 2. 윈도 바로 portrait ↔ landscape 전환, 다른 앱과 1:1 분할 → 잘림·겹침 없음, 상태 유지
 3. 주간·야간 전환 → 깜빡임 없이 테마 변경
 4. 사용 3단계(VHAL 기어·속도 주입 또는 데모 패널): 주차(P)에서 설정 화면 열기 → 기어 D·정차 → 2초 안에 Peek로 바뀌고 입력 요소 없음 → 출발 → 2초 안에 앱이 물러나고 내비가 그 창을 채움 → 다시 정차 → 앱을 열면 Peek
-5. 기어 P 자동 종료: 운행 중 P → 헤즈업 알림과 앱 시트에 같은 카운트다운 → 아무것도 누르지 않으면 만료 시 ReviewTrip / [계속 기록] 1탭이면 계속 / [기록 종료] 1탭이면 즉시 종료
+5. 기어 P 자동 종료: 운행 중 P → 헤즈업 알림과 앱 시트에 같은 카운트다운 → 아무것도 누르지 않으면 만료 시 운행 결과 카드(5초 뒤 일반 업무로 저장하고 Home) / [계속 기록] 1탭이면 계속 / [기록 종료] 1탭이면 즉시 종료
 6. 글자 크기: 주요 정보 높이 ≥ 5 mm, 보조 ≥ 3 mm(화면 실측 또는 DPI로 환산)
 7. 시연 6장면(Backend 기능명세 9장) 재생
 
@@ -940,7 +941,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 |---|---|---|
 | **11.09–10** | 리포 골격, submodule, composite build 스파이크, CI, `ui/design` 토큰·테마·서체, Navigator, `VehicleUsageRepository`(사용 3단계), interim 계약·Fake, 데모 패널 뼈대. A·B에 R-1~R-4·R-7 공유 | `assembleDemoDebug`·테스트 통과, 맥 Pleos 에뮬레이터 실행 |
 | **11.10–11 디자인 게이트** | ProfilePicker · Home(4상태) · AutoEndPrompt · Peek 완성 → Roborazzi PNG(3레이아웃 × 2테마)로 디자인 리뷰 → 맥에서 FormFactorConsole 프리셋 측정(V-01), 사용 3단계 점검(V-11·V-12), 기어·시동 신호 확인(V-15·V-16) | 사용자 디자인 승인 |
-| 11.11–12 | ReviewTrip(탭·음성·거래처 등록) | 시연 장면 1~3을 demo로 재생 |
+| 11.11–12 | 운행 결과 카드(D-27, 5초 자동 저장) | 시연 장면 1~3을 demo로 재생 |
 | **11.13–14** | ReceiptQr·FuelEntry(주유 입력 창 하나, D-20) · Report·보내기 · Settings(연결·메일·수신자·직원) · 카메라 페이지 · 운영 웹 차량 화면(F-50) → **11.14 통합**(B 실구현 연결, A는 준비된 만큼) | 장면 5·6 재생, 영상·APK |
 | 11.15 | 1차 제출 | |
 | 11.16–23 | 운영 웹 직원·장소·배차·수신자 · History · 놓친 운행·복구 다이얼로그 · interim → A 실계약 교체 · 사내 서버 설정·전송 상태(Fake) · 운영 웹 운행·비용·월별 취합(mock) | 직원 추가가 1분 안에 ProfilePicker에 반영 |
@@ -961,7 +962,6 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | R-6 | Backend `app/`·`web/` 삭제, CI `:app:assembleDebug` 제거, CONVENTIONS 1.2·기술명세 7·8장에 "화면은 AutoLog-Frontend" 반영 | 공동 | 같은 applicationId 앱이 두 곳에 있으면 혼란 | 11.30 |
 | R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
 | R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
-| R-10 | 목적 확정 때 도착지 함께 저장: `TripSessionApi.confirmPurpose(..., destinationLabel: String?)`. 도착지를 모르던 운행에 사용자가 최근 목적지를 고르면 같이 저장한다(null이면 그대로). 지금은 interim에 프론트가 추가해 둠 | A | 7.3 목적 확인 | 11.13 |
 | R-9 | 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
 
 ---
@@ -1038,3 +1038,4 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 1.2 | 2026-11-09 | 구조 점검: `SessionRepository`가 화면용 세션 타입을 내보내 `ui/`의 interim 의존 제거(6.5·6.6), Home·Peek 상태 계산을 `XxxReducer.kt`로 분리 |
 | 1.3 | 2026-11-09 | 7.3 목적 확인 구현 반영(제목·요약·추천·선택지·음성·거래처 등록·레이아웃), R-10(확정 때 도착지 저장), 6.10 화면별 ViewModel 저장소 |
 | 1.4 | 2026-11-09 | 6.6 PendingReview에서도 새 운행 시작, 6.10 알림 딥링크(주행 중이면 다음 주차 때), 7.3 이미 목적이 있는 운행 고치기 |
+| 1.5 | 2026-11-09 | D-27 목적 확인 화면 → 운행 결과 카드(라디오 3개 · 기본 일반 업무 · 5초 자동 저장 · [수정하기]/[메인 화면으로]), 7.3 다시 씀, R-10 철회, `TripResultRepository`·`DefaultPurposePolicy` |

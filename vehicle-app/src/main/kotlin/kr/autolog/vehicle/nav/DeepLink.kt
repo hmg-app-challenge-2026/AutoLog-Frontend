@@ -8,12 +8,12 @@ object DeepLinkKeys {
     const val ROUTE = "autolog.route"
     const val TRIP_ID = "autolog.tripId"
 
-    /** [ROUTE] 값: 목적 확인. [TRIP_ID]가 함께 와야 한다. */
-    const val ROUTE_REVIEW = "review"
+    /** [ROUTE] 값: 운행 결과(옛 목적 확인 — 앱 A와 맞춘 값이라 "review" 그대로). [TRIP_ID]가 함께 와야 한다. */
+    const val ROUTE_TRIP_RESULT = "review"
 }
 
 /** extra 값 → 화면. 모르는 경로이거나 필요한 값이 없으면 null(무시). Android Intent와 분리해 단위 테스트한다. */
 fun deepLinkRoute(route: String?, tripId: String?): Route? = when (route) {
-    DeepLinkKeys.ROUTE_REVIEW -> tripId?.takeIf { it.isNotBlank() }?.let { Route.ReviewTrip(it) }
+    DeepLinkKeys.ROUTE_TRIP_RESULT -> tripId?.takeIf { it.isNotBlank() }?.let { Route.TripResult(it) }
     else -> null
 }

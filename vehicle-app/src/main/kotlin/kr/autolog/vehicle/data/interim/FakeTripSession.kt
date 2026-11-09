@@ -64,14 +64,8 @@ class FakeTripSession(
     }
 
     /** 지금 끝난 운행이든 지난 운행이든 확정한다(앱 A: 모든 운행 처리). */
-    override suspend fun confirmPurpose(
-        tripId: String,
-        detail: PurposeDetail,
-        note: String?,
-        inputMode: InputMode,
-        destinationLabel: String?,
-    ) {
-        store?.confirm(tripId, detail, note, destinationLabel)
+    override suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode) {
+        store?.confirm(tripId, detail, note)
         val s = _state.value as? SessionState.PendingReview ?: return
         if (s.trip.tripId == tripId) _state.value = SessionState.Idle
     }

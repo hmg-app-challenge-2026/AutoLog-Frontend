@@ -1,0 +1,296 @@
+package kr.autolog.vehicle.ui.result
+
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kr.autolog.vehicle.R
+import kr.autolog.vehicle.core.PurposeCategory
+import kr.autolog.vehicle.di.LocalAppGraph
+import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalWindowLayout
+import kr.autolog.vehicle.ui.design.Size
+import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.CountdownBar
+import kr.autolog.vehicle.ui.design.components.PrimaryButton
+import kr.autolog.vehicle.ui.design.components.RadioOption
+import kr.autolog.vehicle.ui.design.components.RouteFlow
+import kr.autolog.vehicle.ui.design.components.ScrollColumn
+import kr.autolog.vehicle.ui.design.components.SecondaryButton
+import kr.autolog.vehicle.ui.design.components.Section
+import kr.autolog.vehicle.ui.design.components.TopLine
+import kr.autolog.vehicle.ui.design.durationText
+import kr.autolog.vehicle.ui.design.screenMargin
+
+@Composable
+fun TripResultRoute(tripId: String) {
+    val graph = LocalAppGraph.current
+    val vm = viewModel { TripResultViewModel(tripId, graph.tripResults, graph.navigator) }
+    val state by vm.uiState.collectAsStateWithLifecycle()
+    TripResultScreen(state, vm::onAction)
+}
+
+/**
+ * 스펙 7.3 운행 결과(D-27) — 게임 결과 화면처럼 운행이 끝나면 한 번 보여 주고 5초 뒤 메인 화면으로.
+ * 맨 위 줄 제목 "운행 기록을 완료했어요" → 주행 거리 · 운행 시간 · 경로선 → 이번 운행의 목적(라디오 3개)
+ * → 분류 한 줄 → 남은 시간 + [수정하기]/[저장] · [메인 화면으로](하단 고정).
+ * WIDE는 좌 결과 / 우 목적·버튼, NARROW·TALL은 위아래 한 칸(버튼은 늘 보이게 하단 고정).
+ */
+@Composable
+fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> Unit, modifier: Modifier = Modifier) {
+    val c = AutoLogTheme.colors
+    Column(
+        modifier.fillMaxSize().padding(screenMargin()),
+        verticalArrangement = Arrangement.spacedBy(Space.s4),
+    ) {
+        // 제목은 맨 위 줄(운전자 배지 옆) — 그 아래 좌우 칸이 같은 높이의 소제목으로 시작한다
+        TopLine { Title() }
+        when {
+            state.loading -> Unit
+            state.notFound -> {
+                Text(stringResource(R.string.result_not_found), style = AutoLogTheme.type.body, color = c.textSecondary)
+                Spacer(Modifier.weight(1f))
+                PrimaryButton(
+                    stringResource(R.string.result_home),
+                    onClick = { onAction(TripResultAction.GoHome) },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = Size.buttonMd,
+                )
+            }
+            LocalWindowLayout.current == WindowLayout.WIDE -> {
+                // 위: 좌 결과 | 우 목적(소제목 높이가 같다). 아래: 분류 한 줄 · 남은 시간 · 버튼을 화면 가운데에 모은다
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
+                    ScrollColumn(Modifier.weight(0.45f).fillMaxHeight()) { Summary(state) }
+                    ScrollColumn(Modifier.weight(0.55f).fillMaxHeight()) {
+                        Purpose(state, onAction, withClassification = false)
+                    }
+                }
+                Column(
+                    Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Space.s3),
+                ) {
+                    Classification(state)
+                    Footer(state, onAction, Modifier.widthIn(max = Size.dialogMaxWidth))
+                }
+            }
+            LocalWindowLayout.current == WindowLayout.NARROW -> {
+                // 분할 화면 한 칸(504×640): 목적이 첫 화면에 보이게 거리·시간을 한 줄로 줄이고 경로는 목적 아래로
+                ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {
+                    CompactMetrics(state)
+                    Spacer(Modifier.height(Space.s5))
+                    Purpose(state, onAction)
+                    Spacer(Modifier.height(Space.s5))
+                    Route(state)
+                }
+                Footer(state, onAction, compact = true)
+            }
+            else -> {
+                ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {
+                    Summary(state)
+                    Spacer(Modifier.height(Space.s6))
+                    Purpose(state, onAction)
+                }
+                Footer(state, onAction)
+            }
+        }
+    }
+}
+
+/** 주행 거리 | 운행 시간 · 경로선(끝난 운행이라 흐름 모션 없음). WIDE에선 오른쪽 "이번 운행의 목적"과 소제목 높이가 같다. */
+@Composable
+private fun Summary(state: TripResultUiState) {
+    val c = AutoLogTheme.colors
+    val t = AutoLogTheme.type
+    Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
+        Section(stringResource(R.string.section_distance), Modifier.weight(1f)) {
+            Text(
+                state.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown),
+                style = t.title,
+                color = if (state.km != null) c.textPrimary else c.textSecondary,
+            )
+        }
+        Section(stringResource(R.string.section_trip_time), Modifier.weight(1f)) {
+            Text(state.minutes?.let { minutesText(it) } ?: "—", style = t.title, color = c.textPrimary)
+        }
+    }
+    Spacer(Modifier.height(Space.s5))
+    Route(state)
+}
+
+@Composable
+private fun Title() {
+    Text(
+        stringResource(R.string.result_title),
+        style = AutoLogTheme.type.title,
+        color = AutoLogTheme.colors.textPrimary,
+    )
+}
+
+/** 좁은 창: `48.2 km · 52분` 한 줄. */
+@Composable
+private fun CompactMetrics(state: TripResultUiState) {
+    val km = state.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown)
+    val time = state.minutes?.let { minutesText(it) }
+    Text(
+        if (time != null) stringResource(R.string.trip_meta_pair, km, time) else km,
+        style = AutoLogTheme.type.label,
+        color = AutoLogTheme.colors.textPrimary,
+    )
+}
+
+/** 경로선 — 끝난 운행이라 흐름 모션 없음. 도착지를 모르면 "위치 미상". */
+@Composable
+private fun Route(state: TripResultUiState) {
+    val c = AutoLogTheme.colors
+    RouteFlow(
+        origin = state.origin,
+        destination = state.destination ?: stringResource(R.string.place_unknown),
+        destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
+        live = false,
+    )
+}
+
+/** 이번 운행의 목적: 라디오 3개(보기 모드에선 누를 수 없음) + "일반 업무용 거리 48.2 km로 분류돼요". */
+@Composable
+private fun Purpose(
+    state: TripResultUiState,
+    onAction: (TripResultAction) -> Unit,
+    withClassification: Boolean = true,
+) {
+    Section(stringResource(R.string.section_purpose)) {
+        PURPOSE_CHOICES.forEach { category ->
+            RadioOption(
+                stringResource(choiceLabel(category)),
+                selected = category == state.selected,
+                onClick = if (state.editing) ({ onAction(TripResultAction.Select(category)) }) else null,
+            )
+        }
+        if (withClassification) {
+            Spacer(Modifier.height(Space.s3))
+            Classification(state)
+        }
+    }
+}
+
+/** "✓ 일반 업무용 거리 48.2 km로 분류돼요" — 지금 고른 목적이 운행기록부에 어떻게 들어가는지. */
+@Composable
+private fun Classification(state: TripResultUiState) {
+    val c = AutoLogTheme.colors
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s2)) {
+        Icon(
+            Icons.Rounded.CheckCircle,
+            contentDescription = null,
+            tint = c.success,
+            modifier = Modifier.size(Size.iconSm),
+        )
+        val kind = stringResource(classLabel(state.selected))
+        Text(
+            state.km?.let { stringResource(R.string.result_classified, kind, stringResource(R.string.trip_km, it)) }
+                ?: stringResource(R.string.result_classified_no_km, kind),
+            style = AutoLogTheme.type.caption,
+            color = c.textSecondary,
+        )
+    }
+}
+
+/**
+ * 하단 고정: 남은 시간 한 줄(글자 + 줄어드는 막대) + 버튼 두 개.
+ * 보기: [수정하기](보조) · [메인 화면으로](주). 수정: [저장](주) · [메인 화면으로](보조) — 자리는 그대로, 강조만 옮긴다.
+ */
+@Composable
+private fun Footer(
+    state: TripResultUiState,
+    onAction: (TripResultAction) -> Unit,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s3)) {
+        state.autoCloseSec?.let { sec ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Space.s4),
+            ) {
+                Text(
+                    stringResource(R.string.result_auto_close, durationText(sec)),
+                    style = AutoLogTheme.type.caption,
+                    color = AutoLogTheme.colors.textSecondary,
+                )
+                CountdownBar(state.autoCloseProgress, Modifier.weight(1f))
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+            // 좁은 창은 왼쪽 버튼을 글자 폭에 맞추고 [메인 화면으로]가 나머지 — 반반이면 "메인 화면으로"가 두 줄로 꺾인다
+            val left = if (compact) Modifier else Modifier.weight(1f)
+            val home = stringResource(R.string.result_home)
+            if (state.editing) {
+                PrimaryButton(
+                    stringResource(R.string.result_save),
+                    onClick = { onAction(TripResultAction.Save) },
+                    modifier = left,
+                    height = Size.buttonMd,
+                    loading = state.saving,
+                )
+                SecondaryButton(home, onClick = { onAction(TripResultAction.GoHome) }, modifier = Modifier.weight(1f))
+            } else {
+                SecondaryButton(
+                    stringResource(R.string.result_edit),
+                    onClick = { onAction(TripResultAction.Edit) },
+                    modifier = left,
+                )
+                PrimaryButton(
+                    home,
+                    onClick = { onAction(TripResultAction.GoHome) },
+                    modifier = Modifier.weight(1f),
+                    height = Size.buttonMd,
+                    loading = state.saving,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun minutesText(minutes: Int): String = if (minutes < MINUTES_PER_HOUR) {
+    stringResource(R.string.trip_minutes, minutes)
+} else {
+    stringResource(R.string.trip_hours_minutes, minutes / MINUTES_PER_HOUR, minutes % MINUTES_PER_HOUR)
+}
+
+private const val MINUTES_PER_HOUR = 60
+
+/** 라디오 이름(일반 업무 · 출퇴근 · 개인 용무). */
+@StringRes
+private fun choiceLabel(category: PurposeCategory): Int = when (category) {
+    PurposeCategory.COMMUTE -> R.string.purpose_commute
+    PurposeCategory.NON_BUSINESS -> R.string.purpose_personal
+    PurposeCategory.BUSINESS, PurposeCategory.UNDETERMINED -> R.string.purpose_business
+}
+
+/** 분류 이름(운행기록부 기준: 일반 업무용 · 출퇴근용 · 비업무용). */
+@StringRes
+private fun classLabel(category: PurposeCategory): Int = when (category) {
+    PurposeCategory.COMMUTE -> R.string.purpose_class_commute
+    PurposeCategory.NON_BUSINESS -> R.string.purpose_class_personal
+    PurposeCategory.BUSINESS, PurposeCategory.UNDETERMINED -> R.string.purpose_class_business
+}

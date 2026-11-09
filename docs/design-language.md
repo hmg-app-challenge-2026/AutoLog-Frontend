@@ -301,7 +301,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
 | **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
 | **Master–Detail** (Settings) | 좌 목록 / 우 상세 | 목록 → 상세 push | NARROW와 같음 |
-| **Decision** (ReviewTrip) | 좌 요약 / 우 선택지·추천 | 요약 → 추천 → 선택지 세로 | NARROW와 같음 |
+| **Result** (운행 결과, D-27) | 위 좌 결과 / 우 운행 목적(소제목 높이 같음), 아래 분류 한 줄 · 남은 시간 · 버튼 가운데 | 거리·시간 한 줄 → 운행 목적 → 경로선, 버튼 하단 고정 | 결과 → 운행 목적 세로 |
 
 - 주 버튼은 스크롤 영역 밖 **하단 고정**. 스크롤해야 보이는 주 버튼을 만들지 않는다.
 - **오른쪽 위는 예약 자리**(운전자 배지). 화면의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 비운다 — 배지가 실제로 잰 폭이 들어온다. 화면이 배지 폭을 숫자로 가정하지 않는다.
@@ -420,7 +420,6 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `SecondaryButton` | 높이 `buttonMd`, `surface3` 바탕(팝업 `surface2` 위에서도 면이 보이게), `textPrimary` 글자 |
 | `TertiaryButton` | 바탕 없음, `accent` 글자, 최소 터치 76 dp 유지("나중에 선택" 등) |
 | `DangerButton` | `dangerFill` 바탕. 확인 다이얼로그 안에서만 |
-| `IconButtonXL` | 96 dp 원형, `surface2` 바탕, 아이콘 36 dp. 마이크·키패드 |
 | `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusLine` | 화면 맨 위 상태 한 줄. **배경 없는 점(12 dp) + 글자**: `● 기록 중 · 35분 경과`. 점 색이 상태(기록 중 `success`, 대기 `textTertiary`), 글자 `label` 본문색, 보조(`detail`)는 `body` 회색. 알약 배경이 없어 주인공 숫자와 경쟁하지 않는다. 누를 수 없다(Home·Peek 공용) |
@@ -437,7 +436,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
-| `OptionGroup` | 선택지 묶음 하나(예: 목적 확인의 일반 업무용·출퇴근용·비업무용). 묶음 이름(`caption`, `textSecondary`) 아래 `OptionButton`(`buttonMd`)들을 줄바꿈하며 놓는다. 선택되면 `accent` 링 + 체크. 고르면 바로 실행되는 곳에 쓴다 |
+| `RadioOption` | 여러 개 중 하나를 고르는 한 줄(운행 결과의 운행 목적). 왼쪽 원 28 dp(선택: `accent` 테두리 + 가운데 점, 아니면 `textTertiary` 테두리) + 글자 `body`, 줄 전체 76 dp 터치. `onClick = null`이면 보기 전용(고르지 않은 줄은 흐리게) |
+| `CountdownBar` | 자동 진행까지 남은 시간(1 → 0) 막대, 높이 8 dp, `surface3` 위 `accent`. 1초마다 바뀌는 값을 1초 동안 선형으로 이어 그린다(정지형이면 바로). 자동 종료 팝업 · 운행 결과가 같이 쓴다 |
 | `TopLine` · `ScrollColumn` | 전체 화면 공용 뼈대. `TopLine` = 맨 위 76 dp 줄(상태 줄·화면 제목), 오른쪽은 운전자 배지 자리로 비운다. `ScrollColumn` = 위쪽 정렬 + 넘치면 스크롤 + 가장자리 흐림 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusLine`: 초록 점 + `기록 중`, 터치 불가. 운전자는 오른쪽 위 `DriverBadge`) ② 섹션 "주행 거리"(`HeroMetric`, `heroSmall`) ③ 섹션 "운행 경로"(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) — 소제목·모양은 Home과 같은 `Section` ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
@@ -523,3 +523,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.9 | 2026-11-09 | 앱 안 알림 없음(스펙 D-26): `NoticeRow`·`NoticePill`·`OverflowRow` 삭제, Home은 상태 줄 → 두 섹션 → 타일. `TripListRow` 경고색 제거(목적 없음은 회색 문장). 놓친 운행은 `ModalCard` 팝업(X = 무시, `ModalCard.closeLabel`로 접근성 이름을 그 뜻으로) |
 | 1.10 | 2026-11-09 | 누를 수 있는 요소의 공통 동작을 `Modifier.tappable` 하나로(입력 잠금·누름 0.97배·햅틱, 물결 없음) — `ConfidenceRow`도 누름 피드백·햅틱을 갖게 됨. 화면 바깥 여백 `screenMargin()` 하나로 |
 | 1.11 | 2026-11-09 | 목적 확인 화면(스펙 7.3): `IconButtonXL`(마이크) 구현, `SegmentedPurpose` → 범용 `OptionGroup`, 공용 뼈대 `TopLine`·`ScrollColumn`(Home에서 승격), `RouteFlow(live)`. 팝업 머리 줄 제목은 짧은 명사("거래처 등록"), 질문은 본문 첫 줄 |
+| 1.12 | 2026-11-09 | 목적 확인 화면을 운행 결과 카드로(스펙 D-27): `RadioOption`·`CountdownBar` 추가(자동 종료 팝업도 `CountdownBar` 사용), `IconButtonXL`·`OptionGroup`·`OptionButton`은 쓰는 곳이 없어 삭제 |

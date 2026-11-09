@@ -92,7 +92,7 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 ## Task 4: ReviewTrip — 목적 확인 (F-06, F-08, F-09, F-17)
 
-> 2026-11-09 구현(브랜치 `feat/review-trip`). 계획과 달라진 점: 목적지 없음 칩 선택은 확정 때 함께 저장(R-10, interim `confirmPurpose`에 `destinationLabel`), 거래처 등록은 시트가 아니라 `ModalCard`(X = 아니요), 화면별 ViewModel 저장소(`RouteViewModelStores`) 추가, 제목 "목적 확인".
+> 2026-11-09 구현 후 **운행 결과 카드로 바뀌었다**(스펙 D-27, 브랜치 `feat/review-trip`). 아래 원래 계획(확신 추천 · 선택지 · 음성 · 거래처 등록)은 기록으로 남긴다. 지금: `Route.TripResult`, `ui/result/*`, `TripResultRepository`(`classify` + `detailFor`), `DefaultPurposePolicy`(기본 일반 업무), 5초 자동 저장 · [수정하기]/[저장] · [메인 화면으로]. History(Task 7) 행 탭은 `Route.TripResult`로 연다 — 그때 History에서 연 카드는 카운트다운 없이 열지 정한다.
 
 **Files:** Create `ui/review/ReviewUiState.kt`, `ReviewViewModel.kt`, `ReviewScreen.kt` · Test `ReviewReducerTest`, `ReviewViewModelTest`, `ReviewScreenTest`(조작 예산), `ReviewScreenshotTest`
 

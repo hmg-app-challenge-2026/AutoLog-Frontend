@@ -28,7 +28,7 @@ import kr.autolog.vehicle.ui.profile.ProfilePickerRoute
 import kr.autolog.vehicle.ui.receipt.FuelEntryRoute
 import kr.autolog.vehicle.ui.receipt.ReceiptQrRoute
 import kr.autolog.vehicle.ui.report.ReportRoute
-import kr.autolog.vehicle.ui.review.ReviewRoute
+import kr.autolog.vehicle.ui.result.TripResultRoute
 import kr.autolog.vehicle.ui.settings.SettingsRoute
 
 /** 주차(FULL) 층: 백스택 맨 위 화면. 전환은 motion.screen, 프로필→오른쪽 위 배지는 motion.hero. */
@@ -75,7 +75,7 @@ private fun RouteContent(route: Route) {
     when (route) {
         Route.ProfilePicker -> ProfilePickerRoute()
         Route.Home -> HomeRoute()
-        is Route.ReviewTrip -> ReviewRoute(route.tripId)
+        is Route.TripResult -> TripResultRoute(route.tripId)
         Route.ReceiptQr -> ReceiptQrRoute()
         is Route.FuelEntry -> FuelEntryRoute(route.receiptId)
         Route.Report -> ReportRoute()
