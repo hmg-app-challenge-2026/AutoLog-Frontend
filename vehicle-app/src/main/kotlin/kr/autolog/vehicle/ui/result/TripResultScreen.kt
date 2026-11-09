@@ -144,15 +144,17 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 /**
  * 운행 요약: "운행 거리 · 시간" → "운행 경로". 넓은·세로 창은 위아래로(섹션 사이 32 dp).
  * 좁은 창(dense)은 두 섹션을 **좌우 한 줄**에 — 위아래로 쌓으면 운행 목적이 첫 화면 밖으로 밀린다(높이 약 100 dp 절약).
+ * 화면을 세로 가운데에서 반으로 나눈 두 칸이 같은 들여쓰기를 갖게: 왼쪽 칸은 화면 왼쪽 끝에서, 오른쪽 칸은 가운데 선에서
+ * 똑같이 화면 여백만큼 떨어진다. 콘텐츠 폭(여백 안) 기준으로는 같은 폭 두 칸 + 사이 간격 = 여백 × 2.
  */
 @Composable
 private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
     if (dense) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
-            Section(stringResource(R.string.section_distance_time), Modifier.weight(0.4f), dense = true) {
+        Row(horizontalArrangement = Arrangement.spacedBy(screenMargin() * 2)) {
+            Section(stringResource(R.string.section_distance_time), Modifier.weight(1f), dense = true) {
                 DistanceTime(state, stacked = true)
             }
-            Section(stringResource(R.string.section_route), Modifier.weight(0.6f), dense = true) {
+            Section(stringResource(R.string.section_route), Modifier.weight(1f), dense = true) {
                 Route(state, dense = true)
             }
         }

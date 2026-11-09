@@ -59,7 +59,8 @@ private const val GLOW_SPREAD = 1.2f
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
  * [live] = 지금 달리는 운행(흐르는 화살표). 끝난 운행(운행 결과·이력)은 false — 화살표 대신 ○와 ●를 잇는 가는 선(지도 앱 경로 요약처럼),
  * 흐름이 "진행 중"으로 잘못 읽히지 않게.
- * [dense](좁은 창 반쪽 칸): 출발지·목적지를 **같은 크기**(`caption` 22 sp, 같은 글자색)로 맞추고 **굵기로만** 구분 — 목적지 굵게, 출발지 보통.
+ * [dense](좁은 창 반쪽 칸): 출발지·목적지를 **같은 크기**(`fine` 20 sp — 글자 하한, 같은 글자색)로 맞추고 **굵기로만** 구분 — 목적지 굵게,
+ * 출발지 보통. 표시 칸과 글자 사이도 8 dp로 좁힌다(반쪽 칸 글자 폭 152 dp에 "서울 강남구 역삼동"이 한 줄로).
  */
 @Composable
 fun RouteFlow(
@@ -73,20 +74,21 @@ fun RouteFlow(
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val density = LocalDensity.current
-    val originStyle = t.caption
-    val destinationStyle = if (dense) t.caption.copy(fontWeight = FontWeight.Bold) else t.label
+    val originStyle = if (dense) t.fine else t.caption
+    val destinationStyle = if (dense) t.fine.copy(fontWeight = FontWeight.Bold) else t.label
+    val gap = if (dense) Space.s2 else Space.s3
     val originColor = if (dense) destinationColor else c.textSecondary
     // 점을 그 줄 글자의 첫 줄 가운데에 맞추려고, 점 칸 높이를 글자 한 줄 높이로 둔다
     val originLine = with(density) { originStyle.lineHeight.toDp() }
     val destinationLine = with(density) { destinationStyle.lineHeight.toDp() }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s1)) {
         if (origin != null) {
-            RouteRow(markerHeight = originLine, marker = { OriginMarker() }) {
+            RouteRow(gap, markerHeight = originLine, marker = { OriginMarker() }) {
                 Text(origin, style = originStyle, color = originColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            RouteRow(markerHeight = null, marker = { if (live) FlowChevrons() else StaticConnector() }) {}
+            RouteRow(gap, markerHeight = null, marker = { if (live) FlowChevrons() else StaticConnector() }) {}
         }
-        RouteRow(markerHeight = destinationLine, marker = { DestinationMarker() }) {
+        RouteRow(gap, markerHeight = destinationLine, marker = { DestinationMarker() }) {
             // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
             Text(
                 destination,
@@ -99,10 +101,10 @@ fun RouteFlow(
     }
 }
 
-/** 경로선 한 줄: 왼쪽 표시 칸(폭 `iconSm`, [markerHeight]가 있으면 그 높이 가운데) + 오른쪽 글자 칸. */
+/** 경로선 한 줄: 왼쪽 표시 칸(폭 `iconSm`, [markerHeight]가 있으면 그 높이 가운데) + [gap] + 오른쪽 글자 칸. */
 @Composable
-private fun RouteRow(markerHeight: Dp?, marker: @Composable () -> Unit, text: @Composable () -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(Space.s3), verticalAlignment = Alignment.Top) {
+private fun RouteRow(gap: Dp, markerHeight: Dp?, marker: @Composable () -> Unit, text: @Composable () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.Top) {
         Box(
             Modifier.width(Size.iconSm).then(if (markerHeight != null) Modifier.height(markerHeight) else Modifier),
             contentAlignment = Alignment.Center,
