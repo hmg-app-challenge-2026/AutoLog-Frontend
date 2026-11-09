@@ -16,19 +16,18 @@ import kr.autolog.vehicle.ui.design.components.NoticeRow
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
 /**
- * 알림 목록(D-23): 처리할 일을 한 목록에. 제목 `알림 N` + 줄마다 1탭. 놓친 운행은 줄 안에서 [추가]·[무시]로 끝낸다.
+ * 알림 목록(D-23·D-24, 오른쪽 섹션 "알림"): 처리할 일을 한 목록에. 줄마다 1탭. 놓친 운행은 줄 안에서 [추가]·[무시]로 끝낸다.
+ * 없으면 "새 알림이 없어요".
  * 줄의 모양(아이콘·색·문장·동작)은 [HomeNotice] 종류마다 여기 한 곳에서 정한다.
  */
 @Composable
 internal fun HomeNotices(notices: List<HomeNotice>, onAction: (HomeAction) -> Unit) {
     val c = AutoLogTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
-        Text(
-            stringResource(R.string.notices_title, notices.size),
-            // 목록 머리는 작은 섹션 제목 — 줄 내용보다 한 단계 낮게
-            style = AutoLogTheme.type.caption,
-            color = c.textSecondary,
-        )
+        // 없을 때도 칸을 지킨다 — 좌우 반반이 무너지지 않게(D-24)
+        if (notices.isEmpty()) {
+            Text(stringResource(R.string.notices_empty), style = AutoLogTheme.type.body, color = c.textTertiary)
+        }
         notices.forEach { notice ->
             when (notice) {
                 is HomeNotice.Review ->

@@ -85,17 +85,37 @@ class HomeScreenTest {
     }
 
     @Test
-    fun `독 — 운행 기록·설정, 대기 중엔 작은 직접 시작`() {
+    fun `타일 4개 — 운행 기록 조회·설정·기록 시작`() {
         val actions = mutableListOf<HomeAction>()
         compose.setContent {
             AutoLogTheme { WindowLayoutHost { HomeScreen(readyQuiet, onAction = { actions += it }) } }
         }
 
-        compose.onNodeWithText("운행 기록").performClick()
-        compose.onNodeWithContentDescription("설정").performClick()
-        compose.onNodeWithText("직접 시작").performClick()
+        compose.onNodeWithText("운행 기록 조회").performClick()
+        compose.onNodeWithText("설정").performClick()
+        compose.onNodeWithText("기록 시작").performClick()
 
         assertEquals(listOf(HomeAction.OpenRecords, HomeAction.OpenSettings, HomeAction.StartTrip), actions)
+    }
+
+    @Test
+    fun `기록 중에는 같은 자리의 4번째 타일이 기록 종료`() {
+        val actions = mutableListOf<HomeAction>()
+        compose.setContent { AutoLogTheme { WindowLayoutHost { HomeScreen(recording, onAction = { actions += it }) } } }
+
+        compose.onNodeWithText("기록 시작").assertDoesNotExist()
+        compose.onNodeWithText("기록 종료").performClick()
+
+        assertEquals(listOf<HomeAction>(HomeAction.EndNow), actions)
+    }
+
+    @Test
+    fun `알림이 없어도 알림 칸은 남아 새 알림이 없다고 말한다`() {
+        compose.setContent { AutoLogTheme { WindowLayoutHost { HomeScreen(readyQuiet, onAction = {}) } } }
+
+        compose.onNodeWithText("알림").assertIsDisplayed()
+        compose.onNodeWithText("새 알림이 없어요").assertIsDisplayed()
+        compose.onNodeWithText("최근 운행 정보").assertIsDisplayed()
     }
 
     @Test

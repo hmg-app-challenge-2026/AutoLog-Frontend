@@ -2,113 +2,71 @@ package kr.autolog.vehicle.ui.home
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.LocalGasStation
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.DriverSide
 import kr.autolog.vehicle.ui.design.LocalDriverSide
-import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
-import kr.autolog.vehicle.ui.design.components.DockButton
-import kr.autolog.vehicle.ui.design.components.PrimaryButton
-import kr.autolog.vehicle.ui.design.components.QuickAction
-import kr.autolog.vehicle.ui.design.components.TertiaryButton
+import kr.autolog.vehicle.ui.design.components.DockTile
 
-/** 독의 동작 하나. [labelInWide]가 false면 넓은 창에서도 아이콘만(자주 쓰지 않는 설정). */
+/** 타일 하나. [emphasized] = 같은 자리에서 상태가 바뀐 주 동작(파란 채움). */
 private data class DockItem(
     val icon: ImageVector,
     @StringRes val label: Int,
     val action: HomeAction,
-    val labelInWide: Boolean = true,
+    val emphasized: Boolean = false,
 )
 
-/** 상태와 무관하게 늘 같은 자리 — 주유 기록 추가 · 운행 기록 · 설정(D-23). */
-private val DOCK_ITEMS =
-    listOf(
-        DockItem(Icons.Rounded.LocalGasStation, R.string.action_fuel_add, HomeAction.AddFuelRecord),
-        DockItem(Icons.Rounded.Description, R.string.action_records, HomeAction.OpenRecords),
-        DockItem(Icons.Rounded.Settings, R.string.action_settings, HomeAction.OpenSettings, labelInWide = false),
-    )
+private val FUEL = DockItem(Icons.Rounded.LocalGasStation, R.string.action_fuel_add, HomeAction.AddFuelRecord)
+private val RECORDS = DockItem(Icons.Rounded.Description, R.string.action_records, HomeAction.OpenRecords)
+private val SETTINGS = DockItem(Icons.Rounded.Settings, R.string.action_settings, HomeAction.OpenSettings)
+private val START = DockItem(Icons.Rounded.PlayArrow, R.string.home_start_manual, HomeAction.StartTrip)
+private val END = DockItem(Icons.Rounded.Stop, R.string.home_end, HomeAction.EndNow, emphasized = true)
+
+/** 한 줄에 둘 타일 수. */
+private const val DOCK_COLUMNS_WIDE = 4
+private const val DOCK_COLUMNS_NARROW = 2
 
 /**
- * 맨 아래 독. 끝 동작은 상태에 따라: 대기 = 작은 "직접 시작"(보통은 출발하면 자동), 기록 중 = [기록 종료](주 버튼), 복구 중 = 없음.
- * WIDE는 가로 한 줄(순서는 `driverSide` — 좌핸들이면 동작이 왼쪽·끝 동작이 오른쪽).
- * NARROW·TALL은 끝 동작을 위에 전폭으로 두고, 그 아래 원형 아이콘 3개.
+ * 맨 아래 타일 4개(D-24): [주유 기록 추가] · [운행 기록 조회] · [설정] · [기록 시작].
+ * 모두 같은 [DockTile] — 크기·모양·간격이 같고 아이콘만 다르다. 기록 중에는 4번째가 같은 자리에서 [기록 종료](파란 채움).
+ * 이름이 한 줄에 들어가는 폭이면 4칸 한 줄, 아니면 2×2. 순서는 `driverSide`(우핸들이면 좌우 반전).
  */
 @Composable
-internal fun HomeDock(state: HomeUiState, onAction: (HomeAction) -> Unit, wide: Boolean) {
+internal fun HomeDock(state: HomeUiState, onAction: (HomeAction) -> Unit) {
     if (state.phase == HomePhase.NEEDS_RECOVERY) return
-    val recording = state.phase != HomePhase.READY
-    if (wide) {
-        val items =
-            @Composable {
-                DOCK_ITEMS.forEach { item ->
-                    DockButton(item.icon, stringResource(item.label), {
-                        onAction(item.action)
-                    }, showLabel = item.labelInWide)
-                }
-            }
-        // 끝 동작: 기록 중이면 [기록 종료]가 남은 폭을 다 쓰는 주 버튼, 대기면 작은 "직접 시작"
-        val trailing: @Composable RowScope.() -> Unit = {
-            if (recording) {
-                PrimaryButton(
-                    stringResource(R.string.home_end),
-                    onClick = { onAction(HomeAction.EndNow) },
-                    modifier = Modifier.weight(1f),
-                    height = Size.buttonMd,
-                )
-            } else {
-                Spacer(Modifier.weight(1f))
-                TertiaryButton(stringResource(R.string.home_start_manual), onClick = { onAction(HomeAction.StartTrip) })
-            }
-        }
-        Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Space.s4),
-        ) {
-            if (LocalDriverSide.current == DriverSide.START) {
-                items()
-                trailing()
-            } else {
-                trailing()
-                items()
-            }
-        }
-    } else {
-        Column(
-            Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Space.s4),
-        ) {
-            if (recording) {
-                PrimaryButton(
-                    stringResource(R.string.home_end),
-                    onClick = { onAction(HomeAction.EndNow) },
-                    modifier = Modifier.fillMaxWidth(),
-                    // 분할 화면 한 칸은 높이가 모자라 76 dp, 세로가 넉넉한 TALL은 96 dp
-                    height = if (LocalWindowLayout.current == WindowLayout.NARROW) Size.buttonMd else Size.buttonLg,
-                )
-            } else {
-                TertiaryButton(stringResource(R.string.home_start_manual), onClick = { onAction(HomeAction.StartTrip) })
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                DOCK_ITEMS.forEach { item ->
-                    QuickAction(item.icon, stringResource(item.label), onClick = { onAction(item.action) })
+    val last = if (state.phase == HomePhase.READY) START else END
+    val ordered = listOf(FUEL, RECORDS, SETTINGS, last)
+    val items = if (LocalDriverSide.current == DriverSide.START) ordered else ordered.reversed()
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val fitsOneRow = maxWidth >= Size.dockTileMinWidth * DOCK_COLUMNS_WIDE + Space.s4 * (DOCK_COLUMNS_WIDE - 1)
+        val columns = if (fitsOneRow) DOCK_COLUMNS_WIDE else DOCK_COLUMNS_NARROW
+        Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {
+            items.chunked(columns).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+                    row.forEach { item ->
+                        DockTile(
+                            item.icon,
+                            stringResource(item.label),
+                            onClick = { onAction(item.action) },
+                            modifier = Modifier.weight(1f),
+                            emphasized = item.emphasized,
+                        )
+                    }
                 }
             }
         }

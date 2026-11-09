@@ -17,9 +17,9 @@ import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.RouteFlow
 
 /**
- * Home 주인공 하나(D-23).
- * - 대기: 이번 달 요약 — `이번 달 운행 23회` · `412.6 km` · `업무 388.1 km` + "출발하면 자동으로 기록해요".
- * - 기록 중: 이번 운행 거리 + 경로(Peek과 같은 [RouteFlow]). 경과 시간은 상태 줄이 말한다.
+ * Home 왼쪽 섹션 내용(D-23·D-24).
+ * - 대기("최근 운행 정보"): 이번 달 요약 — `이번 달 운행 23회` · `412.6 km` · `업무 388.1 km` + "출발하면 자동으로 기록해요".
+ * - 기록 중("현재 운행 정보"): 이번 운행 거리 + 경로(Peek과 같은 [RouteFlow]). 경과 시간은 상태 줄이 말한다.
  */
 @Composable
 internal fun ColumnScope.HomeHero(state: HomeUiState) {
@@ -51,7 +51,7 @@ internal fun ColumnScope.HomeHero(state: HomeUiState) {
             HeroMetric(
                 value = state.tripKm,
                 unit = stringResource(R.string.unit_km),
-                label = stringResource(R.string.home_trip_label),
+                label = null, // 섹션 소제목 "현재 운행 정보"가 이미 말한다
                 unavailableText = stringResource(R.string.distance_unavailable),
                 // 가장 큰 숫자는 세로가 넉넉한 TALL에서만 — 높이 640 dp 창에선 경로가 밀려 내려갔다
                 size = when (layout) {
@@ -60,7 +60,7 @@ internal fun ColumnScope.HomeHero(state: HomeUiState) {
                     WindowLayout.NARROW -> MetricSize.COMPACT
                 },
             )
-            Spacer(Modifier.height(Space.s5))
+            Spacer(Modifier.height(Space.s4))
             RouteFlow(
                 origin = state.origin,
                 destination = state.destination ?: stringResource(R.string.peek_no_destination),

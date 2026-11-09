@@ -2,7 +2,6 @@ package kr.autolog.vehicle.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -33,6 +32,7 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ChipTone
+import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusChip
 import kr.autolog.vehicle.ui.design.verticalScrollFade
 
@@ -47,63 +47,50 @@ fun HomeRoute() {
     HomeScreen(state, vm::onAction)
 }
 
-/** WIDE에서 주인공이 차지하는 폭 비율(나머지는 알림). 알림이 없으면 주인공이 다 쓴다. */
-private const val WIDE_HERO_WEIGHT = 0.55f
-
 /**
- * 스펙 7.2 (D-23). 3단: 맨 위 상태 줄(오른쪽은 운전자 배지) / 가운데 주인공 하나 + 알림 / 맨 아래 독.
- * 주인공 = 대기면 이번 달 요약, 기록 중이면 이번 운행 거리 + 경로([HomeHero]). 처리할 일은 알림 목록 하나([HomeNotices]).
- * 동작은 독 한 줄([HomeDock]) — 상태가 바뀌어도 자리가 같다.
+ * 스펙 7.2 (D-23·D-24). 3단: 맨 위 상태 줄(오른쪽은 운전자 배지) / 가운데 두 섹션 / 맨 아래 같은 모양 타일 4개([HomeDock]).
+ * 두 섹션 = 운행 정보([HomeHero] — 대기 "최근 운행 정보", 기록 중 "현재 운행 정보") · 알림([HomeNotices]).
+ * 소제목은 같은 [SectionHeader], 내용은 위쪽 정렬로 시작선을 맞춘다.
  */
 @Composable
 fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 주인공·알림을 그리지 않는다
+    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 섹션을 그리지 않는다
     val showBody = state.phase != HomePhase.NEEDS_RECOVERY
+    val trip = @Composable { HomeSection(tripSectionTitle(state.phase)) { HomeHero(state) } }
+    val notices = @Composable {
+        HomeSection(stringResource(R.string.section_notices)) { HomeNotices(state.notices, onAction) }
+    }
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
-            // 높이 640 dp 안에 상태 줄·알림 3줄·독이 다 들어가게 단 사이 간격은 16 dp
+            // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
             Column(Modifier.fillMaxSize().padding(Space.s7), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
                 TopRow { HomeStatus(state) }
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     if (showBody) {
-                        val hasNotices = state.notices.isNotEmpty()
-                        ScrollRegion(Modifier.weight(if (hasNotices) WIDE_HERO_WEIGHT else 1f).fillMaxHeight()) {
-                            HomeHero(state)
-                        }
-                        if (hasNotices) {
-                            ScrollRegion(Modifier.weight(1f - WIDE_HERO_WEIGHT).fillMaxHeight()) {
-                                HomeNotices(state.notices, onAction)
-                            }
-                        }
+                        // 좌우 반반. 섹션마다 넘치면 그 섹션만 스크롤
+                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { trip() }
+                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { notices() }
                     }
                 }
-                HomeDock(state, onAction, wide = true)
+                HomeDock(state, onAction)
             }
         } else {
             val margin = if (layout == WindowLayout.TALL) Space.tallMargin else Space.s6
             Column(Modifier.fillMaxSize().padding(margin), verticalArrangement = Arrangement.spacedBy(Space.s5)) {
                 TopRow { HomeStatus(state) }
-                // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 독·주 버튼은 늘 보인다
+                // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 타일은 늘 보인다
                 ScrollRegion(Modifier.weight(1f).fillMaxWidth()) {
                     if (showBody) {
-                        // 좁은 창은 한 칸에 하나씩 쌓인다. 대기 중이면 처리할 일(알림)이 요약보다 급하므로 먼저,
-                        // 기록 중이면 지금 운행이 먼저 — 아래 것은 스크롤 + 가장자리 흐림으로 이어진다
+                        // 한 칸에 위아래로 쌓는다. 대기 중 알림이 있으면 처리할 일이 요약보다 급하므로 알림이 먼저,
+                        // 기록 중이면 지금 운행이 먼저
                         val noticesFirst = state.phase == HomePhase.READY && state.notices.isNotEmpty()
-                        if (noticesFirst) {
-                            HomeNotices(state.notices, onAction)
-                            Spacer(Modifier.height(Space.s6))
-                            HomeHero(state)
-                        } else {
-                            HomeHero(state)
-                            if (state.notices.isNotEmpty()) {
-                                Spacer(Modifier.height(Space.s6))
-                                HomeNotices(state.notices, onAction)
-                            }
-                        }
+                        if (noticesFirst) notices() else trip()
+                        Spacer(Modifier.height(Space.s6))
+                        if (noticesFirst) trip() else notices()
                     }
                 }
-                HomeDock(state, onAction, wide = false)
+                HomeDock(state, onAction)
             }
         }
         val autoEnd = state.autoEnd
@@ -119,6 +106,21 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
         if (state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
         }
+    }
+}
+
+/** 왼쪽 섹션 소제목: 대기 "최근 운행 정보", 기록 중 "현재 운행 정보". */
+@Composable
+private fun tripSectionTitle(phase: HomePhase): String = stringResource(
+    if (phase == HomePhase.READY) R.string.section_recent_trip else R.string.section_current_trip,
+)
+
+/** 소제목 + 내용. 모든 섹션이 같은 모양. */
+@Composable
+private fun HomeSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        SectionHeader(title)
+        content()
     }
 }
 
@@ -148,15 +150,9 @@ private fun TopRow(content: @Composable RowScope.() -> Unit) {
     )
 }
 
-/** 공간이 남으면 세로 가운데, 모자라면 스크롤 + 더 있는 쪽 가장자리를 흐린다. */
+/** 위쪽 정렬로 쌓고, 넘치면 스크롤 + 더 있는 쪽 가장자리를 흐린다. */
 @Composable
 private fun ScrollRegion(modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
     val scroll = rememberScrollState()
-    BoxWithConstraints(modifier.verticalScrollFade(scroll, Space.s7)) {
-        Column(
-            Modifier.verticalScroll(scroll).heightIn(min = maxHeight).fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            content = content,
-        )
-    }
+    Column(modifier.verticalScrollFade(scroll, Space.s7).verticalScroll(scroll), content = content)
 }

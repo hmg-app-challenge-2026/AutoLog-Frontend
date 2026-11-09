@@ -37,6 +37,7 @@ object Size {
     val peekMaxWidth = 560.dp
     val sheetMaxWidth = 960.dp
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
+    val dockTileMinWidth = 208.dp // DockTile 이름(최장 "운행 기록 조회", label 28 sp)이 한 줄에 들어가는 폭
     val hairline = 1.dp
     val progressBar = 8.dp
     val ring = 3.dp

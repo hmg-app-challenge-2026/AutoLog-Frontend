@@ -4,14 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -23,8 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
@@ -34,77 +28,42 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /**
- * 디자인 언어 11장 DockButton — 화면 맨 아래 독(넓은 창)의 동작. `surface1` 알약, 높이 76 dp, 아이콘(`accent`) + 이름(`label`).
- * [showLabel]이 false면 아이콘만 있는 정사각(76 dp) — 자주 쓰지 않는 동작(설정). 이름은 접근성 설명으로 남긴다.
+ * 디자인 언어 11장 DockTile — 화면 맨 아래 동작 타일. 모든 타일이 같은 모양: `surface1`, `radius.lg`, 높이 96 dp,
+ * 아이콘(36 dp, `accent`) 위 · 이름(`label`) 아래, 가운데 정렬. 다른 것은 아이콘과 이름뿐이다.
+ * [emphasized]면 파란 채움(`accentFill` + `onAccent`) — 같은 자리에서 상태가 바뀐 주 동작(기록 중의 [기록 종료]).
+ * 폭은 부모가 정한다(보통 `weight(1f)`로 등분). 이름이 한 줄에 들어가려면 최소 [Size.dockTileMinWidth].
  */
 @Composable
-fun DockButton(
+fun DockTile(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    showLabel: Boolean = true,
+    emphasized: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
-    val interaction = remember { MutableInteractionSource() }
-    val view = LocalView.current
-    Row(
-        modifier
-            .heightIn(min = Size.touchMin)
-            .widthIn(min = Size.touchMin)
-            .pressFeedback(interaction)
-            .clip(RoundedCornerShape(Radius.lg))
-            .background(c.surface1)
-            .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
-                view.confirmHaptic()
-                onClick()
-            }.then(
-                if (showLabel) {
-                    Modifier.padding(horizontal = Space.s5)
-                } else {
-                    Modifier.semantics {
-                        contentDescription =
-                            label
-                    }
-                },
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Space.s3, Alignment.CenterHorizontally),
-    ) {
-        Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
-        if (showLabel) Text(label, style = AutoLogTheme.type.label, color = c.textPrimary, maxLines = 1)
-    }
-}
-
-/** 좁은 창 독의 동작: 원형 아이콘(76 dp, `surface2`) + 아래 이름(`caption`). */
-@Composable
-fun QuickAction(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val c = AutoLogTheme.colors
+    val fg = if (emphasized) c.onAccent else c.textPrimary
     val interaction = remember { MutableInteractionSource() }
     val view = LocalView.current
     Column(
         modifier
-            .widthIn(min = Size.touchMin)
+            .heightIn(min = Size.buttonLg)
             .pressFeedback(interaction)
+            .clip(RoundedCornerShape(Radius.lg))
+            .background(if (emphasized) c.accentFill else c.surface1)
             .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
                 view.confirmHaptic()
                 onClick()
-            },
+            }.padding(horizontal = Space.s3, vertical = Space.s3),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Space.s2),
+        verticalArrangement = Arrangement.spacedBy(Space.s1, Alignment.CenterVertically),
     ) {
-        Box(
-            Modifier.size(Size.touchMin).clip(CircleShape).background(c.surface2),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
-        }
-        Text(
-            title,
-            style = AutoLogTheme.type.caption,
-            color = c.textSecondary,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = if (emphasized) c.onAccent else c.accent,
+            modifier = Modifier.size(Size.icon),
         )
+        Text(label, style = AutoLogTheme.type.label, color = fg, textAlign = TextAlign.Center, maxLines = 1)
     }
 }

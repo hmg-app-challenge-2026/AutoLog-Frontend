@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.LocalGasStation
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -83,14 +84,14 @@ class GalleryScreenshotTest {
                 AvatarFace("최", Brush.linearGradient(listOf(c.accent, c.accentFill)), Size.avatarSmall)
                 IconAvatar(Icons.Rounded.Person, Size.avatarSmall)
             }
+            SectionHeader("최근 운행 정보")
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                DockButton(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {})
-                DockButton(Icons.Rounded.Settings, "설정", onClick = {}, showLabel = false)
+                DockTile(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {}, modifier = Modifier.weight(1f))
+                DockTile(Icons.Rounded.History, "운행 기록 조회", onClick = {}, modifier = Modifier.weight(1f))
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                QuickAction(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {})
-                QuickAction(Icons.Rounded.History, "운행 기록", onClick = {})
-                QuickAction(Icons.Rounded.Settings, "설정", onClick = {})
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+                DockTile(Icons.Rounded.Settings, "설정", onClick = {}, modifier = Modifier.weight(1f))
+                DockTile(Icons.Rounded.Stop, "기록 종료", onClick = {}, modifier = Modifier.weight(1f), emphasized = true)
             }
         }
     }
