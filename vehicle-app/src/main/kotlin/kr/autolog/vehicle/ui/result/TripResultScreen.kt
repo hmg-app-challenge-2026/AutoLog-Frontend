@@ -167,21 +167,30 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
  */
 @Composable
 private fun TripSummary(state: TripResultUiState, dense: Boolean = false, gap: Dp = Space.s7) {
+    val contentGap = if (LocalWindowLayout.current == WindowLayout.WIDE) Space.s4 else 0.dp
     if (dense) {
         Column {
             Section(stringResource(R.string.section_distance_time), dense = true) {
+                Spacer(Modifier.height(contentGap))
                 DistanceTime(state)
             }
             Spacer(Modifier.height(Space.s7))
             Section(stringResource(R.string.section_route), dense = true) {
+                Spacer(Modifier.height(contentGap))
                 Route(state)
             }
         }
         return
     }
-    Section(stringResource(R.string.section_distance_time)) { DistanceTime(state) }
+    Section(stringResource(R.string.section_distance_time)) {
+        Spacer(Modifier.height(contentGap))
+        DistanceTime(state)
+    }
     Spacer(Modifier.height(gap))
-    Section(stringResource(R.string.section_route)) { Route(state) }
+    Section(stringResource(R.string.section_route)) {
+        Spacer(Modifier.height(contentGap))
+        Route(state)
+    }
 }
 
 /**
@@ -217,6 +226,7 @@ private fun Route(state: TripResultUiState) {
 @Composable
 private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit, dense: Boolean = false) {
     Section(stringResource(R.string.section_purpose), dense = dense) {
+        if (LocalWindowLayout.current == WindowLayout.WIDE) Spacer(Modifier.height(Space.s4))
         // dense 행은 면 위아래가 이미 비어 있어 간격 없이 쌓는다(면 사이 틈 20 dp)
         Column(verticalArrangement = if (dense) Arrangement.Top else Arrangement.spacedBy(Space.s2)) {
             PURPOSE_CHOICES.forEach { category ->
