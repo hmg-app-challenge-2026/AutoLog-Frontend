@@ -35,14 +35,13 @@ data class AutoLogType(
     val body: TextStyle,
     val label: TextStyle,
     val caption: TextStyle,
-    /** 영역 소제목("이번 달 운행 정보", "운행 경로"). 크기는 caption과 같고 굵기로 제목임을 드러낸다 — 소제목보다 큰 설명 글씨를 두지 않는다. */
+    /** 영역 소제목("이번 달 운행 정보", "운행 경로"). 본문보다 작고 보조 글자보다 굵다. */
     val section: TextStyle,
     /**
-     * **글자 하한**(20 sp) — 공간이 정말 모자란 곳에만: 좁은 창에서 버튼 여러 개를 한 줄에 둘 때(dense 버튼).
-     * Pleos 보조 텍스트 높이 3 mm ≈ 19 sp(기준 밀도 160 dpi)에 맞춘 값. 이보다 작은 글자를 만들지 않는다.
+     * **글자 하한**(22 sp) — 좁은 창의 도크·dense 버튼과 긴 보조 문구처럼 공간이 모자란 곳에만 쓴다.
      */
     val fine: TextStyle,
-    /** [section]의 좁은 창판(20 sp 굵게, 글자 하한) — 분할 화면처럼 세로 공간이 모자란 화면의 소제목. */
+    /** [section]의 좁은 창판(26 sp 굵게) — 분할 화면처럼 세로 공간이 모자란 화면의 소제목. */
     val sectionFine: TextStyle,
 )
 
@@ -61,17 +60,17 @@ private fun style(sizeSp: Int, weight: Int, lineHeight: Float, trackingEm: Float
 
 fun autoLogType(): AutoLogType = AutoLogType(
     hero = style(140, 300, 1.0f, -0.02f, tnum = true),
-    heroSmall = style(96, 300, 1.0f, -0.015f, tnum = true),
-    heroCompact = style(72, 300, 1.0f, -0.015f, tnum = true),
-    display = style(56, 600, 1.15f, -0.01f),
-    headline = style(44, 600, 1.2f, -0.005f),
-    title = style(36, 600, 1.25f, 0f),
-    body = style(28, 400, 1.4f, 0f),
-    label = style(28, 600, 1.2f, 0f),
-    caption = style(22, 500, 1.3f, 0.005f),
-    section = style(22, 700, 1.3f, 0.01f),
-    fine = style(20, 500, 1.3f, 0.005f),
-    sectionFine = style(20, 700, 1.3f, 0.01f),
+    heroSmall = style(112, 300, 1.0f, -0.015f, tnum = true),
+    heroCompact = style(80, 300, 1.0f, -0.015f, tnum = true),
+    display = style(64, 600, 1.15f, -0.01f),
+    headline = style(52, 600, 1.2f, -0.005f),
+    title = style(44, 600, 1.25f, 0f),
+    body = style(34, 400, 1.35f, 0f),
+    label = style(34, 600, 1.2f, 0f),
+    caption = style(28, 500, 1.3f, 0.005f),
+    section = style(30, 700, 1.3f, 0.01f),
+    fine = style(22, 500, 1.3f, 0.005f),
+    sectionFine = style(26, 700, 1.3f, 0.01f),
 )
 
 /**

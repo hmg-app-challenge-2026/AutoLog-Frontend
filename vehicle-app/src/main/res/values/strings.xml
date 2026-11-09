@@ -92,4 +92,5 @@
     <string name="picker_add_duplicate">이미 등록된 사용자에요</string>
     <string name="picker_add_name_hint">예: 홍길동</string>
     <string name="picker_add_dept_hint">예: 영업1팀</string>
+    <string name="picker_add_dept_short_hint">부서명</string>
 </resources>

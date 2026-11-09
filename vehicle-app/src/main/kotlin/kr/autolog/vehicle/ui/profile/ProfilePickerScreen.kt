@@ -83,7 +83,7 @@ fun ProfilePickerScreen(
         ) {
             Text(
                 stringResource(title),
-                style = t.display,
+                style = if (layout == WindowLayout.NARROW) t.headline else t.display,
                 color = c.textPrimary,
                 textAlign = TextAlign.Center,
             )

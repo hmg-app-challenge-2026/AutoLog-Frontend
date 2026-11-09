@@ -232,7 +232,13 @@ private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Un
             Text(
                 state.km?.let { stringResource(R.string.result_classified, kind, stringResource(R.string.trip_km, it)) }
                     ?: stringResource(R.string.result_classified_no_km, kind),
-                style = AutoLogTheme.type.caption,
+                style = if (LocalWindowLayout.current ==
+                    WindowLayout.WIDE
+                ) {
+                    AutoLogTheme.type.fine
+                } else {
+                    AutoLogTheme.type.caption
+                },
                 color = c.textSecondary,
             )
         }
@@ -371,6 +377,13 @@ private fun Home(
             modifier = modifier,
             height = Size.buttonMd,
             loading = state.saving,
+            labelStyle = if (LocalWindowLayout.current ==
+                WindowLayout.WIDE
+            ) {
+                AutoLogTheme.type.caption
+            } else {
+                AutoLogTheme.type.label
+            },
         )
     }
 }

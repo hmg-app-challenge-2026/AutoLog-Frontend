@@ -76,7 +76,15 @@ private fun AddDriverFields(form: AddDriverForm, onAction: (ProfilePickerAction)
                 value = form.dept,
                 onValueChange = { onAction(ProfilePickerAction.AddDeptChanged(it)) },
                 enabled = !form.saving,
-                placeholder = stringResource(R.string.picker_add_dept_hint),
+                placeholder = stringResource(
+                    if (LocalWindowLayout.current ==
+                        WindowLayout.NARROW
+                    ) {
+                        R.string.picker_add_dept_short_hint
+                    } else {
+                        R.string.picker_add_dept_hint
+                    },
+                ),
                 modifier = m,
             )
         }

@@ -16,9 +16,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.WindowLayout
 
 /**
  * 디자인 언어 11장 DockTile — 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식).
@@ -60,7 +62,13 @@ fun DockTile(
         }
         Text(
             label,
-            style = AutoLogTheme.type.caption,
+            style = if (LocalWindowLayout.current ==
+                WindowLayout.NARROW
+            ) {
+                AutoLogTheme.type.fine
+            } else {
+                AutoLogTheme.type.caption
+            },
             color = if (emphasized) c.accent else c.textSecondary,
             textAlign = TextAlign.Center,
             maxLines = 2,

@@ -23,7 +23,7 @@ import kr.autolog.vehicle.ui.design.components.TripListRow
  * - 대기: "이번 달 운행 정보"(누적 km + 보조 사실) · "최근 운행 기록"(최신 3건 목록, 누르면 운행 기록 조회).
  * - 기록 중: "주행 거리" · "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
  * - 복구 중: 없음(팝업이 모든 정보를 말한다).
- * 소제목 문구는 Peek과 같은 `section_*`. 거리 숫자는 72 sp(TALL만 96) — 계기판처럼 계속 보는 앱이 아니므로.
+ * 소제목 문구는 Peek과 같은 `section_*`. 거리 숫자는 화면 폭에 따라 140/112/80 sp로 조정한다.
  */
 @Composable
 internal fun homeSections(state: HomeUiState, onAction: (HomeAction) -> Unit): List<HomeSection> = when (state.phase) {
@@ -50,11 +50,12 @@ private fun TripRoute(state: HomeUiState) {
     )
 }
 
-/** 큰 숫자 크기 — 높이 640 dp 창은 72 sp, 세로가 넉넉한 TALL은 96 sp. */
+/** 큰 숫자 크기 — 넓은 화면 140 sp, 세로 화면 112 sp, 좁은 분할 화면 80 sp. */
 @Composable
 private fun metricSize(): MetricSize = when (LocalWindowLayout.current) {
+    WindowLayout.WIDE -> MetricSize.HERO
     WindowLayout.TALL -> MetricSize.MEDIUM
-    WindowLayout.WIDE, WindowLayout.NARROW -> MetricSize.COMPACT
+    WindowLayout.NARROW -> MetricSize.COMPACT
 }
 
 @Composable
