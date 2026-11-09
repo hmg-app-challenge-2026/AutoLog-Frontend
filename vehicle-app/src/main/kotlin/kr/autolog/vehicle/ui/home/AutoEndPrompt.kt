@@ -20,8 +20,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.DriverSide
-import kr.autolog.vehicle.ui.design.LocalDriverSide
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
@@ -49,21 +47,15 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
     )
     // 결정 버튼은 카드 하단에 고정 — 내용이 넘쳐도 [계속 기록]이 스크롤 밖으로 밀리지 않는다
     ModalCard(footer = {
-        val keep: @Composable (
-            Modifier,
-        ) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_keep), onKeep, m) }
-        val end: @Composable (Modifier) -> Unit = { m ->
-            SecondaryButton(stringResource(R.string.autoend_end), onEnd, m, height = Size.buttonLg)
+        val end: @Composable (Modifier) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_end), onEnd, m) }
+        val keep: @Composable (Modifier) -> Unit = { m ->
+            SecondaryButton(stringResource(R.string.autoend_keep), onKeep, m, height = Size.buttonLg)
         }
+        // 왼쪽 [기록 종료](파란 주 버튼) · 오른쪽 [계속 기록](2026-11-09 사용자 요청)
         if (LocalWindowLayout.current == WindowLayout.WIDE) {
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                if (LocalDriverSide.current == DriverSide.START) {
-                    keep(Modifier.weight(1f))
-                    end(Modifier.weight(1f))
-                } else {
-                    end(Modifier.weight(1f))
-                    keep(Modifier.weight(1f))
-                }
+                end(Modifier.weight(1f))
+                keep(Modifier.weight(1f))
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {

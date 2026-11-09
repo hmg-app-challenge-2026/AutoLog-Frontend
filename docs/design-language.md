@@ -294,7 +294,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 |---|---|---|---|
 | **Hero + Actions** (Home) | 맨 위 줄: 칩(전체 문구) · 배지. 동작 컬럼 45%(운전자 쪽, `ActionCard` 2×2) + hero 55% | 맨 위 줄: 축약 칩 · 배지 → hero(넘치면 스크롤 + 가장자리 흐림) → 보조 동작 → 하단 고정 주 버튼 | 맨 위 줄: 배지만 → 칩(전체 문구) → hero → 보조 동작 → 주 버튼 |
 | **Peek** (정차) | 가운데 카드(최대 폭 560 dp), 정보 늘리지 않음 | 세로 스택 가운데 정렬 — 기본 형태(사이드 창) | NARROW와 같음 |
-| **Countdown** (AutoEndPrompt) | 가운데 카드, 버튼 2개 가로(주 버튼이 운전자 쪽) | 가운데 카드, 버튼 2개 세로(주 버튼 아래) | NARROW와 같음 |
+| **Countdown** (AutoEndPrompt) | 가운데 카드, 버튼 2개 가로(왼쪽 [기록 종료], 오른쪽 [계속 기록]) | 가운데 카드, 버튼 2개 세로(위 [기록 종료], 아래 [계속 기록]) | NARROW와 같음 |
 | **Form Dialog** (새 운전자 추가) | 두 칸: 왼쪽 머리(아바타·제목·설명) / 오른쪽 입력·버튼 | 한 줄, 머리는 제목만 | 한 줄, 머리 전체 |
 | **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
 | **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
@@ -434,7 +434,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중`. 운전자는 오른쪽 위 `DriverBadge`) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 목적지(`title`) ④ 기록 방식 한 줄(`body`, `textSecondary`: "계기판 거리 · 10초 전 저장") ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션 없음 |
-| `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · [계속 기록](`PrimaryButton`, 운전자 쪽) · [기록 종료](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
+| `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · 왼쪽 [기록 종료](`PrimaryButton`) · 오른쪽 [계속 기록](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
 
