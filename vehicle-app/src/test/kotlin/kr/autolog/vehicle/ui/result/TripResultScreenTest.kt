@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.core.PurposeCategory
-import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
@@ -72,11 +71,12 @@ class TripResultScreenTest {
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34])
 class TripResultScreenshotTest {
+    // 실제 앱처럼 운전자 배지 없이(FullApp.showsDriverBadge)
     @Test
-    fun viewing() = captureAll("trip_result", driver = SampleDriver) { TripResultScreen(viewing, onAction = {}) }
+    fun viewing() = captureAll("trip_result") { TripResultScreen(viewing, onAction = {}) }
 
     @Test
-    fun editing() = captureAll("trip_result_editing", driver = SampleDriver) {
+    fun editing() = captureAll("trip_result_editing") {
         TripResultScreen(editing, onAction = {})
     }
 }
