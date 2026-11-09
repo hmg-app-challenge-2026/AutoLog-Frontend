@@ -7,23 +7,33 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
@@ -39,10 +49,13 @@ private const val CHEVRON_REST_ALPHA = 0.18f
 private const val GLOW_SPREAD = 1.2f
 
 /**
- * 디자인 언어 11장 RouteFlow — 출발지(`label`, 회색) → 흐르는 화살표 → 목적지(`label`, 두 줄까지). 같은 역할이라 같은 스타일. "지금 이 경로를 가는 중"을 한눈에.
+ * 디자인 언어 11장 RouteFlow — **경로선**: 왼쪽 표시 칸(출발 ○ · 흐르는 화살표 · 도착 ●)과 오른쪽 글자 칸(장소 이름) 두 칸.
+ * 출발지와 목적지가 같은 세로선에서 시작해 두 지점이 짝지어 읽힌다(지도 앱 경로 요약 방식).
+ * 위계: 섹션 소제목(22 굵게) → **목적지**(`label` 28 세미볼드, 값, 두 줄까지) → 출발지(`caption` 22 보통, 회색, 보조).
+ * 출발지를 소제목보다 약하게 둔다 — 같은 회색에 더 크면 또 하나의 소제목처럼 읽혔다(2026-11-09 좁은 창 점검).
  * 화살표는 하이브리드 회생 제동 표시처럼 갈매기(⌄) 3개에 빛이 위에서 아래로 주기적으로 흐른다([MotionTokens.flowPeriodMs]).
  * 반복 모션은 [kr.autolog.vehicle.ui.design.MotionTokens.ambient]일 때만 — 꺼지면 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
- * [origin]이 null이면 출발지·화살표 없이 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
+ * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
  */
 @Composable
 fun RouteFlow(
@@ -53,18 +66,49 @@ fun RouteFlow(
 ) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s2)) {
+    val density = LocalDensity.current
+    // 점을 그 줄 글자의 첫 줄 가운데에 맞추려고, 점 칸 높이를 글자 한 줄 높이로 둔다
+    val originLine = with(density) { t.caption.lineHeight.toDp() }
+    val destinationLine = with(density) { t.label.lineHeight.toDp() }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s1)) {
         if (origin != null) {
-            // 출발지·목적지는 같은 역할(장소 이름)이라 같은 스타일 — 출발지만 회색
-            Text(origin, style = t.label, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            FlowChevrons(Modifier.padding(vertical = Space.s1))
+            RouteRow(markerHeight = originLine, marker = { OriginMarker() }) {
+                Text(origin, style = t.caption, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            RouteRow(markerHeight = null, marker = { FlowChevrons() }) {}
         }
-        // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
-        Text(destination, style = t.label, color = destinationColor, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        RouteRow(markerHeight = destinationLine, marker = { DestinationMarker() }) {
+            // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
+            Text(destination, style = t.label, color = destinationColor, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
-/** 아래를 향한 갈매기 3개. 칸 높이 `space.4`, 폭 `iconSm`, 선 `ring`(3 dp), 둥근 끝. */
+/** 경로선 한 줄: 왼쪽 표시 칸(폭 `iconSm`, [markerHeight]가 있으면 그 높이 가운데) + 오른쪽 글자 칸. */
+@Composable
+private fun RouteRow(markerHeight: Dp?, marker: @Composable () -> Unit, text: @Composable () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Space.s3), verticalAlignment = Alignment.Top) {
+        Box(
+            Modifier.width(Size.iconSm).then(if (markerHeight != null) Modifier.height(markerHeight) else Modifier),
+            contentAlignment = Alignment.Center,
+        ) { marker() }
+        text()
+    }
+}
+
+/** 출발 ○ — 회색 테두리 원. */
+@Composable
+private fun OriginMarker() {
+    Box(Modifier.size(Size.routeDot).border(Size.ring, AutoLogTheme.colors.textSecondary, CircleShape))
+}
+
+/** 도착 ● — 화살표와 같은 accent 채움. */
+@Composable
+private fun DestinationMarker() {
+    Box(Modifier.size(Size.routeDot).clip(CircleShape).background(AutoLogTheme.colors.accent))
+}
+
+/** 아래를 향한 갈매기 3개. 칸 높이 `space.3`(12 dp), 폭 `space.5`, 선 `ring`(3 dp), 둥근 끝. */
 @Composable
 private fun FlowChevrons(modifier: Modifier = Modifier) {
     val motion = AutoLogTheme.motion
@@ -84,7 +128,7 @@ private fun FlowChevrons(modifier: Modifier = Modifier) {
             remember { mutableFloatStateOf(-1f) } // 정지: 아래 alphaOf가 고정 그라데이션을 쓴다
         }
     val p by phase
-    Canvas(modifier.size(width = Size.iconSm, height = Space.s4 * CHEVRONS)) {
+    Canvas(modifier.size(width = Space.s5, height = Space.s3 * CHEVRONS)) {
         val cell = size.height / CHEVRONS
         val stroke = Stroke(width = Size.ring.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         val inset = stroke.width / 2

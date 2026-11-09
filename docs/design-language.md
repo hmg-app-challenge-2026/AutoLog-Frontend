@@ -443,7 +443,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusLine`: 초록 점 + `기록 중`, 터치 불가. 운전자는 오른쪽 위 `DriverBadge`) ② 섹션 "주행 거리"(`HeroMetric`, `heroSmall`) ③ 섹션 "운행 경로"(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) — 소제목·모양은 Home과 같은 `Section` ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
-| `RouteFlow` | 출발지(`label`, `textSecondary`) → 갈매기 3개 화살표(폭 28 dp, 칸 16 dp, 선 3 dp 둥근 끝, `accent`) → 목적지(`label`, 두 줄까지 + 말줄임). 빛의 머리가 위에서 아래로 지나가며 가까운 갈매기를 밝힌다(꺼진 갈매기도 투명도 0.18로 남아 방향이 늘 읽힘), 한 바퀴 1.4초 뒤 짧은 쉼. `motion.ambient`가 꺼지면 위→아래로 짙어지는 정지 그림. 출발지를 모르면 목적지만 |
+| `RouteFlow` | **경로 선**: 왼쪽 표시 칸(폭 28 dp)에 출발 ○(속 빈 원 12 dp, `textSecondary`) → 갈매기 3개 화살표(폭 24 dp, 칸 12 dp, 선 3 dp 둥근 끝, `accent`) → 도착 ●(채운 원 12 dp, `accent`)을 세로로, 오른쪽 글자 칸에 장소 이름. 위계는 소제목(`section` 22 굵게) → **목적지(`label` 28, `textPrimary`, 두 줄까지 + 말줄임 — 값)** → 출발지(`caption` 22 보통, `textSecondary`, 한 줄 — 보조). 표시는 첫 줄 글자 높이의 가운데에 맞춘다. 빛의 머리가 위에서 아래로 지나가며 가까운 갈매기를 밝힌다(꺼진 갈매기도 투명도 0.18로 남아 방향이 늘 읽힘), 한 바퀴 1.4초 뒤 짧은 쉼. `motion.ambient`가 꺼지면 위→아래로 짙어지는 정지 그림. 출발지를 모르면 ●과 목적지만 |
 | `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · 왼쪽 [기록 종료](`PrimaryButton`) · 오른쪽 [계속 기록](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
@@ -521,3 +521,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.5 | 2026-11-09 | 글자 위계: `section` 토큰(22 sp 700) 추가, `SectionHeader`가 사용. Home 왼쪽 = 소제목 "이번 달 운행 정보" → 숫자 → 보조 사실 한 줄(`23회 운행 · 업무 388.1 km`, caption). `RouteFlow` 출발지 caption, "새 알림이 없어요" caption |
 | 1.6 | 2026-11-09 | Home "정상은 침묵"(스펙 D-25): `StatusLine`(점 + 글자)이 `StatusChip`을 대체(삭제), 알림 띠 `NoticePill` + `OverflowRow`(있을 때만), `TripListRow`(최근 운행 기록 3건), 기록 문제 알림 3종, 거리 72 sp, `RouteFlow` 장소 두 개 같은 스타일 |
 | 1.7 | 2026-11-09 | 소제목 통일: "이번 운행" → "주행 거리", 공용 `Section`으로 Home·Peek이 같은 소제목(주행 거리·운행 경로·누적 거리). 상태 문구 키 `status_recording`·`status_ready` 하나로 |
+| 1.8 | 2026-11-09 | `RouteFlow`를 경로 선으로: 출발 ○ · 흐르는 화살표 · 도착 ● 표시 칸 + 글자 칸. 출발지 caption(보조) · 목적지 label(값)으로 위계를 되돌림(1.6의 "같은 스타일"은 좁은 창에서 출발지가 소제목보다 커 보이는 역전을 만들었다). 화살표 칸 16 → 12 dp로 줄여 504×640에서도 목적지까지 스크롤 없이. `Size.routeDot` 추가 |

@@ -26,6 +26,7 @@ object Size {
     val dockIcon = 80.dp // DockTile 아이콘 네모
     val iconSm = 28.dp // 닫기(X)처럼 작은 원 안의 아이콘
     val statusDot = 12.dp // StatusLine 상태 점
+    val routeDot = 12.dp // RouteFlow 출발 ○ · 도착 ● 표시
     val icon = 36.dp
     val iconLg = 48.dp
     val avatarChip = 48.dp
