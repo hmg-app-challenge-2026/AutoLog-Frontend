@@ -151,6 +151,8 @@ AutoLog는 **운전하는 동안 쓰는 앱이 아니다.** 기록은 차가 백
 | D-15 | 카메라 페이지: **빌드 없는 HTML 1장**, 시스템 서체, 업로드 전 canvas 축소 | 폰에서 QR 스캔 → 15초 안에 차 화면까지(F-30). 외부 요청 0 | React 번들(첫 로딩 지연) · 웹폰트(외부 요청·지연) |
 | D-16 | **사용 3단계**: 주행 = 백그라운드(화면 없음), 정차 = Peek(읽기 전용), 주차 = 전체 앱 (1.1) | 사용자 결정. 운전 중 조작 0이 가장 안전하고 심사 위험도 가장 낮다 | 주행 중 표시 전용 Home(시선 유도, 심사 위험) · 정차 중 전체 앱(신호 대기 중 조작 유도) |
 | D-17 | **조작 최소화**: 기본값 자동 진행 + 예외만 터치, 작업별 조작 예산 (1.2). 기어 P → 카운트다운 자동 종료 | 사용자 결정. 차량 터치는 팔을 들어야 해서 1회 비용이 크다 | 매번 확인 버튼(조작 2배) · 타이머 없는 자동 종료(사람이 모르게 결정됨) |
+| D-19 | **운전자 표시는 화면 오른쪽 위 한 곳**(넷플릭스식 `DriverBadge`: 네모 프로필 아이콘 + "○○님"). 주차(FULL)에선 누르면 운전자 선택, 정차(Peek)에선 표시만. 선택 화면은 사람 타일 끝에 **[+ 새 운전자 추가]**, 미확정 운행 질문은 선택 화면에서 빼고 History에서 1탭 지정(F-20) | 사용자 결정(2026-11-09). 이름이 상태 칩·hero와 섞이면 "누가 운전 중인가"를 매번 찾아야 한다. 고정 자리 하나면 시선이 학습된다. 선택 화면은 "지금 누가 타나"만 묻는다(질문 하나 = 조작 하나) | 기록 중 칩 옆에 이름(상태와 사람이 섞임) · 선택 화면에 이전 운행 질문(첫 화면이 두 질문이 됨) |
+| D-20 | **주유 기록 = QR이 기본, 직접 입력은 보조 분기.** Home [주유 기록 추가] → QR(7.4) → 폰으로 영수증 업로드 → OCR 값이 채워진 **입력 창 하나**(7.5 FuelEntry) → [추가하기]. QR 화면 아래 [직접 입력하기]는 같은 입력 창을 빈 칸으로 연다. 영수증 확인 화면과 주유 입력 화면을 따로 두지 않는다 | 사용자 결정(2026-11-09). 사람이 하는 일은 "주유 기록 하나 추가"로 같다 — 출처(영수증·손)가 달라도 같은 창이면 배울 것이 하나다. 영수증이 기본이라 입력 터치가 거의 없다(1.2) | 영수증 저장·주유 기록 버튼 두 개(같은 뜻의 버튼이 나란히) · 영수증 확인 화면과 직접 입력 화면 분리(필드·버튼 위치가 달라 두 번 배움) · 마이크 우선 입력(사용자 흐름에 없음 — 후속 결정으로 미룸) |
 | D-18 | 기어·시동 판정 우선순위: Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙(다음 시동 때 자동 확정, 거리 불변 60초 = 주차) (1.1.1). 기어 P 자동 종료 대기 **5초** | 사용자 결정. Pleos SDK에 기어가 없어도 표준 속성(`CAR_POWERTRAIN`, normal)으로 대부분 해결되고, 최후에도 거리는 정확하다 | 다음 시동 때 매번 묻기(계기판이 같으면 물을 필요가 없음) · 기어 없으면 전체 앱 불가(파킹 후 목적 확인을 못 함) |
 
 ---
@@ -435,10 +437,10 @@ ui/
   design/                     테마, 토큰, 모션, 공용 컴포넌트 (design-language.md)
   root/AutoLogRoot.kt         UsageTier에 따라 Peek / 전체 앱 분기, Navigator 상태 → 화면, 잠금 CompositionLocal 제공
   peek/                       Peek 패널 — 정차 중 읽기 전용 (1.1, 7.0)
-  profile/                    ProfilePicker (F-15, F-20)
+  profile/                    ProfilePicker · AddDriverSheet (F-15, F-24)
   home/                       Home (F-02~05, F-10) + 자동 종료 안내 AutoEndPrompt (F-04, 7.2.1)
   review/                     ReviewTrip (F-06, F-08, F-09, F-17)
-  receipt/                    ReceiptQr (F-30), ReceiptReview (F-19), FuelEntry (F-18)
+  receipt/                    ReceiptQr (F-30), FuelEntry = 주유 입력 창 하나(영수증 OCR 채움 F-19 · 직접 입력 F-18) — D-20
   report/                     Report·보내기 (F-21, F-22)
   history/                    History (F-12)
   settings/                   Settings (F-24, F-01, 사내 서버 8장)
@@ -500,7 +502,7 @@ class HomeViewModel(
 | `ContextRepository` | `ContextApi` | Home, ReviewTrip | 목적지·최근 목적지 |
 | `TripRepository` | `LocalStore.trips`(A, interim), `PurposeEngine.shouldProposePlace`·`registerClientPlace` | History, ReviewTrip | |
 | `VoiceRepository` | `VoiceApi` | ReviewTrip, FuelEntry | `available=false`면 마이크 버튼 숨김 |
-| `ReceiptRepository` | `ReceiptApi`, `LocalStore.receiptInbox`(A, interim) | ReceiptQr, ReceiptReview, FuelEntry | |
+| `ReceiptRepository` | `ReceiptApi`, `LocalStore.receiptInbox`(A, interim) | ReceiptQr, FuelEntry | 입력 창이 넘긴 초안 하나를 출처에 따라 `confirm`(영수증) 또는 `saveFuel`(직접 입력)로 보낸다 — 화면은 저장 경로를 모른다 |
 | `ReportRepository` | `ReportApi`(A, interim), `MailApi.send`·`smtpConfigured` | Report | |
 | `SettingsRepository` | `SettingsApi`, `MailApi.saveSmtp`, `DeviceApi`(A, interim) | Settings | |
 | `UploadRepository` | `UploadApi`(A·B, interim, 8장) | Settings, History | 사내 서버 전송 상태 |
@@ -607,7 +609,7 @@ tier = minOf(fromVehicle, fromPlatform)   // BACKGROUND < PEEK < FULL, 더 제�
 sealed interface Route {
     data object ProfilePicker : Route; data object Home : Route
     data class ReviewTrip(val tripId: String) : Route
-    data object ReceiptQr : Route; data class ReceiptReview(val receiptId: String) : Route
+    data object ReceiptQr : Route; data class FuelEntry(val receiptId: String? = null) : Route  // D-20
     data class FuelEntry(val tripId: String?) : Route
     data object Report : Route; data object History : Route; data object Settings : Route
 }
@@ -637,25 +639,36 @@ sealed interface Route {
 | 목적 | 신호 대기처럼 잠깐 멈췄을 때, 사이드 창에서 **기록이 제대로 되고 있는지 한눈에 확인**만 한다. 조작은 하지 않는다 |
 | 진입 | 정차(PEEK) 중 사용자가 앱을 연다(런처·사이드 창·알림 탭). 앱이 PEEK 단계면 백스택과 무관하게 이 패널이 보인다 |
 | 이탈 | 다시 움직이면(BACKGROUND) 스스로 물러난다. 기어 P(FULL)면 전체 앱 Home으로 바뀐다(기록 중이면 7.2.1 자동 종료 안내가 함께 뜬다). 닫기는 시스템 창 조작으로 |
-| 내용 (위→아래) | ① 상태 줄: `● 기록 중` + 운전자 이름 ② **이번 운행 거리** `23.4 km`(`type.heroSmall`) ③ 목적지 `판교 테크노밸리 거래처`(`type.title`, 없으면 "목적지 없음 — 도착 후 물어볼게요") ④ 기록 방식 한 줄: "계기판 거리 · 10초 전 저장"(`type.body`, `textSecondary`) ⑤ 상황 줄(있을 때만): 움직임 없음 자동 종료 대기면 "멈춰 있으면 2분 41초 뒤 기록을 마쳐요" |
+| 내용 (위→아래) | ① 상태 줄: `● 기록 중`(운전자 이름은 오른쪽 위 배지 — D-19) ② **이번 운행 거리** `23.4 km`(`type.heroSmall`) ③ 목적지 `판교 테크노밸리 거래처`(`type.title`, 없으면 "목적지 없음 — 도착 후 물어볼게요") ④ 기록 방식 한 줄: "계기판 거리 · 10초 전 저장"(`type.body`, `textSecondary`) ⑤ 상황 줄(있을 때만): 움직임 없음 자동 종료 대기면 "멈춰 있으면 2분 41초 뒤 기록을 마쳐요" |
 | 운행이 없을 때 | "기록 중인 운행이 없어요 · 출발하면 자동으로 기록해요" + 누적거리 |
 | 입력 요소 | **없다.** 버튼·스크롤·탭 반응 모두 없음. 한 화면에 다 들어가게 줄인다(넘치면 ⑤ → ④ 순으로 생략) |
 | 모션 | 없음. 숫자는 1초 스로틀로 즉시 교체(D-11) |
 | 레이아웃 | 사이드 창(NARROW·TALL)이 기본. 세로 스택, 가운데 정렬, 최대 폭 560 dp. WIDE에서도 같은 카드를 가운데에 둔다(넓혀서 정보를 늘리지 않는다) |
 | 수용 기준 | 정차 상태에서 앱을 열면 1초 안에 Peek. 입력 노드 0개(UI 테스트). 출발하면 2초 안에 물러남 |
 
-### 7.1 ProfilePicker — "누가 운전하나요?" (F-15, F-20) · 주차 전용
+### 7.1 ProfilePicker — "운전자를 선택해주세요" (F-15, F-24) · 주차 전용
 
 | 항목 | 내용 |
 |---|---|
-| 목적 | 넷플릭스 프로필 선택처럼 **1탭으로 운전자를 정한다**. 폰·비콘 없이 공용차 운전자를 안다 |
-| 데이터 | `ProfileRepository.orderedUsers(vehicleId, now)` → `UserCard(badge=SCHEDULED/RECENT)`, `unassignedTrips()` |
-| 구성 | ① 상단 제목 "누가 운전하나요?"(`type.display`) ② 프로필 타일 최대 5개(배차 → 최근 → 이름순), 6번째 자리는 `[+ 다른 사람]` ③ 하단 텍스트 버튼 "나중에 선택" ④ 미확정 운행이 있으면 제목 위에 카드 "이전 운행(09:00 본사 → 판교 · 23.4 km) 운전자는 누구였나요?" + 후보 타일 |
-| 타일 | `ProfileTile`: 정사각 아바타(이니셜, 사람별 그라데이션) + 이름 + 부서. 배차 운전자는 `ring.accent` 링 + "배차" 배지, 첫 자리 |
-| 동작 | 타일 탭 → `selectDriver(userId)` → 아바타가 Home 상단 칩 자리로 이어지는 shared-element 전환(`motion.hero`) → Home. "나중에 선택" → `selectDriver(null)` → Home. `[+ 다른 사람]` → 전체 직원 시트(검색 + 목록, 키보드 규제 시 목록만) |
-| 레이아웃 | WIDE: 타일 한 줄 가운데 정렬(타일 200 dp) · NARROW: 2열 그리드(타일 160 dp) · TALL: 2열 그리드, 제목 위 여백 확대 |
-| 빈 상태 | 직원 0명 → "아직 등록된 직원이 없어요" + [설정에서 직원 추가] + "나중에 선택" |
-| 수용 기준 | 배차 시간대에 열면 그 운전자가 첫 타일. 1탭으로 Home. 오프라인 동작. 미확정 운행 카드 1탭으로 운전자 지정 |
+| 목적 | 넷플릭스 프로필 선택처럼 **1탭으로 운전자를 정한다**. 폰·비콘 없이 공용차 운전자를 안다. 이 화면은 질문 하나("지금 누가 타나")만 한다 — D-19 |
+| 데이터 | `ProfileRepository.orderedProfiles()` = 추천 엔진 순서(`UserCard.badge` SCHEDULED/RECENT) + 엔진이 아직 모르는 직원(방금 추가한 사람 등)을 뒤에 이름순. `addDriver(name, dept)` |
+| 구성 | ① 제목 "운전자를 선택해주세요"(`type.display`, NARROW는 어절 단위 두 줄 "운전자를 / 선택해주세요") ② 타일 줄: 사람 타일 최대 5개(배차 → 최근 → 이름순) → 넘치면 `[··· 다른 사람]` → **맨 끝 `[+ 새 운전자 추가]`** ③ 하단 텍스트 버튼 "나중에 선택". 타일 순서는 `ProfilePickerUiState.tiles`(`PickerTile.Person/More/Add`)가 정하고 화면은 그리기만 한다 |
+| 타일 | `ProfileTile`: 정사각 아바타(이니셜, 사람별 그라데이션) + 이름 + 부서. 배차 운전자는 `ring.accent` 링 + "배차" 배지, 첫 자리. 동작 타일(`ActionTile`)은 같은 격자·크기의 아이콘 네모(`IconAvatar`) + 동작 이름(`type.label`, `textSecondary`, 두 줄까지) |
+| 동작 | 사람 타일 탭 → `selectDriver(userId)` → Home(아바타 shared-element `motion.hero` → 오른쪽 위 배지 자리). "나중에 선택" → `selectDriver(null)` → Home. `[다른 사람]` → 전체 직원 시트. `[+ 새 운전자 추가]` → 추가 시트 |
+| 추가 시트 | 제목 "새 운전자 추가" · 입력 "이름"(필수) · "부서 (선택)" · [취소] · **[추가하고 시작]**(이름이 비면 비활성). 누르면 `addDriver` → 그 사람으로 `selectDriver` → Home — 추가와 선택이 한 번에 끝난다(1.2). 원천이 거절하면 시트에 사유를 남기고 입력을 고치면 지운다. 새 사람은 `SettingsApi.addUser`(origin=LOCAL)로 들어가며, 동명이인이 있어도 "추가 전에 없던 id"로 찾는다. 키보드가 올라오면 시트가 같이 올라간다(`imePadding`) |
+| 레이아웃 | WIDE: 타일 한 줄 가운데 정렬(타일 200 dp, 넘치면 줄바꿈) · TALL: 3열(160 dp) · NARROW(분할 화면 한 칸): 3열(128 dp) |
+| 빈 상태 | 직원 0명 → "아직 등록된 직원이 없어요" + `[+ 새 운전자 추가]` 타일 + "나중에 선택" |
+| 오른쪽 위 배지 | 이 화면에는 없다(운전자를 고르는 화면이므로) |
+| 수용 기준 | 배차 시간대에 열면 그 운전자가 첫 타일. 1탭으로 Home. 새 운전자는 타일 1탭 + 이름 입력 + 1탭으로 그 사람으로 시작. 오프라인 동작 |
+
+#### 7.1.1 운전자 배지 (DriverBadge) — 모든 화면 오른쪽 위 (D-19)
+
+| 항목 | 내용 |
+|---|---|
+| 모양 | 네모 프로필 아이콘(`avatarChip` 48 dp, 아바타와 같은 모서리) + "○○님"(`type.label`). 운전자 미선택이면 사람 아이콘 네모 + "운전자 선택"(`accent`) |
+| 자리 | `BadgeScaffold`(root)가 ProfilePicker를 뺀 모든 FULL 화면과 Peek 위에 그린다. 위는 화면 여백, 오른쪽은 화면 여백 − s3(글자가 콘텐츠 여백선에 맞게). 화면의 맨 위 줄은 `LocalTopEndReserved`(배지가 실제로 잰 폭 − s3 + s4)만큼 오른쪽을 비운다 — 이름 길이가 달라도 겹치지 않는다 |
+| 동작 | FULL: 1탭 → ProfilePicker(운전자 바꾸기). Peek: 표시만(클릭 의미론 없음 — 7.0 입력 0개 검사 그대로) |
+| 모달 | `ScrimSheet`가 떠 있으면 숨긴다(`LocalModalCount`). 시트가 화면 전체를 덮어야 결정이 하나로 보인다 |
 
 ### 7.2 Home (F-02~05, F-10) · 주차 전용
 
@@ -663,8 +676,8 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 
 | 상태 | 주인공 (hero) | 보조 정보 | 동작 |
 |---|---|---|---|
-| **Ready** (운행 없음) | 현재 누적거리 `18,420.5 km`(`type.heroSmall`) + "출발하면 자동으로 기록해요" | 운전자 칩, 연결·동기화 점, "확인 필요 N건" 칩, 영수증 도착 칩 | 주 버튼 **[운행 시작]**(`buttonXl`, 직접 시작용 — 보통은 출발하면 자동 시작), 보조: 영수증 저장 · 운행기록부 · 이력 · 설정 |
-| **RecordingParked** (운행 중 주차, 자동 종료를 취소한 뒤) | 이번 운행 거리 `23.4`(`type.hero`) + `km` | 목적지, 경과 시간 | 주 버튼 **[기록 종료]**. 보조: 영수증 저장(주유 중 등) |
+| **Ready** (운행 없음) | 현재 누적거리 `18,420.5 km`(`type.heroSmall`) + "출발하면 자동으로 기록해요" | 연결·동기화 점, "확인 필요 N건" 칩, 영수증 도착 칩(운전자는 오른쪽 위 배지 — D-19) | 주 버튼 **[운행 시작]**(`buttonXl`, 직접 시작용 — 보통은 출발하면 자동 시작), 보조: 주유 기록 추가 · 운행기록부 · 이력 · 설정 |
+| **RecordingParked** (운행 중 주차, 자동 종료를 취소한 뒤) | 이번 운행 거리 `23.4`(`type.hero`) + `km` | 목적지, 경과 시간 | 주 버튼 **[기록 종료]**. 보조: 주유 기록 추가(주유 중 등) · 이력 · 설정 |
 | **AutoEnding** (기어 P → 자동 종료 대기) | 7.2.1 AutoEndPrompt가 화면 위에 뜬다 | — | [계속 기록] · [기록 종료] |
 | **NeedsRecovery** | — | 복구 다이얼로그: "기록 중이던 운행이 있어요 (+3.2 km)" | [기록하기] · [계속 기록] · [삭제] |
 
@@ -688,9 +701,10 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 - **놓친 운행 배너**(F-10): Ready 상단에 "앱이 꺼진 동안 15.0 km를 달렸어요" + [추가] · [무시].
 - **Odometer 미지원·실패**: hero 자리에 "계기판 거리를 읽지 못했어요"(`status.warning`) + 거리 없이 시작 가능. **추정값을 그리지 않는다.**
 - **레이아웃**
-  - WIDE: 동작 컬럼 40%는 **운전자에 가까운 쪽**(`driverSide`, 기본 START = 한국 좌핸들에서 왼쪽)에 두고 주 버튼을 그 컬럼 하단에 둔다. hero 60%(거리·목적지·추천)는 반대쪽. 우핸들 시장은 `driverSide = END`로 좌우가 바뀐다 — `design-language.md` 6.3.
-  - NARROW: 세로 스택. 상단 칩 줄 → hero → 보조 정보 → 하단 고정 주 버튼.
-  - TALL: NARROW와 같되 hero를 화면 높이 1/3 지점에 두고 보조 버튼을 2×2 그리드로.
+  - 공통: 맨 위 줄(높이 76 dp)은 왼쪽 상태 칩, 오른쪽 운전자 배지(7.1.1).
+  - WIDE: 동작 컬럼 45%(보조 동작은 아이콘 위·이름 아래 세로 `ActionCard` 2×2 — 이름이 한 줄에 들어가는 폭)는 **운전자에 가까운 쪽**(`driverSide`, 기본 START = 한국 좌핸들에서 왼쪽)에 두고 주 버튼을 그 컬럼 하단에 둔다. hero 55%(거리·목적지·추천)는 반대쪽. 우핸들 시장은 `driverSide = END`로 좌우가 바뀐다 — `design-language.md` 6.3.
+  - NARROW: 세로 스택. 맨 위 줄에 **축약 칩**(아이콘 + 숫자, 전체 문구는 접근성 설명) → hero(넘치면 스크롤 + 가장자리 흐림 `verticalScrollFade`) → 보조 동작 → 하단 고정 주 버튼. 504×640에서 전체 문구 칩을 세로로 쌓으면 hero 영역이 40 dp로 줄어 배너가 잘렸다(2026-11-09 스크린샷 검토).
+  - TALL: NARROW와 같되 세로가 넉넉하므로 맨 위 줄은 배지만, 칩은 전체 문구로 본문 위에 둔다.
 - 수용 기준: 출발(BACKGROUND) 2초 안에 앱이 물러나고 보조 화면이 닫힌다. 기어 P 후 Home·알림에 같은 카운트다운이 보인다. 거리 표시(Peek·RecordingParked)는 Odometer 18,420.5 → 18,443.9 변경 시 2초 안에 "23.4".
 
 ### 7.3 ReviewTrip — 목적 확인 (F-06, F-08, F-09, F-17) · 주차 전용
@@ -705,30 +719,35 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 | 확정 후 | `shouldProposePlace`면 시트 "이곳을 거래처로 등록할까요?" 라벨 입력(프리셋: 내비 목적지명) → [등록] · [아니요] |
 | 수용 기준 | 1탭 확정(CONFIRMED). 음성 "판교 A고객사 미팅" → 거래처 방문 + note. 주행 시작 시 2초 안에 닫힘 |
 
-### 7.4 ReceiptQr — 영수증 저장 (F-30) · 주차 전용
-
-- `ReceiptRepository.issueQr()` → QR(ZXing, 화면 짧은 변의 45%, 흰 바탕 여백 4모듈) + 주소 텍스트 + 남은 시간 `9:41`(초 단위 갱신은 숫자만 교체).
-- 안내 한 줄: "휴대폰 카메라로 찍어 영수증을 보내 주세요". 열려 있는 동안 10초마다 inbox 확인(앱 A `InboxSyncWorker`, 화면은 `receiptInbox` 구독). 영수증이 도착하면 자동으로 ReceiptReview로 이동.
-- 만료 → [새 QR]. 실패 → "서버에 연결하지 못했어요. 네트워크를 확인해 주세요" + [다시 시도].
-
-### 7.5 ReceiptReview — OCR 결과 확인 (F-19) · 주차 전용
+### 7.4 ReceiptQr — 주유 기록 추가의 기본 경로 (F-30, D-20) · 주차 전용
 
 | 항목 | 내용 |
 |---|---|
-| 구성 | WIDE: 좌 썸네일(Coil, 탭하면 확대) ↔ 우 필드 목록 · NARROW/TALL: 썸네일 상단 1/3 + 필드 목록 |
-| 필드 | 상호 · 일시 · 유종 · 수량(L) · 단가 · 할인 · 금액 · 카드 끝 4자리. 각 행에 신뢰도 점: 초록(≥ 0.95) / 노랑(0.75–0.95) / 빨강(< 0.75). **색만으로 구분하지 않는다** — 노랑·빨강 행은 "확인 필요" 텍스트와 테두리 |
-| 검산 배지 | `arithOk=true` "금액 검산 통과" / false "금액이 맞지 않아요" → [확정] 비활성 |
-| 수정 | 행 탭 → 숫자 키패드 시트(큰 키 96 dp) 또는 마이크 |
-| 운행 연결 | 후보 ≤ 3개(`TripCandidate.label`, 주유소 정차 배지) + "연결 안 함" |
-| 자동 | 모두 초록 + 검산 통과 + 후보 1개 → 추천 상태로 열리고 [확정] 1탭 |
-| OCR 실패 | `ocrStatus=FAILED` → 썸네일 + 빈 필드, 금액만 입력해도 저장 가능 |
-| 수용 기준 | 검산 실패 시 확정 비활성. 카드 16자리가 화면·로그 어디에도 없다 |
+| 진입 | Home 보조 동작 [주유 기록 추가] |
+| 구성 (위→아래) | ① QR(ZXing, 화면 짧은 변의 45%, 흰 바탕 여백 4모듈) — `ReceiptRepository.issueQr()` ② 그 아래 작은 글씨(`type.caption`, `textSecondary`) "스마트폰으로 QR 코드를 인식한 뒤 안내에 따라 영수증을 업로드해주세요" ③ 남은 시간 `9:41`(1초마다 숫자만 교체) ④ 그 아래 **[직접 입력하기]**(`SecondaryButton`) → 7.5 입력 창을 빈 칸으로 |
+| 위계 | QR이 주인공(기본 경로), 직접 입력은 보조 분기(부가 기능)라 한 단계 낮은 버튼으로 맨 아래 |
+| 영수증 도착 | 열려 있는 동안 10초마다 inbox 확인(앱 A `InboxSyncWorker`, 화면은 `receiptInbox` 구독). 새 영수증이 오면 **자동으로** 7.5 입력 창으로 바뀐다 — OCR 값이 채워진 채로(`FuelEntry(receiptId)`, 백스택에서 QR을 대체) |
+| 만료·실패 | 만료 → [새 QR]. 실패 → "서버에 연결하지 못했어요. 네트워크를 확인해 주세요" + [다시 시도]. 실패해도 [직접 입력하기]는 그대로 쓸 수 있다 |
+| 수용 기준 | [주유 기록 추가] 1탭으로 QR. 폰 업로드 후 손대지 않아도 입력 창으로 넘어간다. [직접 입력하기] 1탭으로 빈 입력 창 |
 
-### 7.6 FuelEntry — 주유 기록 (F-18) · 주차 전용
+### 7.5 FuelEntry — 주유 입력 창 하나 (F-19, F-18, D-20) · 주차 전용
 
-- 진입: 주유소에서 주차(P) 중 알림 "주유하셨나요?" 탭, Home 보조 메뉴(RecordingParked의 보조 버튼 포함).
-- 마이크 우선: "6만8천원 40리터" → `VoiceFuel` → 금액·리터 채움 → [저장]. 실패·미지원 → 숫자 키패드(금액 필수, 리터 선택).
-- 저장 결과 `ConfirmResult.Rejected` → 사유 한 줄 + 수정 유도.
+영수증으로 채우든 손으로 채우든 **같은 창, 같은 필드 순서, 같은 [추가하기]**다. 다른 점은 처음에 칸이 채워져 있는지와 영수증 전용 정보(썸네일·신뢰도·검산)가 보이는지뿐이다.
+
+| 항목 | 내용 |
+|---|---|
+| 진입 | ① QR 화면에서 영수증 도착(자동, `receiptId` 있음) ② Home "영수증 도착 N건" 칩(가장 최근 영수증) ③ QR 화면 [직접 입력하기](`receiptId` 없음, 빈 칸) ④ 주유소 주차 알림 "주유하셨나요?"(빈 칸) |
+| 필드 (공통) | 금액(원, 필수) · 수량(L) · 단가(원/L) · 연결 운행. 숫자 칸은 탭 → `NumericKeypad` 시트(큰 키 96 dp) |
+| 영수증에서 왔을 때 더 | 썸네일(Coil, 탭하면 확대) · 상호 · 일시 · 유종 · 할인 · 카드 끝 4자리. 각 행 `ConfidenceRow` 신뢰도: 초록(≥ 0.95) / 노랑(0.75–0.95) / 빨강(< 0.75), **색만으로 구분하지 않는다**(노랑·빨강은 "확인 필요" 글자와 테두리). 검산 배지: 통과 "금액 검산 통과" / 실패 "금액이 맞지 않아요" → [추가하기] 비활성 |
+| 연결 운행 | 영수증: 후보 ≤ 3개(`TripCandidate.label`, 주유소 정차 배지) + "연결 안 함". 직접 입력: 지금(또는 방금 끝난) 운행이 기본 선택 |
+| 버튼 | 맨 아래 **[추가하기]**(`PrimaryButton`). 누르면 주유 기록이 완전히 들어간다. 금액이 없거나 검산 실패면 비활성 |
+| 자동 | 영수증 모두 초록 + 검산 통과 + 후보 1개 → 후보가 선택된 상태로 열리고 [추가하기] 1탭으로 끝 |
+| 저장 경로 | 화면은 `FuelDraft`(출처 = 영수증 id 또는 직접 입력, 필드, 연결 운행) 하나를 `ReceiptRepository`에 넘긴다. 영수증이면 `ReceiptApi.confirm(receipt, tripId, edits)`, 직접 입력이면 `ReceiptApi.saveFuel(tripId, VoiceFuel(금액, 리터, 단가), source = MANUAL)`. `Rejected` → 사유 한 줄 + 해당 칸 강조 |
+| OCR 실패 | `ocrStatus=FAILED` → 썸네일 + 빈 칸. 금액만 넣어도 추가 가능 |
+| 계약 공백 | 직접 입력은 지금 계약(`VoiceFuel`)상 금액·리터·단가만 저장된다. 상호·유종도 손으로 받으려면 앱 B `saveFuel` 확장이 필요하다 — R-8. 그 전까지 직접 입력 창에는 공통 필드만 보인다 |
+| 마이크 | 이번 범위에서 뺀다(D-20). `VoiceApi.listenFuel`은 계약에 남아 있어 나중에 칸 채우기 보조로 붙일 수 있다 |
+| 레이아웃 | WIDE: 좌 썸네일 / 우 필드(직접 입력이면 필드만 가운데, 최대 폭 `sheetMaxWidth`) · NARROW/TALL: 썸네일 상단 1/3 + 필드. [추가하기]는 항상 하단 고정 |
+| 수용 기준 | 영수증 경로: 업로드 후 [추가하기] 1탭(자동 조건일 때). 검산 실패 시 비활성. 직접 입력: 금액 없으면 비활성. 카드 16자리가 화면·로그 어디에도 없다 |
 
 ### 7.7 Report — 운행기록부·보내기 (F-21, F-22) · 주차 전용
 
@@ -745,6 +764,7 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 ### 7.8 History — 운행 이력 (F-12) · 주차 전용
 
 - 이번 달 목록(월 이동 가능). 행: 날짜·시각 · 운전자 · 출발 → 도착 · 거리 · 목적 · 상태 배지(확정/확인 필요/운전자 미확정/거리 미확정) · 사내 서버 전송 배지(8장).
+- **운전자 미확정 행**(F-20): 행 안에 후보 아바타(최근 운전자 최대 3명)를 두고 1탭으로 지정(`SessionRepository.assignDriver`). 선택 화면에서 옮겨 왔다 — D-19.
 - 미확정 행 탭 → ReviewTrip. 상단 합계: 건수 · km(엑셀 요약과 같은 계산 — `TripRepository`가 계산, 화면은 표시만).
 - 긴 목록은 `LazyColumn`. 자동 스크롤 없음.
 
@@ -909,7 +929,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | **11.09–10** | 리포 골격, submodule, composite build 스파이크, CI, `ui/design` 토큰·테마·서체, Navigator, `VehicleUsageRepository`(사용 3단계), interim 계약·Fake, 데모 패널 뼈대. A·B에 R-1~R-4·R-7 공유 | `assembleDemoDebug`·테스트 통과, 맥 Pleos 에뮬레이터 실행 |
 | **11.10–11 디자인 게이트** | ProfilePicker · Home(4상태) · AutoEndPrompt · Peek 완성 → Roborazzi PNG(3레이아웃 × 2테마)로 디자인 리뷰 → 맥에서 FormFactorConsole 프리셋 측정(V-01), 사용 3단계 점검(V-11·V-12), 기어·시동 신호 확인(V-15·V-16) | 사용자 디자인 승인 |
 | 11.11–12 | ReviewTrip(탭·음성·거래처 등록) | 시연 장면 1~3을 demo로 재생 |
-| **11.13–14** | ReceiptQr·ReceiptReview·FuelEntry · Report·보내기 · Settings(연결·메일·수신자·직원) · 카메라 페이지 · 운영 웹 차량 화면(F-50) → **11.14 통합**(B 실구현 연결, A는 준비된 만큼) | 장면 5·6 재생, 영상·APK |
+| **11.13–14** | ReceiptQr·FuelEntry(주유 입력 창 하나, D-20) · Report·보내기 · Settings(연결·메일·수신자·직원) · 카메라 페이지 · 운영 웹 차량 화면(F-50) → **11.14 통합**(B 실구현 연결, A는 준비된 만큼) | 장면 5·6 재생, 영상·APK |
 | 11.15 | 1차 제출 | |
 | 11.16–23 | 운영 웹 직원·장소·배차·수신자 · History · 놓친 운행·복구 다이얼로그 · interim → A 실계약 교체 · 사내 서버 설정·전송 상태(Fake) · 운영 웹 운행·비용·월별 취합(mock) | 직원 추가가 1분 안에 ProfilePicker에 반영 |
 | 11.24–30 | 업로드 실API 연결 · 맥 에뮬레이터 QA(10.3) · 6장면 리허설 · Backend 정리 PR(R-5, R-6) | P0 완료 정의 |
@@ -928,6 +948,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | R-5 | Backend `ops/` nginx 마운트를 Frontend 산출물로 변경 | 공동 | 9.3 | 11.27 |
 | R-6 | Backend `app/`·`web/` 삭제, CI `:app:assembleDebug` 제거, CONVENTIONS 1.2·기술명세 7·8장에 "화면은 AutoLog-Frontend" 반영 | 공동 | 같은 applicationId 앱이 두 곳에 있으면 혼란 | 11.30 |
 | R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
+| R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
 
 ---
 

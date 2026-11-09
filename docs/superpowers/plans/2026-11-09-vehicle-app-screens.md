@@ -64,7 +64,7 @@ interface UploadApi { val status: StateFlow<UploadStatus>; suspend fun uploadNow
 **Interfaces:**
 ```kotlin
 sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripId: String); ReceiptQr;
-    data class ReceiptReview(val receiptId: String); data class FuelEntry(val tripId: String?); Report; History; Settings }
+    data class FuelEntry(val receiptId: String? = null); Report; History; Settings }  // ReceiptReview는 D-20으로 FuelEntry에 합쳐짐
 // ReviewRepository: fun review(tripId): Flow<TripReview?>; suspend fun confirm(tripId, detail, note, mode); suspend fun destinationCandidates(): List<String>;
 //   suspend fun shouldProposePlace(tripId, detail): Boolean; suspend fun registerPlace(tripId, label): SettingsResult; val voiceAvailable: StateFlow<Boolean>; suspend fun listenPurpose(): VoiceResult<VoicePurpose>
 // data class TripReview(tripId, startTime, endTime, distanceKm: String?, origin: String?, destination: String?, suggestion: Suggestion?)
@@ -73,7 +73,7 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 // ReportRepository: fun summary(month): Flow<MonthSummary>; suspend fun build(month): ReportBuildResult; suspend fun send(file, to): MailResult; val smtpConfigured: Boolean; fun recipients(): Flow<List<RecipientInfo>>
 // SettingsRepository: DeviceApi·UploadApi·SettingsApi·MailApi 묶음 (connection, register, upload status/now, recipients CRUD, users add, autoMonthlySend, syncNow, saveSmtp)
 ```
-- Home: "확인 필요 N건" 칩 = `LocalStore.pendingReviews` 수, 탭 → 가장 최근 건 `ReviewTrip`. READY·RECORDING_PARKED 보조 동작 `ActionCard` 4개(영수증 저장 · 운행기록부 · 이력 · 설정), 영수증 inbox가 있으면 "영수증 도착 N" 칩 → `ReceiptReview`.
+- Home: "확인 필요 N건" 칩 = `LocalStore.pendingReviews` 수, 탭 → 가장 최근 건 `ReviewTrip`. READY·RECORDING_PARKED 보조 동작 `ActionCard`(대기: 주유 기록 추가 · 운행기록부 · 이력 · 설정 / 운행 중: 주유 기록 추가 · 이력 · 설정), 영수증 inbox가 있으면 "영수증 도착 N" 칩 → `FuelEntry(receiptId)`(D-20).
 - 운행 종료(PendingReview)가 되면 Home이 `ReviewTrip`으로 바로 연다(스펙 7.3 진입 1번).
 
 **Tests:** 확인 필요 칩 탭 → `ReviewTrip(최근 id)` · PendingReview 진입 시 ReviewTrip push 1회 · FULL 아니면 push 무시(기존).
@@ -102,15 +102,17 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 ---
 
-## Task 5: 영수증 — QR·OCR 확인·주유 (F-30, F-19, F-18)
+## Task 5: 주유 기록 — QR 기본 + 입력 창 하나 (F-30, F-19, F-18, D-20)
 
-**Files:** Create `ui/receipt/ReceiptQrScreen.kt`(+VM/State), `ReceiptReviewScreen.kt`(+VM/State), `FuelEntryScreen.kt`(+VM/State) · Test reducer·VM·screen·screenshot 각각
+> 2026-11-09 사용자 결정으로 바뀌었다(스펙 D-20). 영수증 확인(ReceiptReview)과 주유 입력(FuelEntry)을 **입력 창 하나**로 합쳤다. `Route.ReceiptReview`는 없고 `Route.FuelEntry(receiptId: String? = null)`이다(Task 2 정리 커밋에서 반영됨).
 
-- ReceiptQr(스펙 7.4): QR + 주소 + 남은 시간 `9:41`(만료 시각까지, 1초 숫자 교체). inbox에 새 영수증이 오면 자동으로 ReceiptReview로 교체. 실패 → 문구 + [다시 시도].
-- ReceiptReview(스펙 7.5): 썸네일(Coil, 실패 시 자리표시) · `ConfidenceRow` 8필드 · 검산 배지 · 운행 후보 ≤ 3 + "연결 안 함" · [확정](검산 실패 시 비활성). 모두 초록 + 검산 통과 + 후보 1개면 후보 선택 상태로 열린다(1탭). 필드 탭 → 키패드 시트. OCR 실패 → 금액만 입력해도 확정.
-- FuelEntry(스펙 7.6): 마이크 우선, 아니면 키패드(금액 필수·리터 선택) → [저장].
+**Files:** Create `ui/receipt/ReceiptQrScreen.kt`(+VM/State), `ui/receipt/FuelEntryScreen.kt`(+VM/State, `FuelDraft`·필드 행), `data/repository/ReceiptRepository.kt`에 `add(draft: FuelDraft): ConfirmResult` 추가(출처별 `confirm`/`saveFuel` 분기는 여기 한 곳) · Test reducer·VM·screen·screenshot 각각
 
-**Tests:** 검산 실패 시 확정 비활성 · 전부 초록이면 1탭 확정 · 리터 수정 후 확정 시 edits 반영 · OCR 실패 시 금액만으로 확정 · QR 만료 → [새 QR] · 주유 금액 없으면 저장 비활성.
+- ReceiptQr(스펙 7.4): QR → 작은 글씨 안내 "스마트폰으로 QR 코드를 인식한 뒤 안내에 따라 영수증을 업로드해주세요"(`receipt_qr_hint`) → 남은 시간 → **[직접 입력하기]**(`receipt_manual_entry`, `SecondaryButton`) → `FuelEntry(null)`. inbox에 새 영수증이 오면 `navigator.replaceTop(FuelEntry(receiptId))`(QR을 백스택에서 대체 — `replaceTop`은 이 작업에서 Navigator에 추가, 맨 위 한 칸만 바꾸고 FULL이 아니면 무시). 만료 → [새 QR]. 실패 → 문구 + [다시 시도], 직접 입력은 그대로.
+- FuelEntry(스펙 7.5): 공통 필드(금액 필수·리터·단가·연결 운행) + 영수증이면 썸네일·상호·일시·유종·할인·카드 끝 4자리·`ConfidenceRow`·검산 배지. 맨 아래 **[추가하기]**(`fuel_add_confirm`). 영수증 자동 조건(전부 초록·검산 통과·후보 1개)이면 후보 선택 상태로 열린다. 숫자 칸 탭 → `NumericKeypad` 시트. 마이크 없음.
+- Home: [주유 기록 추가] → `ReceiptQr`, "영수증 도착" 칩 → `FuelEntry(receiptId)`(Task 2 정리 커밋에서 반영됨).
+
+**Tests:** QR 화면 [직접 입력하기] 1탭 → 빈 입력 창 · 영수증 도착 시 입력 창이 OCR 값으로 채워져 QR을 대체 · 검산 실패 시 [추가하기] 비활성 · 전부 초록이면 [추가하기] 1탭 · 리터 수정 후 추가 시 edits 반영 · OCR 실패 시 금액만으로 추가 · 직접 입력은 `saveFuel`, 영수증은 `confirm`으로 간다(Repository 테스트) · QR 만료 → [새 QR] · 직접 입력 금액 없으면 비활성.
 
 ---
 

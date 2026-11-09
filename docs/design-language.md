@@ -292,15 +292,17 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 | 패턴 | WIDE | NARROW | TALL |
 |---|---|---|---|
-| **Hero + Actions** (Home) | 동작 컬럼 40%(운전자 쪽) + hero 60% | 칩 줄 → hero → 정보 → 하단 고정 주 버튼 | NARROW + hero를 높이 1/3 지점, 보조 버튼 2×2 |
+| **Hero + Actions** (Home) | 맨 위 줄: 칩(전체 문구) · 배지. 동작 컬럼 45%(운전자 쪽, `ActionCard` 2×2) + hero 55% | 맨 위 줄: 축약 칩 · 배지 → hero(넘치면 스크롤 + 가장자리 흐림) → 보조 동작 → 하단 고정 주 버튼 | 맨 위 줄: 배지만 → 칩(전체 문구) → hero → 보조 동작 → 주 버튼 |
 | **Peek** (정차) | 가운데 카드(최대 폭 560 dp), 정보 늘리지 않음 | 세로 스택 가운데 정렬 — 기본 형태(사이드 창) | NARROW와 같음 |
 | **Countdown Sheet** (AutoEndPrompt) | 화면 아래 시트, 버튼 2개 가로(주 버튼이 운전자 쪽) | 시트, 버튼 2개 세로(주 버튼 아래) | NARROW와 같음 |
-| **Picker** (ProfilePicker) | 타일 한 줄 가운데 | 2열 그리드 | 2열 그리드 + 제목 위 여백 확대 |
-| **Media + Form** (ReceiptReview) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
+| **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
+| **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
 | **Master–Detail** (Settings) | 좌 목록 / 우 상세 | 목록 → 상세 push | NARROW와 같음 |
 | **Decision** (ReviewTrip) | 좌 요약 / 우 선택지·추천 | 요약 → 추천 → 선택지 세로 | NARROW와 같음 |
 
 - 주 버튼은 스크롤 영역 밖 **하단 고정**. 스크롤해야 보이는 주 버튼을 만들지 않는다.
+- **오른쪽 위는 예약 자리**(운전자 배지). 화면의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 비운다 — 배지가 실제로 잰 폭이 들어온다. 화면이 배지 폭을 숫자로 가정하지 않는다.
+- 스크롤 영역에 더 볼 내용이 있으면 그 가장자리를 `Modifier.verticalScrollFade(state, space.7)`로 흐린다. 잘린 글자가 "깨짐"이 아니라 "더 있음"으로 읽힌다.
 - 창 크기가 바뀔 때 레이아웃 전환: 주차 중 `motion.layout`, Peek에서는 즉시.
 - 시스템 UI가 겹칠 수 있으므로 핵심 정보는 창 가장자리에서 24 dp 안쪽에 두지 않는다.
 
@@ -415,8 +417,12 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `IconButtonXL` | 96 dp 원형, `surface2` 바탕, 아이콘 36 dp. 마이크·키패드 |
 | `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
-| `StatusChip` | `radius.full`, 높이 56 dp, 아이콘 + 글자(`label`). 의미색 글자 + `surface3` 바탕 |
-| `ActionCard` | `surface1`, `radius.md`, 안쪽 `space.5`. 아이콘 + 제목(`title`) + 한 줄 설명. 카드 전체가 터치 대상 |
+| `StatusChip` | `radius.full`, 높이 56 dp, 아이콘 + 글자(`label`). 의미색 글자 + `surface3` 바탕. **축약형**(NARROW 맨 위 줄): 아이콘 + 숫자만, 전체 문구는 접근성 설명 — 색·아이콘이 같아 같은 칩으로 읽힌다 |
+| `ActionCard` | WIDE 보조 동작 타일. `surface1`, `radius.md`, 안쪽 `space.4`, 최소 높이 `buttonLg`. **아이콘(왼쪽 위, `accent`) + 아래 이름(`label`, 두 줄까지)** 세로 배치, 개수 배지는 오른쪽 위. 2열 격자, 마지막 줄이 덜 차도 빈 칸으로 채워 폭을 맞춘다. 카드 전체가 터치 대상 |
+| `QuickAction` | NARROW·TALL 보조 동작: 원형 아이콘(`surface2`) + 아래 이름(`caption`). 한 줄에 균등 배치 |
+| `DriverBadge` | 화면 오른쪽 위 고정(넷플릭스식, 스펙 7.1.1·D-19). 네모 아바타(`avatarChip` 48 dp) + "○○님"(`label`). 미선택이면 `IconAvatar`(사람) + "운전자 선택"(`accent`). FULL은 누르면 운전자 선택, Peek은 표시만. 모달이 뜨면 숨는다. 운전자 이름은 앱 전체에서 **이 자리에만** 보인다 |
+| `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
+| `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
 | `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 폭 720 dp 미만이면 버튼을 문장 아래로 내린다(문장이 3줄로 눌리지 않게). 놓친 운행 등 |
 | `Sheet` | 아래에서 올라오는 시트, `surface2`, 위 모서리 `radius.lg`, 뒤 `scrim`. 단계가 FULL에서 내려가면 즉시 닫힘 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
@@ -424,7 +430,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
 | `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
-| `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중` + 운전자) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 목적지(`title`) ④ 기록 방식 한 줄(`body`, `textSecondary`: "계기판 거리 · 10초 전 저장") ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션 없음 |
+| `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중`. 운전자는 오른쪽 위 `DriverBadge`) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 목적지(`title`) ④ 기록 방식 한 줄(`body`, `textSecondary`: "계기판 거리 · 10초 전 저장") ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션 없음 |
 | `AutoEndPrompt` | 기어 P 자동 종료 시트. 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 뒤 자동으로 마쳐요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · [계속 기록](`PrimaryButton`, 운전자 쪽) · [기록 종료](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
@@ -495,3 +501,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 버전 | 날짜 | 내용 |
 |---|---|---|
 | 1.0 | 2026-11-09 | 최초 확정 (사용 3단계·조작 최소화 포함) |
+| 1.1 | 2026-11-09 | 운전자 배지 오른쪽 위 고정(D-19) · `DriverBadge`·`IconAvatar`·`ActionTile` 추가 · `ActionCard` 세로 배치 · 축약 `StatusChip` · 오른쪽 위 예약 자리(`LocalTopEndReserved`) · 스크롤 가장자리 흐림 · Home WIDE 45:55 · 주유 기록 버튼 하나로(D-20) |
