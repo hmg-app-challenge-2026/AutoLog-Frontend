@@ -1,10 +1,13 @@
 package kr.autolog.vehicle.ui.home
 
+import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.data.interim.LiveTrip
 import kr.autolog.vehicle.data.interim.MissedTrip
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.interim.StopReason
+import kr.autolog.vehicle.data.repository.HistoryItem
 import kr.autolog.vehicle.data.repository.MonthSummary
+import kr.autolog.vehicle.data.repository.UploadInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -88,5 +91,73 @@ class HomeReducerTest {
     @Test
     fun `처리할 일이 없으면 알림 목록이 비어 칸이 사라진다`() {
         assertTrue(reduceHome(SessionState.Idle, null, null, now = 0).notices.isEmpty())
+    }
+
+    @Test
+    fun `기록 자체의 문제(계기판·저장·전송)가 처리할 일보다 먼저`() {
+        val noOdo = SessionState.Recording(trip, liveKm = null, lastSavedAt = 0)
+        val upload = UploadInfo(enabled = true, pendingCount = 2, lastUploadAt = null, lastError = "timeout")
+
+        val s = reduceHome(noOdo, null, "판교", now = 40_000, pendingReviewIds = listOf("t-0"), upload = upload)
+
+        assertEquals(
+            listOf(
+                HomeNotice.OdometerUnavailable,
+                HomeNotice.SaveDelayed,
+                HomeNotice.UploadFailed(2),
+                HomeNotice.Review(1),
+            ),
+            s.notices,
+        )
+    }
+
+    @Test
+    fun `저장이 30초 안이고 전송이 꺼져 있으면 문제 알림이 없다`() {
+        val ok = SessionState.Recording(trip, 23.4, lastSavedAt = 20_000)
+        val off = UploadInfo(enabled = false, pendingCount = 5, lastUploadAt = null, lastError = "x")
+
+        assertTrue(reduceHome(ok, null, "판교", now = 40_000, upload = off).notices.isEmpty())
+    }
+
+    @Test
+    fun `최근 운행은 최대 3건, 오늘·어제·그 전으로 나누고 목적이 없으면 확인 필요`() {
+        val now = java.time.ZonedDateTime.of(
+            2026,
+            11,
+            9,
+            12,
+            0,
+            0,
+            0,
+            kr.autolog.vehicle.common.AppZone,
+        ).toInstant().toEpochMilli()
+        fun at(day: Int, h: Int) = java.time.ZonedDateTime.of(
+            2026,
+            11,
+            day,
+            h,
+            12,
+            0,
+            0,
+            kr.autolog.vehicle.common.AppZone,
+        ).toInstant().toEpochMilli()
+        fun item(id: String, start: Long, purpose: PurposeDetail?) =
+            HistoryItem(id, start, start + 1, "김영업", false, "본사", "판교", 23.4, purpose, null)
+        val recent =
+            listOf(
+                item("a", at(9, 9), null),
+                item("b", at(8, 17), PurposeDetail.CLIENT_VISIT),
+                item("c", at(6, 13), PurposeDetail.FIELD_WORK),
+                item("d", at(5, 8), PurposeDetail.FIELD_WORK),
+            )
+
+        val s = reduceHome(SessionState.Idle, null, null, now = now, recent = recent)
+
+        assertEquals(listOf("a", "b", "c"), s.recentTrips.map { it.tripId })
+        assertEquals(listOf(TripDay.TODAY, TripDay.YESTERDAY, TripDay.EARLIER), s.recentTrips.map { it.day })
+        assertEquals("09:12", s.recentTrips[0].time)
+        assertTrue(s.recentTrips[0].needsReview)
+        assertEquals("거래처 방문", s.recentTrips[1].purpose)
+        assertEquals(6, s.recentTrips[2].dayOfMonth)
     }
 }

@@ -127,7 +127,11 @@ fun DangerButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifie
  * 고르기만 하는 팝업(전체 직원 등)의 오른쪽 위에 둔다. 결정이 필요한 팝업은 X 대신 하단 버튼으로 끝낸다(디자인 언어 11장).
  */
 @Composable
-fun CloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun CloseButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.action_close),
+) {
     val c = AutoLogTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val view = LocalView.current
@@ -145,7 +149,7 @@ fun CloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Box(Modifier.size(Size.iconLg).clip(CircleShape).background(c.surface3), contentAlignment = Alignment.Center) {
             Icon(
                 Icons.Rounded.Close,
-                contentDescription = stringResource(R.string.action_close),
+                contentDescription = label,
                 tint = c.textSecondary,
                 modifier = Modifier.size(Size.iconSm),
             )

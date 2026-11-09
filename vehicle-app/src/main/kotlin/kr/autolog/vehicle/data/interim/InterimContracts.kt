@@ -116,6 +116,9 @@ interface LocalStore {
     /** 목적 확인이 필요한 운행(purpose == null), 최신 순. */
     val pendingReviews: Flow<List<TripRow>>
 
+    /** 달과 상관없이 가장 최근 운행 [limit]건, 최신 순(Home "최근 운행 기록"). */
+    fun recent(limit: Int): Flow<List<TripRow>>
+
     /** inbox로 받은 영수증 OCR 결과 중 아직 확정하지 않은 것. */
     val receiptInbox: Flow<List<ReceiptPayload>>
 

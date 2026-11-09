@@ -47,10 +47,10 @@ class GalleryScreenshotTest {
             PrimaryButton("계속 기록", onClick = {}, modifier = Modifier.fillMaxWidth())
             SecondaryButton("기록 종료", onClick = {}, modifier = Modifier.fillMaxWidth())
             TertiaryButton("나중에 선택", onClick = {})
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                StatusChip("확인 필요 1건", ChipTone.WARNING, icon = Icons.Rounded.ErrorOutline, onClick = {})
-                StatusChip("1", ChipTone.ACCENT, icon = Icons.AutoMirrored.Rounded.ReceiptLong, onClick = {}) // 축약형
-            }
+            StatusLine("기록 중", AutoLogTheme.colors.success, detail = "35분 경과")
+            StatusLine("대기 중", AutoLogTheme.colors.textTertiary)
+            NoticePill(Icons.AutoMirrored.Rounded.ReceiptLong, AutoLogTheme.colors.accent, "영수증 1장 도착", onClick = {})
+            TripListRow("본사 → 판교 테크노밸리 거래처", "오늘 09:12 · 23.4 km · 목적 확인 필요", onClick = {}, needsAttention = true)
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s6)) {
                 DriverBadge("u-1", "김영업", onClick = {})
                 DriverBadge(null, null, onClick = {})

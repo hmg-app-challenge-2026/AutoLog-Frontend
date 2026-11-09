@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -89,5 +90,52 @@ fun NoticeRow(
                 content = actions,
             )
         }
+    }
+}
+
+/**
+ * 디자인 언어 11장 NoticePill — 넓은 창 알림 띠의 알림 한 건. 알약(`radius.full`) `surface1`, 높이 76 dp,
+ * 의미색 아이콘(28 dp) + 문장(`label`). [onClick]이 있으면 알약 전체가 터치 대상이고 끝에 ›.
+ * [trailing]이 있으면 문장 뒤에 그 줄 안에서 끝내는 버튼을 둔다(놓친 운행 [추가] · X). 둘을 함께 쓰지 않는다.
+ */
+@Composable
+fun NoticePill(
+    icon: ImageVector,
+    tint: Color,
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null,
+) {
+    val c = AutoLogTheme.colors
+    val interaction = remember { MutableInteractionSource() }
+    val view = LocalView.current
+    val tap =
+        if (onClick != null) {
+            Modifier.pressFeedback(
+                interaction,
+            ).clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
+                view.confirmHaptic()
+                onClick()
+            }
+        } else {
+            Modifier
+        }
+    Row(
+        modifier
+            .heightIn(min = Size.touchMin)
+            .clip(CircleShape)
+            .background(c.surface1)
+            .then(tap)
+            .padding(start = Space.s5, end = if (trailing != null) Space.s1 else Space.s4),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Space.s3),
+    ) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(Size.iconSm))
+        Text(text, style = AutoLogTheme.type.label, color = c.textPrimary, maxLines = 1)
+        if (onClick != null) {
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = c.textTertiary)
+        }
+        trailing?.invoke(this)
     }
 }

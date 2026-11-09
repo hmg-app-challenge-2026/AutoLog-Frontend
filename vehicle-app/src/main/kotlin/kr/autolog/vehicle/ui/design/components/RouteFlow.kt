@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextOverflow
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
@@ -38,7 +39,7 @@ private const val CHEVRON_REST_ALPHA = 0.18f
 private const val GLOW_SPREAD = 1.2f
 
 /**
- * 디자인 언어 11장 RouteFlow — 출발지(`caption`) → 흐르는 화살표 → 목적지(`title`). "지금 이 경로를 가는 중"을 한눈에.
+ * 디자인 언어 11장 RouteFlow — 출발지(`label`, 회색) → 흐르는 화살표 → 목적지(`label`, 두 줄까지). 같은 역할이라 같은 스타일. "지금 이 경로를 가는 중"을 한눈에.
  * 화살표는 하이브리드 회생 제동 표시처럼 갈매기(⌄) 3개에 빛이 위에서 아래로 주기적으로 흐른다([MotionTokens.flowPeriodMs]).
  * 반복 모션은 [kr.autolog.vehicle.ui.design.MotionTokens.ambient]일 때만 — 꺼지면 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
  * [origin]이 null이면 출발지·화살표 없이 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
@@ -54,11 +55,12 @@ fun RouteFlow(
     val t = AutoLogTheme.type
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s2)) {
         if (origin != null) {
-            // 출발지는 보조 사실 — 소제목과 같은 크기(22 sp)로, 목적지(데이터 값)만 크게
-            Text(origin, style = t.caption, color = c.textSecondary, maxLines = 1)
+            // 출발지·목적지는 같은 역할(장소 이름)이라 같은 스타일 — 출발지만 회색
+            Text(origin, style = t.label, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             FlowChevrons(Modifier.padding(vertical = Space.s1))
         }
-        Text(destination, style = t.title, color = destinationColor)
+        // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
+        Text(destination, style = t.label, color = destinationColor, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 

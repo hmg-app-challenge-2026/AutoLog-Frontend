@@ -23,15 +23,23 @@ import org.robolectric.annotation.GraphicsMode
 
 private val month = MonthUi(tripCount = 23, totalKm = "412.6", businessKm = "388.1")
 
+private val recent =
+    listOf(
+        RecentTripUi("t-1", "본사", "판교 테크노밸리 거래처", "23.4", TripDay.TODAY, 11, 9, "09:12", null, needsReview = true),
+        RecentTripUi("t-2", "판교 테크노밸리 거래처", "본사", "22.8", TripDay.YESTERDAY, 11, 8, "17:40", "거래처 방문", false),
+        RecentTripUi("t-3", "본사", "수원 물류센터", "41.2", TripDay.EARLIER, 11, 6, "13:05", "외근", false),
+    )
+
 private val ready =
     HomeUiState(
         phase = HomePhase.READY,
         month = month,
+        recentTrips = recent,
         notices = listOf(HomeNotice.Review(1), HomeNotice.Receipt(1), HomeNotice.MissedTrip("15.0")),
     )
 
-/** 처리할 일이 없는 대기 — 알림 칸이 사라지고 주인공이 넓어진다. */
-private val readyQuiet = HomeUiState(phase = HomePhase.READY, month = month)
+/** 정상 대기 — 알림 띠가 없다. */
+private val readyQuiet = ready.copy(notices = emptyList())
 
 private val recording =
     HomeUiState(
@@ -40,6 +48,14 @@ private val recording =
         origin = "본사",
         destination = "판교 테크노밸리 거래처",
         elapsedMin = 35,
+    )
+
+/** 기록 자체에 문제가 있을 때 — 계기판 미확정 + 영수증 도착, 긴 목적지 이름. */
+private val recordingTrouble =
+    recording.copy(
+        tripKm = null,
+        destination = "경기도 성남시 분당구 판교역로 테크노밸리 제2캠퍼스 거래처 본관",
+        notices = listOf(HomeNotice.OdometerUnavailable, HomeNotice.Receipt(1)),
     )
 private val autoEnding = recording.copy(phase = HomePhase.AUTO_ENDING, autoEnd = AutoEndUi(3, 0.6f, StopReason.GEAR_P))
 private val recovery = HomeUiState(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = "3.2")
@@ -50,10 +66,14 @@ private val recovery = HomeUiState(phase = HomePhase.NEEDS_RECOVERY, recoveryExt
 class HomeScreenTest {
     @get:Rule val compose = createComposeRule()
 
+    private fun show(state: HomeUiState, actions: MutableList<HomeAction> = mutableListOf()) = compose.setContent {
+        AutoLogTheme { WindowLayoutHost { HomeScreen(state, onAction = { actions += it }) } }
+    }
+
     @Test
     fun `자동 종료 안내에서 계속 기록은 1탭`() {
         val actions = mutableListOf<HomeAction>()
-        compose.setContent { AutoLogTheme { HomeScreen(autoEnding, onAction = { actions += it }) } }
+        show(autoEnding, actions)
 
         compose.onNodeWithText("계속 기록").performClick()
 
@@ -63,7 +83,7 @@ class HomeScreenTest {
     @Test
     fun `삭제는 한 번 더 확인한다`() {
         val actions = mutableListOf<HomeAction>()
-        compose.setContent { AutoLogTheme { HomeScreen(recovery, onAction = { actions += it }) } }
+        show(recovery, actions)
 
         compose.onNodeWithText("삭제").performClick()
         compose.onNodeWithText("지우기").performClick()
@@ -72,24 +92,42 @@ class HomeScreenTest {
     }
 
     @Test
-    fun `알림 줄 1탭으로 처리 화면을 열고, 놓친 운행은 줄 안에서 추가한다`() {
+    fun `알림 띠 — 알약 1탭으로 처리 화면, 넘치면 외 N건 목록에서 놓친 운행을 추가`() {
         val actions = mutableListOf<HomeAction>()
-        compose.setContent { AutoLogTheme { WindowLayoutHost { HomeScreen(ready, onAction = { actions += it }) } } }
+        show(ready, actions)
 
-        // 알림이 많으면 알림 칸이 스크롤된다 — 사람처럼 줄을 보이게 한 뒤 누른다
-        compose.onNodeWithText("운행 1건 목적 확인").performScrollTo().performClick()
-        compose.onNodeWithText("영수증 1장 도착").performScrollTo().performClick()
+        compose.onNodeWithText("운행 1건 목적 확인").performClick()
+        compose.onNodeWithText("영수증 1장 도착").performClick()
+        // 넓은 창 한 줄에 셋이 다 안 들어가 마지막은 "외 1건"으로 접힌다
+        compose.onNodeWithText("외 1건").performClick()
         compose.onNodeWithText("추가").performScrollTo().performClick()
 
         assertEquals(listOf(HomeAction.OpenReview, HomeAction.OpenReceipt, HomeAction.AcceptMissedTrip), actions)
     }
 
     @Test
+    fun `정상이면 알림 띠가 없고 최근 운행 기록이 보인다`() {
+        show(readyQuiet)
+
+        compose.onNodeWithText("운행 1건 목적 확인").assertDoesNotExist()
+        compose.onNodeWithText("최근 운행 기록").assertIsDisplayed()
+        compose.onNodeWithText("본사 → 판교 테크노밸리 거래처").assertIsDisplayed()
+    }
+
+    @Test
+    fun `최근 운행 — 목적이 없는 운행을 누르면 그 운행의 목적 확인`() {
+        val actions = mutableListOf<HomeAction>()
+        show(readyQuiet, actions)
+
+        compose.onNodeWithText("오늘 09:12 · 23.4 km · 목적 확인 필요").performClick()
+
+        assertEquals(listOf<HomeAction>(HomeAction.OpenTrip("t-1", needsReview = true)), actions)
+    }
+
+    @Test
     fun `타일 4개 — 운행 기록 조회·설정·기록 시작`() {
         val actions = mutableListOf<HomeAction>()
-        compose.setContent {
-            AutoLogTheme { WindowLayoutHost { HomeScreen(readyQuiet, onAction = { actions += it }) } }
-        }
+        show(readyQuiet, actions)
 
         compose.onNodeWithText("운행 기록 조회").performClick()
         compose.onNodeWithText("설정").performClick()
@@ -99,10 +137,13 @@ class HomeScreenTest {
     }
 
     @Test
-    fun `기록 중에는 같은 자리의 4번째 타일이 기록 종료`() {
+    fun `기록 중 — 상태 줄은 점 + 기록 중 · 경과, 4번째 타일은 기록 종료`() {
         val actions = mutableListOf<HomeAction>()
-        compose.setContent { AutoLogTheme { WindowLayoutHost { HomeScreen(recording, onAction = { actions += it }) } } }
+        show(recording, actions)
 
+        compose.onNodeWithText("기록 중").assertIsDisplayed()
+        compose.onNodeWithText("35분 경과").assertIsDisplayed()
+        compose.onNodeWithText("운행 경로").assertIsDisplayed()
         compose.onNodeWithText("기록 시작").assertDoesNotExist()
         compose.onNodeWithText("기록 종료").performClick()
 
@@ -110,18 +151,9 @@ class HomeScreenTest {
     }
 
     @Test
-    fun `알림이 없어도 알림 칸은 남아 새 알림이 없다고 말한다`() {
-        compose.setContent { AutoLogTheme { WindowLayoutHost { HomeScreen(readyQuiet, onAction = {}) } } }
-
-        compose.onNodeWithText("알림").assertIsDisplayed()
-        compose.onNodeWithText("새 알림이 없어요").assertIsDisplayed()
-        compose.onNodeWithText("이번 달 운행 정보").assertIsDisplayed()
-    }
-
-    @Test
     fun `삭제 확인에서 X를 누르면 지우지 않고 앞 단계로 돌아간다`() {
         val actions = mutableListOf<HomeAction>()
-        compose.setContent { AutoLogTheme { HomeScreen(recovery, onAction = { actions += it }) } }
+        show(recovery, actions)
 
         compose.onNodeWithText("삭제").performClick()
         compose.onNodeWithContentDescription("닫기").performClick()
@@ -146,6 +178,11 @@ class HomeScreenshotTest {
 
     @Test
     fun recording() = captureAll("home_recording", driver = SampleDriver) { HomeScreen(recording, onAction = {}) }
+
+    @Test
+    fun recordingTrouble() = captureAll("home_recording_trouble", driver = SampleDriver) {
+        HomeScreen(recordingTrouble, onAction = {})
+    }
 
     @Test
     fun autoEnding() = captureAll("home_autoend", driver = SampleDriver) { HomeScreen(autoEnding, onAction = {}) }

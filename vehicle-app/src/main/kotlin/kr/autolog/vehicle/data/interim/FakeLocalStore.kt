@@ -38,6 +38,9 @@ class FakeLocalStore(clock: AppClock, seed: Boolean = true) : LocalStore {
     override val pendingReviews: Flow<List<TripRow>> =
         rows.map { all -> all.filter { it.purpose == null }.sortedByDescending { it.startTime } }
 
+    override fun recent(limit: Int): Flow<List<TripRow>> =
+        rows.map { all -> all.sortedByDescending { it.startTime }.take(limit) }
+
     override val receiptInbox: Flow<List<ReceiptPayload>> = inbox.asStateFlow()
 
     override suspend fun trip(tripId: String): TripRow? = rows.value.firstOrNull { it.tripId == tripId }

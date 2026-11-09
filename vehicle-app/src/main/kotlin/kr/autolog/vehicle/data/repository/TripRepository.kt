@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.core.SettingsApi
 import kr.autolog.vehicle.data.interim.LocalStore
+import kr.autolog.vehicle.data.interim.TripRow
 import kr.autolog.vehicle.data.interim.UploadState
 import java.time.YearMonth
 
@@ -16,16 +17,24 @@ interface TripRepository {
 
     fun history(month: YearMonth): Flow<List<HistoryItem>>
 
+    /** 달과 상관없이 가장 최근 운행 [limit]건, 최신 순(Home "최근 운행 기록", 스펙 7.2). */
+    fun recent(limit: Int): Flow<List<HistoryItem>>
+
     fun summary(month: YearMonth): Flow<MonthSummary>
 }
 
 class DefaultTripRepository(private val store: LocalStore, private val settings: SettingsApi) : TripRepository {
     override val pendingReviewIds: Flow<List<String>> = store.pendingReviews.map { rows -> rows.map { it.tripId } }
 
-    override fun history(month: YearMonth): Flow<List<HistoryItem>> =
-        combine(store.trips(month), settings.users()) { rows, users ->
+    override fun history(month: YearMonth): Flow<List<HistoryItem>> = items(store.trips(month))
+
+    override fun recent(limit: Int): Flow<List<HistoryItem>> = items(store.recent(limit))
+
+    /** 저장 행 → 화면 항목. 운전자 이름은 직원 목록에서 찾는다(이력·최근 운행이 같은 변환을 쓴다). */
+    private fun items(rows: Flow<List<TripRow>>): Flow<List<HistoryItem>> =
+        combine(rows, settings.users()) { list, users ->
             val names = users.associate { it.userId to it.name }
-            rows.map { r ->
+            list.map { r ->
                 HistoryItem(
                     tripId = r.tripId,
                     startTime = r.startTime,

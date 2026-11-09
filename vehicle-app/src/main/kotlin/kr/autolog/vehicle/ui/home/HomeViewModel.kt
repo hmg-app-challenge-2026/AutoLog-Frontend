@@ -18,6 +18,7 @@ import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.repository.ContextRepository
 import kr.autolog.vehicle.data.repository.ReceiptRepository
 import kr.autolog.vehicle.data.repository.SessionRepository
+import kr.autolog.vehicle.data.repository.SettingsRepository
 import kr.autolog.vehicle.data.repository.TripRepository
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
@@ -27,6 +28,7 @@ class HomeViewModel(
     context: ContextRepository,
     trips: TripRepository,
     receipts: ReceiptRepository,
+    settings: SettingsRepository,
     private val navigator: Navigator,
     clock: AppClock,
     ticker: Flow<Long> = tickerFlow(clock),
@@ -40,12 +42,12 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> =
         combine(
             combine(session.state, session.missedTrip, context.destinationLabel, ::Triple),
-            combine(pendingIds, receiptIds, ::Pair),
-            // 대기 주인공 = 이번 달 요약(D-23). 화면이 열려 있는 동안 달이 바뀌는 경우는 다음 진입 때 맞춘다
-            trips.summary(clock.currentMonth()),
+            combine(pendingIds, receiptIds, settings.upload, ::Triple),
+            // 대기 왼쪽 = 이번 달 요약, 오른쪽 = 최근 운행 기록(D-25). 화면이 열려 있는 동안 달이 바뀌는 경우는 다음 진입 때 맞춘다
+            combine(trips.summary(clock.currentMonth()), trips.recent(RECENT_TRIPS), ::Pair),
             ticker,
-        ) { (s, missed, dest), (pending, receipts), month, now ->
-            reduceHome(s, missed, dest, now, pending, receipts, month)
+        ) { (s, missed, dest), (pending, receipts, upload), (month, recent), now ->
+            reduceHome(s, missed, dest, now, pending, receipts, month, recent, upload)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
@@ -75,6 +77,8 @@ class HomeViewModel(
                 }
                 HomeAction.AddFuelRecord -> navigator.push(Route.ReceiptQr)
                 HomeAction.OpenRecords -> navigator.push(Route.History)
+                is HomeAction.OpenTrip ->
+                    navigator.push(if (action.needsReview) Route.ReviewTrip(action.tripId) else Route.History)
                 HomeAction.OpenSettings -> navigator.push(Route.Settings)
             }
         }

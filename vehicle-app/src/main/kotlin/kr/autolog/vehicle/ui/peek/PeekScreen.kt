@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FiberManualRecord
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,11 +19,10 @@ import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.components.ChipTone
 import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.RouteFlow
-import kr.autolog.vehicle.ui.design.components.StatusChip
+import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.durationText
 
 @Composable
@@ -46,11 +43,8 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
             when (state) {
                 PeekUiState.Loading -> Unit
                 is PeekUiState.Recording -> {
-                    StatusChip(
-                        text = stringResource(R.string.peek_recording), // 운전자는 오른쪽 위 배지에만
-                        tone = ChipTone.SUCCESS,
-                        icon = Icons.Rounded.FiberManualRecord,
-                    )
+                    // Home과 같은 상태 줄(점 + 글자). 운전자는 오른쪽 위 배지에만
+                    StatusLine(text = stringResource(R.string.peek_recording), dot = c.success)
                     HeroMetric(
                         value = state.tripKm,
                         unit = stringResource(R.string.unit_km),

@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FiberManualRecord
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,14 +24,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.di.LocalAppGraph
+import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalTopEndReserved
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
-import kr.autolog.vehicle.ui.design.components.ChipTone
-import kr.autolog.vehicle.ui.design.components.SectionHeader
-import kr.autolog.vehicle.ui.design.components.StatusChip
+import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.verticalScrollFade
 
 @Composable
@@ -41,36 +38,41 @@ fun HomeRoute() {
     val graph = LocalAppGraph.current
     val vm =
         viewModel {
-            HomeViewModel(graph.session, graph.context, graph.trips, graph.receipts, graph.navigator, graph.clock)
+            HomeViewModel(
+                graph.session,
+                graph.context,
+                graph.trips,
+                graph.receipts,
+                graph.settings,
+                graph.navigator,
+                graph.clock,
+            )
         }
     val state by vm.uiState.collectAsStateWithLifecycle()
     HomeScreen(state, vm::onAction)
 }
 
 /**
- * 스펙 7.2 (D-23·D-24). 3단: 맨 위 상태 줄(오른쪽은 운전자 배지) / 가운데 두 섹션 / 맨 아래 같은 모양 타일 4개([HomeDock]).
- * 두 섹션 = 운행 정보([HomeHero] — 대기 "이번 달 운행 정보", 기록 중 "현재 운행 정보") · 알림([HomeNotices]).
- * 소제목은 같은 [SectionHeader], 내용은 위쪽 정렬로 시작선을 맞춘다.
+ * 스펙 7.2 (D-23·D-24·D-25). 위에서 아래로:
+ * 상태 줄(`● 기록 중 · 35분 경과`, 오른쪽은 운전자 배지) → 알림 띠(**있을 때만**) → 가운데 두 섹션(값 · 맥락) → 같은 모양 타일 4개.
+ * 정상이면 알림 띠가 없다 — "문제가 있을 때만 말한다". 두 섹션 내용은 [HomePrimarySection]·[HomeSecondarySection].
  */
 @Composable
 fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 섹션을 그리지 않는다
+    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 섹션·알림을 그리지 않는다
     val showBody = state.phase != HomePhase.NEEDS_RECOVERY
-    val trip = @Composable { HomeSection(tripSectionTitle(state.phase)) { HomeHero(state) } }
-    val notices = @Composable {
-        HomeSection(stringResource(R.string.section_notices)) { HomeNotices(state.notices, onAction) }
-    }
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
-            // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
+            // 높이 640 dp 안에 상태 줄·알림 띠·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
             Column(Modifier.fillMaxSize().padding(Space.s7), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
                 TopRow { HomeStatus(state) }
+                if (showBody && state.notices.isNotEmpty()) HomeNoticeStrip(state.notices, onAction)
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     if (showBody) {
                         // 좌우 반반. 섹션마다 넘치면 그 섹션만 스크롤
-                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { trip() }
-                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { notices() }
+                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { HomePrimarySection(state) }
+                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { HomeSecondarySection(state, onAction) }
                     }
                 }
                 HomeDock(state, onAction)
@@ -82,12 +84,14 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 타일은 늘 보인다
                 ScrollRegion(Modifier.weight(1f).fillMaxWidth()) {
                     if (showBody) {
-                        // 한 칸에 위아래로 쌓는다. 대기 중 알림이 있으면 처리할 일이 요약보다 급하므로 알림이 먼저,
-                        // 기록 중이면 지금 운행이 먼저
-                        val noticesFirst = state.phase == HomePhase.READY && state.notices.isNotEmpty()
-                        if (noticesFirst) notices() else trip()
+                        // 한 칸에 위아래로: 알림(있을 때만) → 값 → 맥락
+                        if (state.notices.isNotEmpty()) {
+                            HomeNoticeList(state.notices, onAction)
+                            Spacer(Modifier.height(Space.s6))
+                        }
+                        HomePrimarySection(state)
                         Spacer(Modifier.height(Space.s6))
-                        if (noticesFirst) trip() else notices()
+                        HomeSecondarySection(state, onAction)
                     }
                 }
                 HomeDock(state, onAction)
@@ -109,35 +113,20 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
     }
 }
 
-/** 왼쪽 섹션 소제목: 대기 "이번 달 운행 정보", 기록 중 "현재 운행 정보". */
-@Composable
-private fun tripSectionTitle(phase: HomePhase): String = stringResource(
-    if (phase == HomePhase.READY) R.string.section_month_trip else R.string.section_current_trip,
-)
-
-/** 소제목 + 내용. 모든 섹션이 같은 모양. */
-@Composable
-private fun HomeSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxWidth()) {
-        SectionHeader(title)
-        content()
-    }
-}
-
-/** 상태 줄: `● 대기 중` / `● 기록 중 · 35분째`. 누를 수 없는 표시. */
+/** 상태 줄: `● 대기 중` / `● 기록 중 · 35분 경과`. 점 색이 상태를 말한다(기록 중 초록, 대기 흐린 회색). */
 @Composable
 private fun HomeStatus(state: HomeUiState) {
+    val c = AutoLogTheme.colors
     val recording = state.phase == HomePhase.RECORDING_PARKED || state.phase == HomePhase.AUTO_ENDING
-    StatusChip(
-        text =
-        if (recording) {
-            stringResource(R.string.home_status_recording, state.elapsedMin ?: 0)
-        } else {
-            stringResource(R.string.home_status_ready)
-        },
-        tone = if (recording) ChipTone.SUCCESS else ChipTone.MUTED,
-        icon = Icons.Rounded.FiberManualRecord,
-    )
+    if (recording) {
+        StatusLine(
+            text = stringResource(R.string.home_status_recording),
+            dot = c.success,
+            detail = stringResource(R.string.home_status_elapsed, state.elapsedMin ?: 0),
+        )
+    } else {
+        StatusLine(text = stringResource(R.string.home_status_ready), dot = c.textTertiary)
+    }
 }
 
 /** 화면 맨 위 줄(높이 76 dp). 오른쪽은 운전자 배지 자리로 비운다([LocalTopEndReserved]). */

@@ -36,7 +36,7 @@ class HomeViewModelTest {
     @Test
     fun `계속 기록을 누르면 자동 종료가 취소된다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.settings, g.navigator, g.clock)
         g.trip.startSession()
         g.trip.setMotion(VehicleMotion.PARKED)
 
@@ -48,7 +48,7 @@ class HomeViewModelTest {
     @Test
     fun `기록 종료를 누르면 바로 끝난다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.settings, g.navigator, g.clock)
         g.trip.startSession()
         g.trip.setMotion(VehicleMotion.PARKED)
 
@@ -60,7 +60,7 @@ class HomeViewModelTest {
     @Test
     fun `운행이 끝나면 목적 확인 화면이 자동으로 열린다`() = runTest {
         val g = graph()
-        HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
+        HomeViewModel(g.session, g.context, g.trips, g.receipts, g.settings, g.navigator, g.clock)
         g.trip.startSession()
         g.trip.addKm(2.0)
 
@@ -78,7 +78,7 @@ class HomeViewModelTest {
     @Test
     fun `알림 '목적 확인'을 누르면 가장 최근 운행의 목적 확인이 열린다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.settings, g.navigator, g.clock)
 
         vm.onAction(HomeAction.OpenReview)
 
@@ -88,10 +88,23 @@ class HomeViewModelTest {
     @Test
     fun `독의 운행 기록은 이력(기록부 포함)으로 간다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.navigator, g.clock)
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.settings, g.navigator, g.clock)
 
         vm.onAction(HomeAction.OpenRecords)
 
+        assertEquals(Route.History, g.navigator.current)
+    }
+
+    @Test
+    fun `최근 운행 — 목적이 없으면 그 운행의 목적 확인, 있으면 운행 기록`() = runTest {
+        val g = graph()
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.receipts, g.settings, g.navigator, g.clock)
+
+        vm.onAction(HomeAction.OpenTrip("t-s1", needsReview = true))
+        assertEquals(Route.ReviewTrip("t-s1"), g.navigator.current)
+
+        g.navigator.replaceAll(Route.Home)
+        vm.onAction(HomeAction.OpenTrip("t-s2", needsReview = false))
         assertEquals(Route.History, g.navigator.current)
     }
 }
