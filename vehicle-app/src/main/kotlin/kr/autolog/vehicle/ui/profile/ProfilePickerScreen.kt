@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -37,7 +35,6 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ActionTile
 import kr.autolog.vehicle.ui.design.components.ModalCard
-import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.ProfileTile
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
@@ -132,18 +129,9 @@ private fun PickerTileOf(tile: PickerTile, size: Dp, onAction: (ProfilePickerAct
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfilePickerAction) -> Unit) {
-    ModalCard(
-        maxWidth = Size.sheetMaxWidth,
-        footer = {
-            TertiaryButton(
-                stringResource(R.string.action_cancel),
-                onClick = { onAction(ProfilePickerAction.HideAll) },
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-        },
-    ) {
-        ModalTitle(stringResource(R.string.picker_all_title))
-        Spacer(Modifier.height(Space.s5))
+    // 제목 없음: "다른 사람"을 눌러 펼친 목록이라 무엇을 고르는지 이미 안다 — 같은 정보를 두 번 주지 않는다.
+    // 고르기만 하는 팝업이라 하단 [취소] 대신 오른쪽 위 X로 닫는다
+    ModalCard(maxWidth = Size.sheetMaxWidth, onClose = { onAction(ProfilePickerAction.HideAll) }) {
         // 카드 하나의 스크롤로 흐른다 — 높이 고정 격자를 카드 안에 넣으면 스크롤이 두 겹이 되고 줄이 잘렸다
         FlowRow(
             Modifier.fillMaxWidth(),

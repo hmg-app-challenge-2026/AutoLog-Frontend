@@ -53,6 +53,7 @@ class GalleryScreenshotTest {
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s6)) {
                 DriverBadge("u-1", "김영업", onClick = {})
                 DriverBadge(null, null, onClick = {})
+                CloseButton(onClick = {})
             }
             HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             Banner("앱이 꺼진 동안 15.0 km를 달렸어요", listOf(BannerAction("추가") {}, BannerAction("무시") {}))
@@ -105,6 +106,21 @@ class GalleryScreenshotTest {
     }
 
     @Test
+    fun modalList() = captureAll("components_modal_close", tall) {
+        Box {
+            Text(
+                "뒤 화면",
+                Modifier.padding(Space.s6),
+                style = AutoLogTheme.type.display,
+                color = AutoLogTheme.colors.textPrimary,
+            )
+            ModalCard(onClose = {}) {
+                ModalText("고르기만 하는 팝업은 제목 없이, 오른쪽 위 X로 닫아요.")
+            }
+        }
+    }
+
+    @Test
     fun modal() = captureAll("components_modal", tall) {
         Box {
             Text(
@@ -117,12 +133,8 @@ class GalleryScreenshotTest {
                 PrimaryButton("확인", onClick = {}, modifier = Modifier.fillMaxWidth(), height = Size.buttonMd)
                 TertiaryButton("취소", onClick = {}, modifier = Modifier.align(Alignment.CenterHorizontally))
             }) {
-                Text("가운데 카드", style = AutoLogTheme.type.headline, color = AutoLogTheme.colors.textPrimary)
-                Text(
-                    "모든 팝업은 이 모양이에요. 결정 버튼은 아래에 고정돼요.",
-                    style = AutoLogTheme.type.body,
-                    color = AutoLogTheme.colors.textSecondary,
-                )
+                ModalTitle("가운데 카드")
+                ModalText("모든 팝업은 이 모양이에요. 결정 버튼은 아래에 고정돼요.")
             }
         }
     }

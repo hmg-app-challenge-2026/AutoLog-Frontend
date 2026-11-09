@@ -8,8 +8,12 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -18,9 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
@@ -114,4 +120,35 @@ fun TertiaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modif
 fun DangerButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     val c = AutoLogTheme.colors
     ButtonBody(text, onClick, modifier, Size.buttonMd, c.dangerFill, c.onAccent, c.surface3, enabled)
+}
+
+/**
+ * 닫기(X). 보이는 원은 `iconLg`(48 dp, `surface3`)지만 터치 영역은 `touchMin`(76 dp) — 팔을 들어 누르는 차 화면 기준.
+ * 고르기만 하는 팝업(전체 직원 등)의 오른쪽 위에 둔다. 결정이 필요한 팝업은 X 대신 하단 버튼으로 끝낸다(디자인 언어 11장).
+ */
+@Composable
+fun CloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val c = AutoLogTheme.colors
+    val interaction = remember { MutableInteractionSource() }
+    val view = LocalView.current
+    Box(
+        modifier
+            .size(Size.touchMin)
+            .clip(CircleShape)
+            .pressFeedback(interaction)
+            .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
+                view.confirmHaptic()
+                onClick()
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(Size.iconLg).clip(CircleShape).background(c.surface3), contentAlignment = Alignment.Center) {
+            Icon(
+                Icons.Rounded.Close,
+                contentDescription = stringResource(R.string.action_close),
+                tint = c.textSecondary,
+                modifier = Modifier.size(Size.iconSm),
+            )
+        }
+    }
 }

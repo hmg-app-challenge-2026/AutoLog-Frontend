@@ -23,6 +23,7 @@ object Size {
     val buttonLg = 96.dp
     val buttonXl = 120.dp
     val iconButton = 96.dp
+    val iconSm = 28.dp // 닫기(X)처럼 작은 원 안의 아이콘
     val icon = 36.dp
     val iconLg = 48.dp
     val avatarChip = 48.dp

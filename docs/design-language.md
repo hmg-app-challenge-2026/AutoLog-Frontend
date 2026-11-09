@@ -425,7 +425,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
 | `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 폭 720 dp 미만이면 버튼을 문장 아래로 내린다(문장이 3줄로 눌리지 않게). 놓친 운행 등 |
-| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다 |
+| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **닫는 법은 팝업 종류로 정한다**: 결정·입력 팝업은 `footer` 버튼으로 끝내고, 고르기만 하는 목록 팝업은 `onClose`로 오른쪽 위 X(`CloseButton`)를 둔다(하단 [취소] 없음). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) |
+| `CloseButton` | 닫기 X. 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 영역 76 dp. 접근성 이름 "닫기" |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
@@ -504,4 +505,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 |---|---|---|
 | 1.0 | 2026-11-09 | 최초 확정 (사용 3단계·조작 최소화 포함) |
 | 1.1 | 2026-11-09 | 운전자 배지 오른쪽 위 고정(D-19) · `DriverBadge`·`IconAvatar`·`ActionTile` 추가 · `ActionCard` 세로 배치 · 축약 `StatusChip` · 오른쪽 위 예약 자리(`LocalTopEndReserved`) · 스크롤 가장자리 흐림 · Home WIDE 45:55 · 주유 기록 버튼 하나로(D-20) |
-| 1.2 | 2026-11-09 | 팝업을 가운데 카드 `ModalCard` 하나로 통일(D-21, `ScrimSheet` 삭제), 팝업 제목·설명 가운데 정렬(`ModalTitle`·`ModalText`) · `surfaceRaised` · 채움형 `InputField` · `AvatarFace` · 새 운전자 추가 팝업 고도화 |
+| 1.2 | 2026-11-09 | 팝업을 가운데 카드 `ModalCard` 하나로 통일(D-21, `ScrimSheet` 삭제), 팝업 제목·설명 가운데 정렬(`ModalTitle`·`ModalText`) · 목록 팝업은 제목 없이 오른쪽 위 X(`CloseButton`, `ModalCard.onClose`) · `surfaceRaised` · 채움형 `InputField` · `AvatarFace` · 새 운전자 추가 팝업 고도화 |

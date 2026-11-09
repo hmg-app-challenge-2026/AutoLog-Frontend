@@ -2,6 +2,7 @@ package kr.autolog.vehicle.ui.profile
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -56,6 +57,24 @@ class ProfilePickerScreenTest {
         compose.onNodeWithText("새 운전자 추가").performClick()
 
         assertEquals(listOf<ProfilePickerAction>(ProfilePickerAction.OpenAdd), actions)
+    }
+
+    @Test
+    fun `전체 직원 팝업은 제목 없이 오른쪽 위 X 1탭으로 닫는다`() {
+        val actions = mutableListOf<ProfilePickerAction>()
+        compose.setContent {
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, showAll = true, loaded = true), onAction = {
+                    actions +=
+                        it
+                })
+            }
+        }
+
+        compose.onNodeWithText("운전자 선택").assertDoesNotExist()
+        compose.onNodeWithContentDescription("닫기").performClick()
+
+        assertEquals(listOf<ProfilePickerAction>(ProfilePickerAction.HideAll), actions)
     }
 
     @Test

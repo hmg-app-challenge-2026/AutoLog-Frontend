@@ -20,8 +20,8 @@
     <string name="picker_later">나중에 선택</string>
     <string name="picker_more">다른 사람</string>
     <string name="picker_empty">아직 등록된 직원이 없어요</string>
-    <string name="picker_all_title">운전자 선택</string>
     <string name="action_cancel">취소</string>
+    <string name="action_close">닫기</string>
     <string name="home_ready_hint">출발하면 자동으로 기록해요</string>
     <string name="home_start">운행 시작</string>
     <string name="home_end">기록 종료</string>

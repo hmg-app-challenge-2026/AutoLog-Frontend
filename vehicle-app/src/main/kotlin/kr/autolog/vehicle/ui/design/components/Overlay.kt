@@ -51,6 +51,7 @@ private const val MODAL_ENTER_SCALE = 0.94f
  * - 등장: scrim은 투명도, 카드는 투명도 + 0.94→1 배율(`motion.standard`, 정적 모드면 즉시).
  * - 키보드가 올라오면 카드가 그 위로 올라가고(imePadding), 내용이 넘치면 카드 안에서 스크롤한다(가장자리 흐림).
  * - [footer]는 스크롤 밖 카드 하단에 고정된다 — 결정 버튼은 여기에 둔다(주 버튼은 스크롤해야 보이면 안 된다, 디자인 언어 7장).
+ * - [onClose]가 있으면 카드 오른쪽 위에 X([CloseButton])가 고정된다 — 고르기만 하는 팝업(목록)용. 결정 팝업은 footer로 끝낸다.
  * - 바깥 탭은 뒤 화면으로 새지 않게 삼킨다(클릭 의미론 없음 — Peek 입력 0개 검사에 걸리지 않는다). 닫기는 카드 안 버튼으로만.
  * 단계가 FULL에서 내려가면 루트가 화면째 지운다.
  */
@@ -59,6 +60,7 @@ fun ModalCard(
     modifier: Modifier = Modifier,
     maxWidth: Dp = Size.dialogMaxWidth,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
+    onClose: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val c = AutoLogTheme.colors
@@ -87,13 +89,33 @@ fun ModalCard(
                     .background(c.surfaceRaised)
                     .border(Size.hairline, c.outline, shape),
             ) {
+                // X는 스크롤 밖 머리 줄에 고정 — 내용 위에 겹치지 않고, 스크롤해도 항상 닿는다
+                if (onClose != null) {
+                    Box(
+                        Modifier.fillMaxWidth().padding(top = Space.s3, end = Space.s3),
+                        contentAlignment = Alignment.TopEnd,
+                    ) {
+                        CloseButton(onClose)
+                    }
+                }
                 val scroll = rememberScrollState()
                 Column(
                     Modifier
                         .weight(1f, fill = false)
                         .verticalScrollFade(scroll, Space.s7)
                         .verticalScroll(scroll)
-                        .padding(Space.s6),
+                        .padding(
+                            start = Space.s6,
+                            end = Space.s6,
+                            bottom = Space.s6,
+                            top = if (onClose !=
+                                null
+                            ) {
+                                Space.s1
+                            } else {
+                                Space.s6
+                            },
+                        ),
                     content = content,
                 )
                 if (footer != null) {
