@@ -15,7 +15,6 @@ import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.common.tickerFlow
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.repository.ContextRepository
-import kr.autolog.vehicle.data.repository.ProfileRepository
 import kr.autolog.vehicle.data.repository.ReceiptRepository
 import kr.autolog.vehicle.data.repository.SessionRepository
 import kr.autolog.vehicle.data.repository.TripRepository
@@ -24,7 +23,6 @@ import kr.autolog.vehicle.nav.Route
 
 class HomeViewModel(
     private val session: SessionRepository,
-    profile: ProfileRepository,
     context: ContextRepository,
     trips: TripRepository,
     receipts: ReceiptRepository,
@@ -41,11 +39,11 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> =
         combine(
             combine(session.state, session.totalOdometerKm, session.missedTrip, ::Triple),
-            combine(profile.currentDriver(), context.destinationLabel, ::Pair),
+            context.destinationLabel,
             combine(pendingIds, receiptIds, ::Pair),
             ticker,
-        ) { (s, odo, missed), (driver, dest), (pending, receipts), now ->
-            reduceHome(s, odo, missed, driver, dest, now, pending, receipts)
+        ) { (s, odo, missed), dest, (pending, receipts), now ->
+            reduceHome(s, odo, missed, dest, now, pending, receipts)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
@@ -61,22 +59,19 @@ class HomeViewModel(
     }
 
     fun onAction(action: HomeAction) {
-        val state = uiState.value
         viewModelScope.launch {
             when (action) {
                 HomeAction.StartTrip -> session.startTrip()
                 HomeAction.EndNow -> session.endNow()
                 HomeAction.KeepRecording -> session.keepRecording()
-                HomeAction.OpenProfilePicker -> navigator.push(Route.ProfilePicker)
                 HomeAction.AcceptMissedTrip -> session.acceptMissedTrip()
                 HomeAction.IgnoreMissedTrip -> session.ignoreMissedTrip()
                 is HomeAction.Recover -> session.resolveRecovery(action.choice)
                 HomeAction.OpenReview -> pendingIds.value.firstOrNull()?.let { navigator.push(Route.ReviewTrip(it)) }
                 HomeAction.OpenReceipt -> receiptIds.value.firstOrNull()?.let {
-                    navigator.push(Route.ReceiptReview(it))
+                    navigator.push(Route.FuelEntry(receiptId = it))
                 }
-                HomeAction.OpenReceiptQr -> navigator.push(Route.ReceiptQr)
-                HomeAction.OpenFuel -> navigator.push(Route.FuelEntry(state.currentTripId))
+                HomeAction.AddFuelRecord -> navigator.push(Route.ReceiptQr)
                 HomeAction.OpenReport -> navigator.push(Route.Report)
                 HomeAction.OpenHistory -> navigator.push(Route.History)
                 HomeAction.OpenSettings -> navigator.push(Route.Settings)

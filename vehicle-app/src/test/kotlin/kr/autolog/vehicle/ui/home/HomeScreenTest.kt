@@ -6,7 +6,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.data.interim.RecoveryChoice
 import kr.autolog.vehicle.data.interim.StopReason
-import kr.autolog.vehicle.data.repository.DriverProfile
+import kr.autolog.vehicle.screenshot.SampleDriver
+import kr.autolog.vehicle.screenshot.ShotDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import org.junit.Assert.assertEquals
@@ -16,11 +17,18 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-private val driver = DriverProfile("u-1", "김영업", "영업1팀")
+private val ready =
+    HomeUiState(
+        phase = HomePhase.READY,
+        odometerKm = "18,420.5",
+        reviewCount = 1,
+        receiptCount = 1,
+        missedTripKm = "15.0",
+    )
+
 private val recording =
     HomeUiState(
         phase = HomePhase.RECORDING_PARKED,
-        driver = driver,
         tripKm = "23.4",
         destination = "판교 테크노밸리 거래처",
         elapsedMin = 35,
@@ -61,25 +69,17 @@ class HomeScreenTest {
 @Config(sdk = [34])
 class HomeScreenshotTest {
     @Test
-    fun ready() = captureAll("home_ready") {
-        HomeScreen(
-            HomeUiState(
-                phase = HomePhase.READY,
-                driver = driver,
-                odometerKm = "18,420.5",
-                reviewCount = 1,
-                missedTripKm = "15.0",
-            ),
-            onAction = {},
-        )
-    }
+    fun ready() = captureAll("home_ready", driver = SampleDriver) { HomeScreen(ready, onAction = {}) }
 
     @Test
-    fun recording() = captureAll("home_recording") { HomeScreen(recording, onAction = {}) }
+    fun noDriver() = captureAll("home_nodriver", driver = ShotDriver(null, null)) { HomeScreen(ready, onAction = {}) }
 
     @Test
-    fun autoEnding() = captureAll("home_autoend") { HomeScreen(autoEnding, onAction = {}) }
+    fun recording() = captureAll("home_recording", driver = SampleDriver) { HomeScreen(recording, onAction = {}) }
 
     @Test
-    fun recovery() = captureAll("home_recovery") { HomeScreen(recovery, onAction = {}) }
+    fun autoEnding() = captureAll("home_autoend", driver = SampleDriver) { HomeScreen(autoEnding, onAction = {}) }
+
+    @Test
+    fun recovery() = captureAll("home_recovery", driver = SampleDriver) { HomeScreen(recovery, onAction = {}) }
 }

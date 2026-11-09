@@ -30,7 +30,7 @@ import kr.autolog.vehicle.ui.design.durationText
 @Composable
 fun PeekRoute() {
     val graph = LocalAppGraph.current
-    val vm = viewModel { PeekViewModel(graph.session, graph.profile, graph.context, graph.clock) }
+    val vm = viewModel { PeekViewModel(graph.session, graph.context, graph.clock) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     PeekScreen(state)
 }
@@ -45,9 +45,8 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
             when (state) {
                 PeekUiState.Loading -> Unit
                 is PeekUiState.Recording -> {
-                    val driver = state.driverName ?: stringResource(R.string.peek_driver_unknown)
                     StatusChip(
-                        text = stringResource(R.string.peek_recording) + " · " + driver,
+                        text = stringResource(R.string.peek_recording), // 운전자는 오른쪽 위 배지에만
                         tone = ChipTone.SUCCESS,
                         icon = Icons.Rounded.FiberManualRecord,
                     )

@@ -16,7 +16,7 @@ import kr.autolog.vehicle.core.VoiceFuel
 import kr.autolog.vehicle.core.VoiceResult
 import kr.autolog.vehicle.data.interim.LocalStore
 
-/** 영수증·주유(스펙 7.4~7.6, F-18·19·30). */
+/** 영수증·주유(스펙 7.4~7.5, D-20, F-18·19·30). */
 interface ReceiptRepository {
     suspend fun issueQr(): QrResult
 

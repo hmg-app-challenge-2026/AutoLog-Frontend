@@ -8,18 +8,17 @@
     <string name="badge_scheduled">배차</string>
     <string name="badge_recent">최근</string>
     <string name="peek_recording">기록 중</string>
-    <string name="peek_driver_unknown">운전자 미선택</string>
-    <string name="peek_trip_label">이번 운행</string>
+        <string name="peek_trip_label">이번 운행</string>
     <string name="peek_no_destination">목적지 없음 — 도착 후 물어볼게요</string>
     <string name="peek_source_saved">계기판 거리 · %1$d초 전 저장</string>
     <string name="peek_auto_end">멈춰 있으면 %1$s 뒤 기록을 마쳐요</string>
     <string name="peek_no_trip">기록 중인 운행이 없어요</string>
     <string name="peek_no_trip_hint">출발하면 자동으로 기록해요</string>
     <string name="odometer_label">누적 거리</string>
-    <string name="picker_title">누가 운전하나요?</string>
+    <string name="picker_title">운전자를 선택해주세요</string>
+    <string name="picker_title_two_lines">운전자를\n선택해주세요</string>
     <string name="picker_later">나중에 선택</string>
     <string name="picker_more">다른 사람</string>
-    <string name="picker_unassigned_title">이전 운행 운전자는 누구였나요?</string>
     <string name="picker_empty">아직 등록된 직원이 없어요</string>
     <string name="picker_all_title">운전자 선택</string>
     <string name="action_cancel">취소</string>
@@ -44,8 +43,7 @@
     <string name="recovery_delete">삭제</string>
     <string name="recovery_delete_confirm">이 운행을 지울까요? 되돌릴 수 없어요</string>
     <string name="recovery_delete_yes">지우기</string>
-    <string name="action_receipt">영수증 저장</string>
-    <string name="action_fuel">주유 기록</string>
+    <string name="action_fuel_add">주유 기록 추가</string>
     <string name="action_report">운행기록부</string>
     <string name="action_history">이력</string>
     <string name="action_settings">설정</string>
@@ -57,4 +55,10 @@
     <string name="confidence_recheck">다시 확인</string>
     <string name="confidence_missing">입력 필요</string>
     <string name="qr_description">영수증을 보낼 주소의 QR 코드</string>
+    <string name="driver_honorific">%1$s님</string>
+    <string name="picker_add">새 운전자 추가</string>
+    <string name="picker_add_name">이름</string>
+    <string name="picker_add_dept">부서 (선택)</string>
+    <string name="picker_add_confirm">추가하고 시작</string>
+    <string name="picker_add_name_required">이름을 입력해 주세요</string>
 </resources>

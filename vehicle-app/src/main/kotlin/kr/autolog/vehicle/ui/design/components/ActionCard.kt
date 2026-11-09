@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,13 +33,16 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.confirmHaptic
 
-/** 디자인 언어 11장 ActionCard: 아이콘 + 제목(+ 한 줄 설명). 카드 전체가 터치 대상. 넓은 창의 보조 동작. */
+/**
+ * 디자인 언어 11장 ActionCard: 넓은 창의 보조 동작 타일. 아이콘(왼쪽 위) + 이름(아래), 카드 전체가 터치 대상.
+ * 세로 배치라 2열 격자에서도 이름이 한 줄을 온전히 쓴다(가로 배치는 아이콘 몫만큼 이름 폭이 줄어 글자 단위로 꺾였다).
+ */
 @Composable
 fun ActionCard(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier, badge: Int = 0) {
     val c = AutoLogTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val view = LocalView.current
-    Row(
+    Column(
         modifier
             .heightIn(min = Size.buttonLg)
             .pressFeedback(interaction)
@@ -46,13 +51,15 @@ fun ActionCard(icon: ImageVector, title: String, onClick: () -> Unit, modifier: 
             .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
                 view.confirmHaptic()
                 onClick()
-            }.padding(horizontal = Space.s5, vertical = Space.s4),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Space.s4),
+            }.padding(Space.s4),
+        verticalArrangement = Arrangement.spacedBy(Space.s3),
     ) {
-        Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
-        Text(title, style = AutoLogTheme.type.label, color = c.textPrimary, modifier = Modifier.weight(1f))
-        if (badge > 0) CountBadge(badge)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
+            Spacer(Modifier.weight(1f))
+            if (badge > 0) CountBadge(badge)
+        }
+        Text(title, style = AutoLogTheme.type.label, color = c.textPrimary, maxLines = 2)
     }
 }
 

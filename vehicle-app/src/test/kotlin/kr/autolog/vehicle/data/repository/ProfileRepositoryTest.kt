@@ -8,6 +8,7 @@ import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.fake.FakePurposeEngine
 import kr.autolog.vehicle.fake.FakeSettingsApi
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -36,11 +37,25 @@ class ProfileRepositoryTest {
     }
 
     @Test
-    fun `운전자 미확정 운행은 후보를 먼저 두고 최대 3명`() = runTest {
-        val item = repo.unassignedTrip()!!
+    fun `새 운전자를 추가하면 id를 돌려주고 목록 끝에 보인다`() = runTest {
+        val added = repo.addDriver("  최신입 ", "영업2팀") as AddDriverResult.Added
 
-        assertEquals("t-9", item.tripId)
-        assertEquals("u-1", item.candidates.first().userId)
-        assertEquals(3, item.candidates.size)
+        val profiles = repo.orderedProfiles().first()
+
+        assertEquals(added.userId, profiles.last().userId)
+        assertEquals("최신입", profiles.last().name)
+    }
+
+    @Test
+    fun `동명이인을 추가해도 새로 생긴 사람을 돌려준다`() = runTest {
+        val first = repo.addDriver("김영업", null) as AddDriverResult.Added
+        val second = repo.addDriver("김영업", null) as AddDriverResult.Added
+
+        assertNotEquals(first.userId, second.userId)
+    }
+
+    @Test
+    fun `이름이 비면 추가하지 않는다`() = runTest {
+        assertEquals(AddDriverResult.EmptyName, repo.addDriver(" ", null))
     }
 }

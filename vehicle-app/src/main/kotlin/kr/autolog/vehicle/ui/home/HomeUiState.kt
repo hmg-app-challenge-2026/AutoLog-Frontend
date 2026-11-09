@@ -4,7 +4,6 @@ import kr.autolog.vehicle.data.interim.MissedTrip
 import kr.autolog.vehicle.data.interim.RecoveryChoice
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.interim.StopReason
-import kr.autolog.vehicle.data.repository.DriverProfile
 import kr.autolog.vehicle.ui.design.formatKm
 import kr.autolog.vehicle.ui.design.progressOf
 import kr.autolog.vehicle.ui.design.remainingSeconds
@@ -16,12 +15,9 @@ data class AutoEndUi(val remainingSec: Int, val progress: Float, val reason: Sto
 
 data class HomeUiState(
     val phase: HomePhase = HomePhase.READY,
-    val driver: DriverProfile? = null,
     val odometerKm: String? = null,
     /** 기록 중 거리. null = 계기판 미확정(추정 금지). */
     val tripKm: String? = null,
-    /** 진행 중인 운행(주유 기록을 이 운행에 연결). */
-    val currentTripId: String? = null,
     val destination: String? = null,
     val elapsedMin: Int? = null,
     val autoEnd: AutoEndUi? = null,
@@ -43,8 +39,6 @@ sealed interface HomeAction {
 
     data object KeepRecording : HomeAction
 
-    data object OpenProfilePicker : HomeAction
-
     data object AcceptMissedTrip : HomeAction
 
     data object IgnoreMissedTrip : HomeAction
@@ -53,11 +47,11 @@ sealed interface HomeAction {
 
     data object OpenReview : HomeAction
 
+    /** "영수증 도착" 칩 — 가장 최근 영수증의 OCR 값이 채워진 주유 입력 창(스펙 7.5). */
     data object OpenReceipt : HomeAction
 
-    data object OpenReceiptQr : HomeAction
-
-    data object OpenFuel : HomeAction
+    /** 주유 기록 추가 — 영수증 QR로 들어간다(스펙 7.4). */
+    data object AddFuelRecord : HomeAction
 
     data object OpenReport : HomeAction
 
@@ -70,7 +64,6 @@ internal fun reduceHome(
     state: SessionState,
     odometerKm: Double?,
     missed: MissedTrip?,
-    driver: DriverProfile?,
     destination: String?,
     now: Long,
     pendingReviewIds: List<String> = emptyList(),
@@ -78,7 +71,6 @@ internal fun reduceHome(
 ): HomeUiState {
     val base =
         HomeUiState(
-            driver = driver,
             odometerKm = formatKm(odometerKm),
             destination = destination,
             reviewCount = pendingReviewIds.size,
@@ -93,14 +85,12 @@ internal fun reduceHome(
             base.copy(
                 phase = HomePhase.RECORDING_PARKED,
                 tripKm = formatKm(state.liveKm),
-                currentTripId = state.trip.tripId,
                 elapsedMin = ((now - state.trip.startTime) / 60_000).toInt().coerceAtLeast(0),
             )
         is SessionState.StopCandidate ->
             base.copy(
                 phase = HomePhase.AUTO_ENDING,
                 tripKm = formatKm(state.liveKm),
-                currentTripId = state.trip.tripId,
                 autoEnd =
                 AutoEndUi(
                     remainingSec = remainingSeconds(state.deadlineAt, now),

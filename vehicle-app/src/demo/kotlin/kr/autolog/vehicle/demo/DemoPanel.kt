@@ -26,11 +26,11 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.ScrimSheet
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 
-/** 오른쪽 위 96 dp 영역 길게 누르기 → 패널. 데모 전용이라 잠금을 무시한다(정차 중에도 주차로 되돌릴 수 있게). */
+/** 왼쪽 위 96 dp 영역(오른쪽 위는 운전자 배지) 길게 누르기 → 패널. 데모 전용이라 잠금을 무시한다(정차 중에도 주차로 되돌릴 수 있게). */
 @Composable
 fun DemoPanelOverlay(scenario: DemoScenario) {
     var open by remember { mutableStateOf(false) }
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Box(Modifier.size(Size.iconButton).pointerInput(Unit) { detectTapGestures(onLongPress = { open = true }) })
     }
     if (open) {

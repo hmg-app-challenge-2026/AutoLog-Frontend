@@ -4,9 +4,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kr.autolog.vehicle.data.repository.AddDriverResult
 import kr.autolog.vehicle.data.repository.DriverProfile
 import kr.autolog.vehicle.data.repository.ProfileBadge
-import kr.autolog.vehicle.data.repository.UnassignedTripItem
+import kr.autolog.vehicle.screenshot.ShotSize
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import org.junit.Assert.assertEquals
@@ -42,6 +43,20 @@ class ProfilePickerScreenTest {
 
         assertEquals(listOf(ProfilePickerAction.Select("u-2")), actions)
     }
+
+    @Test
+    fun `새 운전자 추가 타일은 1탭으로 시트를 연다`() {
+        val actions = mutableListOf<ProfilePickerAction>()
+        compose.setContent {
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, loaded = true), onAction = { actions += it })
+            }
+        }
+
+        compose.onNodeWithText("새 운전자 추가").performClick()
+
+        assertEquals(listOf<ProfilePickerAction>(ProfilePickerAction.OpenAdd), actions)
+    }
 }
 
 @RunWith(AndroidJUnit4::class)
@@ -50,10 +65,29 @@ class ProfilePickerScreenTest {
 class ProfilePickerScreenshotTest {
     @Test
     fun picker() = captureAll("picker") {
+        ProfilePickerScreen(ProfilePickerUiState(profiles, loaded = true), onAction = {})
+    }
+
+    @Test
+    fun pickerMany() = captureAll("picker_many") {
+        val many = profiles + listOf("정다은", "최민수", "한지민").mapIndexed { i, n -> DriverProfile("u-${i + 4}", n, "영업2팀") }
+        ProfilePickerScreen(ProfilePickerUiState(many, loaded = true), onAction = {})
+    }
+
+    @Test
+    fun addSheet() = captureAll("picker_add") {
+        ProfilePickerScreen(
+            ProfilePickerUiState(profiles, addForm = AddDriverForm(name = "최신입"), loaded = true),
+            onAction = {},
+        )
+    }
+
+    @Test
+    fun addSheetError() = captureAll("picker_add_error", sizes = listOf(ShotSize.WIDE)) {
         ProfilePickerScreen(
             ProfilePickerUiState(
                 profiles,
-                UnassignedTripItem("t-9", "09:00 본사 → 판교 거래처 · 23.4 km", profiles),
+                addForm = AddDriverForm(name = "김영업", error = AddDriverResult.Rejected("이미 등록된 이름이에요")),
                 loaded = true,
             ),
             onAction = {},

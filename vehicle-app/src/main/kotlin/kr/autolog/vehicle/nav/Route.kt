@@ -8,11 +8,14 @@ sealed interface Route {
 
     data class ReviewTrip(val tripId: String) : Route
 
+    /** 주유 기록 추가의 기본 경로: 폰으로 영수증을 올릴 QR(스펙 7.4, D-20). */
     data object ReceiptQr : Route
 
-    data class ReceiptReview(val receiptId: String) : Route
-
-    data class FuelEntry(val tripId: String?) : Route
+    /**
+     * 주유 기록 입력 창 하나(스펙 7.5, D-20). [receiptId]가 있으면 영수증 OCR 값이 채워진 채로,
+     * null이면 빈 칸으로(QR 화면의 [직접 입력하기]) 열린다. 저장은 [추가하기] 한 번.
+     */
+    data class FuelEntry(val receiptId: String? = null) : Route
 
     data object Report : Route
 
