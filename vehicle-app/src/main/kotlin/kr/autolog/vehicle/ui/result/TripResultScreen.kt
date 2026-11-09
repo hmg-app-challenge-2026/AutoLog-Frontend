@@ -3,6 +3,7 @@ package kr.autolog.vehicle.ui.result
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
@@ -21,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
@@ -113,8 +117,15 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
             }
             layout == WindowLayout.WIDE -> {
                 TwoColumns(Modifier.weight(1f)) {
-                    ScrollColumn(Modifier.weight(1f).fillMaxHeight()) { TripSummary(state) }
-                    ScrollColumn(Modifier.weight(1f).fillMaxHeight()) { Purpose(state, onAction) }
+                    BoxWithConstraints(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
+                        val summaryGap = if (maxHeight >= 800.dp) Space.s7 * 2 + Space.s4 else Space.s7
+                        ScrollColumn(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
+                            TripSummary(state, gap = summaryGap)
+                        }
+                    }
+                    BoxWithConstraints(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
+                        ScrollColumn(Modifier.fillMaxWidth().heightIn(max = maxHeight)) { Purpose(state, onAction) }
+                    }
                 }
                 ClassificationSummary(state)
                 // 행동 줄: 버튼 3개를 콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 주 버튼 안에
@@ -145,11 +156,11 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 }
 
 /**
- * 운행 요약: "운행 거리 · 시간" → "운행 경로". 섹션 사이는 모든 창에서 48 dp.
+ * 운행 요약: "운행 거리 · 시간" → "운행 경로". 일반 창은 48 dp, 높이가 넉넉한 차량 화면은 112 dp.
  * 좁은 창에서는 거리·시간과 경로를 전폭으로 쌓아 커진 값이 잘리지 않게 한다. 아래 목적 선택은 같은 칸에서 스크롤한다.
  */
 @Composable
-private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
+private fun TripSummary(state: TripResultUiState, dense: Boolean = false, gap: Dp = Space.s7) {
     if (dense) {
         Column {
             Section(stringResource(R.string.section_distance_time), dense = true) {
@@ -163,7 +174,7 @@ private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
         return
     }
     Section(stringResource(R.string.section_distance_time)) { DistanceTime(state) }
-    Spacer(Modifier.height(Space.s7))
+    Spacer(Modifier.height(gap))
     Section(stringResource(R.string.section_route)) { Route(state) }
 }
 
