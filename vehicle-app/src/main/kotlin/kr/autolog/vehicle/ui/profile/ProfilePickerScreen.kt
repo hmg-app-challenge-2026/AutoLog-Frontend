@@ -1,39 +1,25 @@
 package kr.autolog.vehicle.ui.profile
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,15 +29,13 @@ import kr.autolog.vehicle.data.repository.DriverProfile
 import kr.autolog.vehicle.data.repository.ProfileBadge
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
-import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
-import kr.autolog.vehicle.ui.design.components.Avatar
+import kr.autolog.vehicle.ui.design.components.ActionTile
+import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.ProfileTile
-import kr.autolog.vehicle.ui.design.components.ScrimSheet
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
 @Composable
@@ -63,8 +47,8 @@ fun ProfilePickerRoute() {
 }
 
 /**
- * 스펙 7.1. 제목과 타일이 화면 가운데 주인공이다(넷플릭스식).
- * 미확정 운행 질문(F-20)은 보조라서 아래쪽 한 줄로 둔다. WIDE = 타일 한 줄 + 하단 가로 배치, NARROW·TALL = 2열 + 세로 쌓기.
+ * 스펙 7.1. 제목과 타일이 화면 가운데 주인공이다(넷플릭스식). 타일 순서는 [ProfilePickerUiState.tiles]가 정한다.
+ * WIDE = 한 줄, NARROW·TALL = 3열.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -76,8 +60,7 @@ fun ProfilePickerScreen(
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val layout = LocalWindowLayout.current
-    val wide = layout == WindowLayout.WIDE
-    // WIDE 200 dp·한 줄 / TALL 160 dp·3열 / NARROW(분할 화면 한 칸) 128 dp·3열 — 세 명이 스크롤 없이 한 줄에 보이게
+    // WIDE 200 dp·한 줄 / TALL 160 dp·3열 / NARROW(분할 화면 한 칸) 128 dp·3열 — 세 개가 스크롤 없이 한 줄에 보이게
     val tile =
         when (layout) {
             WindowLayout.WIDE -> Size.profileTileWide
@@ -85,6 +68,9 @@ fun ProfilePickerScreen(
             WindowLayout.NARROW -> Size.profileTileCompact
         }
     val gap = if (layout == WindowLayout.NARROW) Space.s5 else Space.s6
+    // 분할 화면 한 칸(NARROW)은 한 줄에 안 들어간다 — 어절 단위 두 줄을 문자열로 정해 둔다
+    // (Phrase 줄바꿈은 기기에선 되지만 Robolectric 스크린샷에선 글자 단위로 꺾인다)
+    val title = if (layout == WindowLayout.NARROW) R.string.picker_title_two_lines else R.string.picker_title
     BoxWithConstraints(modifier.fillMaxSize()) {
         Column(
             Modifier
@@ -96,7 +82,7 @@ fun ProfilePickerScreen(
             verticalArrangement = Arrangement.spacedBy(Space.s6, Alignment.CenterVertically),
         ) {
             Text(
-                stringResource(R.string.picker_title),
+                stringResource(title),
                 style = t.display,
                 color = c.textPrimary,
                 textAlign = TextAlign.Center,
@@ -107,61 +93,56 @@ fun ProfilePickerScreen(
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(Space.s5),
-                maxItemsInEachRow = if (wide) PICKER_VISIBLE_MAX + 1 else 3,
+                maxItemsInEachRow = if (layout == WindowLayout.WIDE) Int.MAX_VALUE else 3,
             ) {
-                state.visible.forEach { p -> ProfileTileOf(p, tile) { onAction(ProfilePickerAction.Select(p.userId)) } }
-                if (state.hasMore) MoreTile(tile) { onAction(ProfilePickerAction.ShowAll) }
+                state.tiles.forEach { PickerTileOf(it, tile, onAction) }
             }
-            val later = @Composable {
-                TertiaryButton(stringResource(R.string.picker_later), onClick = { onAction(ProfilePickerAction.Later) })
-            }
-            val previous =
-                @Composable {
-                    state.unassigned?.let { item ->
-                        UnassignedRow(item.label, item.candidates, stacked = !wide) {
-                            onAction(ProfilePickerAction.AssignPrevious(item.tripId, it))
-                        }
-                    }
-                }
-            if (wide) {
-                Row(
-                    Modifier.widthIn(max = Size.sheetMaxWidth).fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Space.s6),
-                ) {
-                    later()
-                    Spacer(Modifier.weight(1f))
-                    previous()
-                }
-            } else {
-                previous()
-                later()
-            }
+            TertiaryButton(stringResource(R.string.picker_later), onClick = { onAction(ProfilePickerAction.Later) })
         }
-        if (state.showAll) {
-            ScrimSheet {
-                Text(stringResource(R.string.picker_all_title), style = t.headline, color = c.textPrimary)
-                Spacer(Modifier.height(Space.s5))
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(Size.profileTileNarrow),
-                    horizontalArrangement = Arrangement.spacedBy(Space.s5),
-                    verticalArrangement = Arrangement.spacedBy(Space.s5),
-                    modifier = Modifier.fillMaxWidth().height(Size.profileTileWide * 2),
-                ) {
-                    items(state.profiles, key = { it.userId }) { p ->
-                        ProfileTileOf(p, Size.profileTileNarrow) { onAction(ProfilePickerAction.Select(p.userId)) }
-                    }
+        if (state.showAll) AllProfilesDialog(state.profiles, onAction)
+        state.addForm?.let { AddDriverDialog(it, onAction) }
+    }
+}
+
+@Composable
+private fun PickerTileOf(tile: PickerTile, size: Dp, onAction: (ProfilePickerAction) -> Unit) = when (tile) {
+    is PickerTile.Person -> ProfileTileOf(tile.profile, size) {
+        onAction(ProfilePickerAction.Select(tile.profile.userId))
+    }
+    PickerTile.More ->
+        ActionTile(Icons.Rounded.MoreHoriz, stringResource(R.string.picker_more), onClick = {
+            onAction(ProfilePickerAction.ShowAll)
+        }, tileSize = size)
+    PickerTile.Add ->
+        ActionTile(Icons.Rounded.Add, stringResource(R.string.picker_add), onClick = {
+            onAction(ProfilePickerAction.OpenAdd)
+        }, tileSize = size)
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfilePickerAction) -> Unit) {
+    // 제목 없음: "다른 사람"을 눌러 펼친 목록이라 무엇을 고르는지 이미 안다 — 같은 정보를 두 번 주지 않는다.
+    // 고르기만 하는 팝업이라 하단 [취소] 대신 오른쪽 위 X로 닫는다
+    ModalCard(maxWidth = Size.sheetMaxWidth, onClose = { onAction(ProfilePickerAction.HideAll) }) {
+        // 카드 하나의 스크롤로 흐른다 — 높이 고정 격자를 카드 안에 넣으면 스크롤이 두 겹이 되고 줄이 잘렸다
+        FlowRow(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Space.s5, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(Space.s5),
+        ) {
+            profiles.forEach { p ->
+                // 뒤 화면의 같은 사람 타일과 shared element 키가 겹치지 않게 팝업 쪽은 끈다
+                ProfileTileOf(p, Size.profileTileNarrow, sharedKey = null) {
+                    onAction(ProfilePickerAction.Select(p.userId))
                 }
-                TertiaryButton(stringResource(R.string.action_cancel), onClick = {
-                    onAction(ProfilePickerAction.HideAll)
-                })
             }
         }
     }
 }
 
 @Composable
-private fun ProfileTileOf(p: DriverProfile, size: Dp, onClick: () -> Unit) = ProfileTile(
+private fun ProfileTileOf(p: DriverProfile, size: Dp, sharedKey: String? = p.userId, onClick: () -> Unit) = ProfileTile(
     userId = p.userId,
     name = p.name,
     dept = p.dept,
@@ -169,78 +150,5 @@ private fun ProfileTileOf(p: DriverProfile, size: Dp, onClick: () -> Unit) = Pro
     recent = p.badge == ProfileBadge.RECENT,
     onClick = onClick,
     tileSize = size,
+    sharedKey = sharedKey,
 )
-
-@Composable
-private fun MoreTile(size: Dp, onClick: () -> Unit) {
-    val c = AutoLogTheme.colors
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Space.s3)) {
-        Box(
-            Modifier
-                .size(size - Space.s4)
-                .clip(RoundedCornerShape(Radius.xl))
-                .background(c.surface2)
-                .clickable(enabled = !LocalInputLocked.current, role = Role.Button, onClick = onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Rounded.Add,
-                contentDescription = stringResource(R.string.picker_more),
-                tint = c.textSecondary,
-                modifier = Modifier.size(Size.iconLg),
-            )
-        }
-        Text(stringResource(R.string.picker_more), style = AutoLogTheme.type.title, color = c.textSecondary)
-    }
-}
-
-/**
- * 스펙 7.1 ④ / F-20: 미확정 운행의 운전자를 후보 1탭으로 지정. 보조 질문이라 작게(아바타 64 dp, 터치 76 dp).
- * 같은 사람이 위 타일에도 있으므로 shared element는 쓰지 않는다.
- */
-@Composable
-private fun UnassignedRow(label: String, candidates: List<DriverProfile>, stacked: Boolean, onPick: (String) -> Unit) {
-    val c = AutoLogTheme.colors
-    val t = AutoLogTheme.type
-    val question =
-        @Composable {
-            Column(verticalArrangement = Arrangement.spacedBy(Space.s1)) {
-                Text(stringResource(R.string.picker_unassigned_title), style = t.label, color = c.textPrimary)
-                Text(label, style = t.caption, color = c.textSecondary)
-            }
-        }
-    val picks = @Composable { candidates.forEach { p -> SmallPick(p) { onPick(p.userId) } } }
-    val box = Modifier.clip(RoundedCornerShape(Radius.md)).background(c.surface1).padding(Space.s4)
-    if (stacked) {
-        // 좁은 창: 질문 위, 후보 아래
-        Column(box, verticalArrangement = Arrangement.spacedBy(Space.s4)) {
-            question()
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) { picks() }
-        }
-    } else {
-        Row(
-            box,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Space.s5),
-        ) {
-            question()
-            picks()
-        }
-    }
-}
-
-@Composable
-private fun SmallPick(p: DriverProfile, onClick: () -> Unit) {
-    val c = AutoLogTheme.colors
-    Column(
-        Modifier
-            .widthIn(min = Size.touchMin)
-            .clip(RoundedCornerShape(Radius.sm))
-            .clickable(enabled = !LocalInputLocked.current, role = Role.Button, onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Space.s1),
-    ) {
-        Avatar(p.userId, p.name, Size.avatarSmall)
-        Text(p.name, style = AutoLogTheme.type.caption, color = c.textPrimary, maxLines = 1)
-    }
-}

@@ -58,7 +58,7 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
                     WindowLayoutHost {
                         when (tier) {
                             UsageTier.FULL -> FullApp(graph)
-                            UsageTier.PEEK -> PeekRoute()
+                            UsageTier.PEEK -> DriverBadgeScaffold(onClick = null) { PeekRoute() } // 정차: 배지는 표시만
                             UsageTier.BACKGROUND -> Unit
                         }
                     }

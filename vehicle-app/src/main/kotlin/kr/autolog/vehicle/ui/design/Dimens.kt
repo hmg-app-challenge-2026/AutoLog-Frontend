@@ -23,16 +23,23 @@ object Size {
     val buttonLg = 96.dp
     val buttonXl = 120.dp
     val iconButton = 96.dp
+    val dockIcon = 80.dp // DockTile 아이콘 네모
+    val iconSm = 28.dp // 닫기(X)처럼 작은 원 안의 아이콘
+    val statusDot = 12.dp // StatusLine 상태 점
+    val routeDot = 12.dp // RouteFlow 출발 ○ · 도착 ● 표시
     val icon = 36.dp
     val iconLg = 48.dp
     val avatarChip = 48.dp
     val avatarSmall = 64.dp
-    val chipHeight = 76.dp // StatusChip 터치 최소 높이(시각 높이 56 dp는 안쪽 여백으로)
+    val avatarPreview = 120.dp // 팝업 아바타 미리보기(새 운전자 추가)
+    val avatarPreviewTall = 160.dp // 같은 미리보기, 세로가 넉넉한 TALL
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp
     val profileTileCompact = 128.dp
     val peekMaxWidth = 560.dp
     val sheetMaxWidth = 960.dp
+    val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
+    val hairline = 1.dp
     val progressBar = 8.dp
     val ring = 3.dp
 }

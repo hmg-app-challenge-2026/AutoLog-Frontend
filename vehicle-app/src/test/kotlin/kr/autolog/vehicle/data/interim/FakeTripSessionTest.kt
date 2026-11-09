@@ -1,11 +1,13 @@
 package kr.autolog.vehicle.data.interim
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.core.PurposeDetail
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -87,5 +89,21 @@ class FakeTripSessionTest {
 
         assertEquals(18_422.0, s.totalOdometerKm.value!!, 0.001)
         assertEquals(1.5, (s.state.value as SessionState.Recording).liveKm!!, 0.001)
+    }
+
+    @Test
+    fun `운행이 끝나면 저장소에 목적 확인 필요로 남고 확정하면 빠진다`() = runTest {
+        val store = FakeLocalStore(AppClock { testScheduler.currentTime }, seed = false)
+        val s = FakeTripSession(backgroundScope, AppClock { testScheduler.currentTime }, store = store)
+        s.startSession()
+        s.addKm(3.0)
+        s.finalize()
+        val tripId = (s.state.value as SessionState.PendingReview).trip.tripId
+
+        assertEquals(listOf(tripId), store.pendingReviews.first().map { it.tripId })
+        s.confirmPurpose(tripId, PurposeDetail.MEETING, null, InputMode.TAP)
+
+        assertTrue(store.pendingReviews.first().isEmpty())
+        assertTrue(s.state.value is SessionState.Idle)
     }
 }

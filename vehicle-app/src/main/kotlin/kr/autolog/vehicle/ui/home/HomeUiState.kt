@@ -1,81 +1,74 @@
 package kr.autolog.vehicle.ui.home
 
-import kr.autolog.vehicle.data.interim.MissedTrip
-import kr.autolog.vehicle.data.interim.RecoveryChoice
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.StopReason
-import kr.autolog.vehicle.data.repository.DriverProfile
-import kr.autolog.vehicle.ui.design.formatKm
-import kr.autolog.vehicle.ui.design.progressOf
-import kr.autolog.vehicle.ui.design.remainingSeconds
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.runtime.Composable
+import kr.autolog.vehicle.data.repository.RecoveryAction
 
-/** 스펙 7.2 상태 4가지. */
+/** 스펙 7.2 상태 4가지. 상태 계산은 [reduceHome](HomeReducer.kt). */
 enum class HomePhase { READY, RECORDING_PARKED, AUTO_ENDING, NEEDS_RECOVERY }
 
-data class AutoEndUi(val remainingSec: Int, val progress: Float, val reason: StopReason)
+data class AutoEndUi(val remainingSec: Int, val progress: Float)
+
+/** 대기 상태의 주인공 — 이번 달 요약(스펙 7.2, D-23). */
+data class MonthUi(val tripCount: Int, val totalKm: String, val businessKm: String)
+
+/** 최근 운행 한 줄의 날짜 구분 — 화면이 "오늘/어제/11월 7일"로 말한다. */
+enum class TripDay { TODAY, YESTERDAY, EARLIER }
+
+/** 대기 오른쪽 "최근 운행 기록"의 한 줄(D-25). [purpose]가 null이면 화면이 "목적 미입력"(회색)으로 말한다 — 고치는 곳은 운행 기록 조회(D-26). */
+data class RecentTripUi(
+    val tripId: String,
+    val origin: String?,
+    val destination: String?,
+    val km: String?,
+    val day: TripDay,
+    val month: Int,
+    val dayOfMonth: Int,
+    val time: String,
+    val purpose: String?,
+)
+
+/** Home 가운데 섹션 한 칸: 소제목 + 내용. **무엇을** 보여 줄지는 [homeSections], 창 크기별 **배치**는 [HomeScreen]이 정한다. */
+internal class HomeSection(val title: String, val content: @Composable ColumnScope.() -> Unit)
 
 data class HomeUiState(
     val phase: HomePhase = HomePhase.READY,
-    val driver: DriverProfile? = null,
-    val odometerKm: String? = null,
+    val month: MonthUi? = null,
     /** 기록 중 거리. null = 계기판 미확정(추정 금지). */
     val tripKm: String? = null,
+    val origin: String? = null,
     val destination: String? = null,
     val elapsedMin: Int? = null,
     val autoEnd: AutoEndUi? = null,
-    val reviewCount: Int = 0,
-    val missedTripKm: String? = null,
+    /** 대기 오른쪽 "최근 운행 기록", 최신 순 최대 [RECENT_TRIPS]건. */
+    val recentTrips: List<RecentTripUi> = emptyList(),
     val recoveryExtraKm: String? = null,
+    /** 앱이 꺼진 동안 달린 거리(F-10). 대기 상태에서만 채워지고, 있으면 Home이 [추가하기]·X 팝업으로 한 번 묻는다(D-26). */
+    val missedKm: String? = null,
 )
 
 sealed interface HomeAction {
+    /** 수동 시작 — 보통은 출발하면 자동으로 시작된다(타일 첫 칸 [기록 시작]). */
     data object StartTrip : HomeAction
 
     data object EndNow : HomeAction
 
     data object KeepRecording : HomeAction
 
-    data object OpenProfilePicker : HomeAction
-
     data object AcceptMissedTrip : HomeAction
 
     data object IgnoreMissedTrip : HomeAction
 
-    data class Recover(val choice: RecoveryChoice) : HomeAction
+    data class Recover(val action: RecoveryAction) : HomeAction
+
+    /** 주유 기록 추가 — 영수증 QR로 들어간다(스펙 7.4). */
+    data object AddFuelRecord : HomeAction
+
+    /** 운행 기록 조회(이력 + 운행기록부 만들기·보내기, D-23). 최근 운행 줄을 눌러도 여기로 — 목적 수정도 여기서(D-26). */
+    data object OpenRecords : HomeAction
+
+    data object OpenSettings : HomeAction
 }
 
-internal fun reduceHome(
-    state: SessionState,
-    odometerKm: Double?,
-    missed: MissedTrip?,
-    driver: DriverProfile?,
-    destination: String?,
-    now: Long,
-): HomeUiState {
-    val base = HomeUiState(driver = driver, odometerKm = formatKm(odometerKm), destination = destination)
-    return when (state) {
-        SessionState.Idle -> base.copy(missedTripKm = formatKm(missed?.gapKm))
-        is SessionState.PendingReview -> base.copy(reviewCount = 1, missedTripKm = formatKm(missed?.gapKm))
-        is SessionState.Recording ->
-            base.copy(
-                phase = HomePhase.RECORDING_PARKED,
-                tripKm = formatKm(state.liveKm),
-                elapsedMin = ((now - state.trip.startTime) / 60_000).toInt().coerceAtLeast(0),
-            )
-        is SessionState.StopCandidate ->
-            base.copy(
-                phase = HomePhase.AUTO_ENDING,
-                tripKm = formatKm(state.liveKm),
-                autoEnd =
-                AutoEndUi(
-                    remainingSec = remainingSeconds(state.deadlineAt, now),
-                    progress = progressOf(state.since, state.deadlineAt, now),
-                    reason = state.reason,
-                ),
-            )
-        is SessionState.NeedsRecovery -> base.copy(
-            phase = HomePhase.NEEDS_RECOVERY,
-            recoveryExtraKm = formatKm(state.extraKm),
-        )
-    }
-}
+/** "최근 운행 기록"에 보이는 최대 건수(D-25). */
+const val RECENT_TRIPS = 3

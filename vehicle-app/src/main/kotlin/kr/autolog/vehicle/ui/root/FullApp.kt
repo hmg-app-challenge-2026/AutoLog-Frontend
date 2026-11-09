@@ -18,10 +18,16 @@ import kr.autolog.vehicle.nav.Route
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalNavAnimatedScope
 import kr.autolog.vehicle.ui.design.LocalSharedTransitionScope
+import kr.autolog.vehicle.ui.history.HistoryRoute
 import kr.autolog.vehicle.ui.home.HomeRoute
 import kr.autolog.vehicle.ui.profile.ProfilePickerRoute
+import kr.autolog.vehicle.ui.receipt.FuelEntryRoute
+import kr.autolog.vehicle.ui.receipt.ReceiptQrRoute
+import kr.autolog.vehicle.ui.report.ReportRoute
+import kr.autolog.vehicle.ui.review.ReviewRoute
+import kr.autolog.vehicle.ui.settings.SettingsRoute
 
-/** 주차(FULL) 층: 백스택 맨 위 화면. 전환은 motion.screen, 프로필→Home은 motion.hero. */
+/** 주차(FULL) 층: 백스택 맨 위 화면. 전환은 motion.screen, 프로필→오른쪽 위 배지는 motion.hero. */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun FullApp(graph: AppGraph) {
@@ -44,11 +50,27 @@ fun FullApp(graph: AppGraph) {
                 LocalSharedTransitionScope provides this@SharedTransitionLayout,
                 LocalNavAnimatedScope provides this,
             ) {
-                when (route) {
-                    Route.ProfilePicker -> ProfilePickerRoute()
-                    Route.Home -> HomeRoute()
+                if (route == Route.ProfilePicker) {
+                    ProfilePickerRoute()
+                } else {
+                    // 운전자 선택을 뺀 모든 화면: 오른쪽 위 운전자 배지 → 탭하면 운전자 선택
+                    DriverBadgeScaffold(onClick = { graph.navigator.push(Route.ProfilePicker) }) { RouteContent(route) }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RouteContent(route: Route) {
+    when (route) {
+        Route.ProfilePicker -> ProfilePickerRoute()
+        Route.Home -> HomeRoute()
+        is Route.ReviewTrip -> ReviewRoute(route.tripId)
+        Route.ReceiptQr -> ReceiptQrRoute()
+        is Route.FuelEntry -> FuelEntryRoute(route.receiptId)
+        Route.Report -> ReportRoute()
+        Route.History -> HistoryRoute()
+        Route.Settings -> SettingsRoute()
     }
 }

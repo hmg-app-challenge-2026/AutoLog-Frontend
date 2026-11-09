@@ -2,18 +2,22 @@ package kr.autolog.vehicle.ui.home
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kr.autolog.vehicle.TestAppGraph
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.data.interim.MissedTrip
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.interim.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -35,7 +39,7 @@ class HomeViewModelTest {
     @Test
     fun `계속 기록을 누르면 자동 종료가 취소된다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.profile, g.context, g.navigator, g.clock)
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
         g.trip.startSession()
         g.trip.setMotion(VehicleMotion.PARKED)
 
@@ -47,7 +51,7 @@ class HomeViewModelTest {
     @Test
     fun `기록 종료를 누르면 바로 끝난다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.profile, g.context, g.navigator, g.clock)
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
         g.trip.startSession()
         g.trip.setMotion(VehicleMotion.PARKED)
 
@@ -57,12 +61,42 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `운전자 칩을 누르면 운전자 선택 화면이 열린다`() = runTest {
+    fun `운행이 끝나면 목적 확인 화면이 자동으로 열린다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.profile, g.context, g.navigator, g.clock)
+        HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
+        g.trip.startSession()
+        g.trip.addKm(2.0)
 
-        vm.onAction(HomeAction.OpenProfilePicker)
+        g.trip.finalize()
+        advanceTimeBy(1_100)
 
-        assertEquals(Route.ProfilePicker, g.navigator.current)
+        val current = g.navigator.current
+        assertTrue(current is Route.ReviewTrip)
+        assertEquals(
+            (g.trip.state.value as SessionState.PendingReview).trip.tripId,
+            (current as Route.ReviewTrip).tripId,
+        )
+    }
+
+    @Test
+    fun `독의 운행 기록은 이력(기록부 포함)으로 간다`() = runTest {
+        val g = graph()
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
+
+        vm.onAction(HomeAction.OpenRecords)
+
+        assertEquals(Route.History, g.navigator.current)
+    }
+
+    @Test
+    fun `놓친 운행 팝업에서 추가하기를 누르면 운행으로 추가된다`() = runTest {
+        val g = graph()
+        val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
+        g.trip.setMissedTrip(MissedTrip(15.0, 0))
+        assertEquals("15.0", vm.uiState.first { it.missedKm != null }.missedKm)
+
+        vm.onAction(HomeAction.AcceptMissedTrip)
+
+        assertNull(g.trip.missedTrip.value)
     }
 }

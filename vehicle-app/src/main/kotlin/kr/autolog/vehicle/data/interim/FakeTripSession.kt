@@ -23,6 +23,8 @@ class FakeTripSession(
     private val clock: AppClock,
     initialOdometerKm: Double? = 18_420.5,
     private val gearPWaitMs: Long = GEAR_P_WAIT_MS,
+    /** 끝난 운행을 남길 저장소. 앱 A에서는 세션과 Room이 같은 원본을 쓴다. */
+    private val store: FakeLocalStore? = null,
 ) : TripSessionApi {
     private val _state = MutableStateFlow<SessionState>(SessionState.Idle)
     private val _motion = MutableStateFlow<VehicleMotion?>(VehicleMotion.PARKED)
@@ -44,7 +46,7 @@ class FakeTripSession(
     override suspend fun startSession(): StartResult {
         if (_state.value !is SessionState.Idle) return StartResult.Failed("이미 기록 중입니다")
         val now = clock.nowMs()
-        val trip = LiveTrip("trip-$now", now, _totalOdometerKm.value, "판교 테크노밸리 거래처", _currentDriver.value)
+        val trip = LiveTrip("trip-$now", now, _totalOdometerKm.value, "판교 테크노밸리 거래처", _currentDriver.value, "본사")
         _state.value =
             SessionState.Recording(trip, liveKm = if (_totalOdometerKm.value == null) null else 0.0, lastSavedAt = now)
         return StartResult.Started(trip.tripId)
@@ -61,12 +63,16 @@ class FakeTripSession(
         _state.value = SessionState.Recording(s.trip, s.liveKm, clock.nowMs())
     }
 
+    /** 지금 끝난 운행이든 지난 운행이든 확정한다(앱 A: 모든 운행 처리). */
     override suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode) {
+        store?.confirm(tripId, detail, note)
         val s = _state.value as? SessionState.PendingReview ?: return
         if (s.trip.tripId == tripId) _state.value = SessionState.Idle
     }
 
-    override suspend fun assignDriver(tripId: String, userId: String, source: DriverSource) = Unit
+    override suspend fun assignDriver(tripId: String, userId: String, source: DriverSource) {
+        store?.assignDriver(tripId, userId)
+    }
 
     override suspend fun acceptMissedTrip() {
         _missedTrip.value = null
@@ -80,7 +86,10 @@ class FakeTripSession(
         val s = _state.value as? SessionState.NeedsRecovery ?: return
         _state.value =
             when (choice) {
-                RecoveryChoice.RECORD -> SessionState.PendingReview(s.trip, s.extraKm, null)
+                RecoveryChoice.RECORD -> {
+                    record(s.trip, s.extraKm)
+                    SessionState.PendingReview(s.trip, s.extraKm, null)
+                }
                 RecoveryChoice.CONTINUE -> SessionState.Recording(s.trip, s.extraKm, clock.nowMs())
                 RecoveryChoice.DELETE -> SessionState.Idle
             }
@@ -138,6 +147,23 @@ class FakeTripSession(
                 is SessionState.StopCandidate -> s.trip to s.liveKm
                 else -> return
             }
+        record(trip, km)
         _state.value = SessionState.PendingReview(trip, km, null)
+    }
+
+    private fun record(trip: LiveTrip, km: Double?) {
+        store?.upsert(
+            TripRow(
+                tripId = trip.tripId,
+                startTime = trip.startTime,
+                endTime = clock.nowMs(),
+                driverUserId = trip.driverUserId,
+                originLabel = "본사",
+                destinationLabel = trip.destinationLabel,
+                distanceKm = km,
+                purpose = null,
+                upload = UploadState.PENDING,
+            ),
+        )
     }
 }

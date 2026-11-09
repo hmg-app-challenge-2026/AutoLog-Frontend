@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FiberManualRecord
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,21 +19,22 @@ import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.components.ChipTone
 import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
-import kr.autolog.vehicle.ui.design.components.StatusChip
+import kr.autolog.vehicle.ui.design.components.RouteFlow
+import kr.autolog.vehicle.ui.design.components.Section
+import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.durationText
 
 @Composable
 fun PeekRoute() {
     val graph = LocalAppGraph.current
-    val vm = viewModel { PeekViewModel(graph.session, graph.profile, graph.context, graph.clock) }
+    val vm = viewModel { PeekViewModel(graph.session, graph.context, graph.clock) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     PeekScreen(state)
 }
 
-/** 스펙 7.0. 클릭 가능한 요소 0개, 모션 없음. */
+/** 스펙 7.0. 클릭 가능한 요소 0개. 모션은 경로 화살표 흐름(반복 상태 표시)만. */
 @Composable
 fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
@@ -45,29 +44,25 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
             when (state) {
                 PeekUiState.Loading -> Unit
                 is PeekUiState.Recording -> {
-                    val driver = state.driverName ?: stringResource(R.string.peek_driver_unknown)
-                    StatusChip(
-                        text = stringResource(R.string.peek_recording) + " · " + driver,
-                        tone = ChipTone.SUCCESS,
-                        icon = Icons.Rounded.FiberManualRecord,
-                    )
-                    HeroMetric(
-                        value = state.tripKm,
-                        unit = stringResource(R.string.unit_km),
-                        label = stringResource(R.string.peek_trip_label),
-                        unavailableText = stringResource(R.string.distance_unavailable),
-                        size = MetricSize.MEDIUM,
-                    )
-                    Text(
-                        state.destination ?: stringResource(R.string.peek_no_destination),
-                        style = t.title,
-                        color = c.textPrimary,
-                    )
-                    Text(
-                        stringResource(R.string.peek_source_saved, state.savedSecondsAgo),
-                        style = t.body,
-                        color = c.textSecondary,
-                    )
+                    // Home과 같은 상태 줄(점 + 글자). 운전자는 오른쪽 위 배지에만
+                    StatusLine(text = stringResource(R.string.status_recording), dot = c.success)
+                    // Home과 같은 섹션·소제목("주행 거리", "운행 경로") — 같은 정보는 어느 화면에서나 같은 이름
+                    Section(stringResource(R.string.section_distance)) {
+                        HeroMetric(
+                            value = state.tripKm,
+                            unit = stringResource(R.string.unit_km),
+                            label = null,
+                            unavailableText = stringResource(R.string.distance_unavailable),
+                            size = MetricSize.MEDIUM,
+                        )
+                    }
+                    Section(stringResource(R.string.section_route)) {
+                        RouteFlow(
+                            origin = state.origin,
+                            destination = state.destination ?: stringResource(R.string.peek_no_destination),
+                            destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
+                        )
+                    }
                     state.autoEndInSec?.let {
                         Text(
                             stringResource(R.string.peek_auto_end, durationText(it)),
@@ -79,13 +74,15 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                 is PeekUiState.NoTrip -> {
                     Text(stringResource(R.string.peek_no_trip), style = t.title, color = c.textPrimary)
                     Text(stringResource(R.string.peek_no_trip_hint), style = t.body, color = c.textSecondary)
-                    HeroMetric(
-                        value = state.odometerKm,
-                        unit = stringResource(R.string.unit_km),
-                        label = stringResource(R.string.odometer_label),
-                        unavailableText = stringResource(R.string.distance_unavailable),
-                        size = MetricSize.COMPACT,
-                    )
+                    Section(stringResource(R.string.section_odometer)) {
+                        HeroMetric(
+                            value = state.odometerKm,
+                            unit = stringResource(R.string.unit_km),
+                            label = null,
+                            unavailableText = stringResource(R.string.distance_unavailable),
+                            size = MetricSize.COMPACT,
+                        )
+                    }
                 }
             }
         }

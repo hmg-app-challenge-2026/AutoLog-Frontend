@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,14 +20,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.DriverSide
-import kr.autolog.vehicle.ui.design.LocalDriverSide
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalText
+import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
-import kr.autolog.vehicle.ui.design.components.ScrimSheet
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.durationText
 
@@ -46,44 +45,35 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
         animationSpec = if (motion.isStatic) snap() else tween(durationMillis = 1_000, easing = LinearEasing),
         label = "autoEndProgress",
     )
-    ScrimSheet {
-        Text(stringResource(R.string.autoend_title), style = t.headline, color = c.textPrimary)
-        Spacer(Modifier.height(Space.s3))
-        // 거리와 목적지를 나눈다 — 한 줄로 이으면 좁은 창에서 목적지가 단어 중간에서 끊긴다
-        tripKm?.let { Text("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
-        destination?.let { Text(it, style = t.body, color = c.textSecondary) }
-        Spacer(Modifier.height(Space.s3))
-        Text(
-            stringResource(R.string.autoend_remaining, durationText(state.remainingSec)),
-            style = t.body,
-            color = c.textSecondary,
-        )
-        Spacer(Modifier.height(Space.s4))
-        Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
-            Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
+    // 결정 버튼은 카드 하단에 고정 — 내용이 넘쳐도 [계속 기록]이 스크롤 밖으로 밀리지 않는다
+    ModalCard(footer = {
+        val end: @Composable (Modifier) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_end), onEnd, m) }
+        val keep: @Composable (Modifier) -> Unit = { m ->
+            SecondaryButton(stringResource(R.string.autoend_keep), onKeep, m, height = Size.buttonLg)
         }
-        Spacer(Modifier.height(Space.s6))
-        val keep: @Composable (
-            Modifier,
-        ) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_keep), onKeep, m) }
-        val end: @Composable (Modifier) -> Unit = { m ->
-            SecondaryButton(stringResource(R.string.autoend_end), onEnd, m, height = Size.buttonLg)
-        }
+        // 왼쪽 [기록 종료](파란 주 버튼) · 오른쪽 [계속 기록](2026-11-09 사용자 요청)
         if (LocalWindowLayout.current == WindowLayout.WIDE) {
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                if (LocalDriverSide.current == DriverSide.START) {
-                    keep(Modifier.weight(1f))
-                    end(Modifier.weight(1f))
-                } else {
-                    end(Modifier.weight(1f))
-                    keep(Modifier.weight(1f))
-                }
+                end(Modifier.weight(1f))
+                keep(Modifier.weight(1f))
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {
                 end(Modifier.fillMaxWidth())
                 keep(Modifier.fillMaxWidth())
             }
+        }
+    }) {
+        ModalTitle(stringResource(R.string.autoend_title))
+        Spacer(Modifier.height(Space.s3))
+        // 거리와 목적지를 나눈다 — 한 줄로 이으면 좁은 창에서 목적지가 단어 중간에서 끊긴다
+        tripKm?.let { ModalText("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
+        destination?.let { ModalText(it) }
+        Spacer(Modifier.height(Space.s3))
+        ModalText(stringResource(R.string.autoend_remaining, durationText(state.remainingSec)))
+        Spacer(Modifier.height(Space.s4))
+        Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
+            Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
         }
     }
 }

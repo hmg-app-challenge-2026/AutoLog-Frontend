@@ -1,6 +1,7 @@
 package kr.autolog.vehicle.ui.peek
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,12 +13,18 @@ import org.robolectric.annotation.GraphicsMode
 @Config(sdk = [34])
 class PeekScreenshotTest {
     @Test
-    fun recording() =
-        captureAll("peek_recording") { PeekScreen(PeekUiState.Recording("김영업", "23.4", "판교 테크노밸리 거래처", 10, null)) }
+    fun recording() = captureAll("peek_recording", driver = PeekDriver) {
+        PeekScreen(PeekUiState.Recording("23.4", "본사", "판교 테크노밸리 거래처", null))
+    }
 
     @Test
-    fun autoEnd() = captureAll("peek_autoend") { PeekScreen(PeekUiState.Recording("김영업", "23.4", null, 4, 161)) }
+    fun autoEnd() = captureAll("peek_autoend", driver = PeekDriver) {
+        PeekScreen(PeekUiState.Recording("23.4", "본사", null, 161))
+    }
 
     @Test
-    fun noTrip() = captureAll("peek_notrip") { PeekScreen(PeekUiState.NoTrip("18,420.5")) }
+    fun noTrip() = captureAll("peek_notrip", driver = PeekDriver) { PeekScreen(PeekUiState.NoTrip("18,420.5")) }
 }
+
+/** Peek의 배지는 표시 전용(누를 수 없음, 스펙 1.1). */
+private val PeekDriver = SampleDriver.copy(clickable = false)

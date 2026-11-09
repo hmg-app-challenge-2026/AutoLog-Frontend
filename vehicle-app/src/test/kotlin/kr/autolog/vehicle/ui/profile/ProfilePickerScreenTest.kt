@@ -1,12 +1,14 @@
 package kr.autolog.vehicle.ui.profile
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kr.autolog.vehicle.data.repository.AddDriverResult
 import kr.autolog.vehicle.data.repository.DriverProfile
 import kr.autolog.vehicle.data.repository.ProfileBadge
-import kr.autolog.vehicle.data.repository.UnassignedTripItem
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import org.junit.Assert.assertEquals
@@ -42,6 +44,58 @@ class ProfilePickerScreenTest {
 
         assertEquals(listOf(ProfilePickerAction.Select("u-2")), actions)
     }
+
+    @Test
+    fun `새 운전자 추가 타일은 1탭으로 시트를 연다`() {
+        val actions = mutableListOf<ProfilePickerAction>()
+        compose.setContent {
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, loaded = true), onAction = { actions += it })
+            }
+        }
+
+        compose.onNodeWithText("새 운전자 추가").performClick()
+
+        assertEquals(listOf<ProfilePickerAction>(ProfilePickerAction.OpenAdd), actions)
+    }
+
+    @Test
+    fun `전체 직원 팝업은 제목 없이 오른쪽 위 X 1탭으로 닫는다`() {
+        val actions = mutableListOf<ProfilePickerAction>()
+        compose.setContent {
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, showAll = true, loaded = true), onAction = {
+                    actions +=
+                        it
+                })
+            }
+        }
+
+        compose.onNodeWithText("운전자 선택").assertDoesNotExist()
+        compose.onNodeWithContentDescription("닫기").performClick()
+
+        assertEquals(listOf<ProfilePickerAction>(ProfilePickerAction.HideAll), actions)
+    }
+
+    @Test
+    fun `추가 팝업 — 중복 안내를 보여 주고 주 버튼, 오른쪽 위 X로 끝낸다`() {
+        val actions = mutableListOf<ProfilePickerAction>()
+        val form = AddDriverForm(name = "김영업", dept = "영업1팀", error = AddDriverResult.Duplicate)
+        compose.setContent {
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, addForm = form, loaded = true), onAction = {
+                    actions +=
+                        it
+                })
+            }
+        }
+
+        compose.onNodeWithText("이미 등록된 사용자에요").assertIsDisplayed()
+        compose.onNodeWithText("추가 및 시작하기").performClick()
+        compose.onNodeWithContentDescription("닫기").performClick()
+
+        assertEquals(listOf(ProfilePickerAction.SubmitAdd, ProfilePickerAction.CancelAdd), actions)
+    }
 }
 
 @RunWith(AndroidJUnit4::class)
@@ -50,10 +104,35 @@ class ProfilePickerScreenTest {
 class ProfilePickerScreenshotTest {
     @Test
     fun picker() = captureAll("picker") {
+        ProfilePickerScreen(ProfilePickerUiState(profiles, loaded = true), onAction = {})
+    }
+
+    @Test
+    fun pickerMany() = captureAll("picker_many") {
+        val many = profiles + listOf("정다은", "최민수", "한지민").mapIndexed { i, n -> DriverProfile("u-${i + 4}", n, "영업2팀") }
+        ProfilePickerScreen(ProfilePickerUiState(many, loaded = true), onAction = {})
+    }
+
+    @Test
+    fun allProfiles() = captureAll("picker_all") {
+        val many = profiles + listOf("정다은", "최민수", "한지민").mapIndexed { i, n -> DriverProfile("u-${i + 4}", n, "영업2팀") }
+        ProfilePickerScreen(ProfilePickerUiState(many, showAll = true, loaded = true), onAction = {})
+    }
+
+    @Test
+    fun addSheet() = captureAll("picker_add") {
+        ProfilePickerScreen(
+            ProfilePickerUiState(profiles, addForm = AddDriverForm(name = "최신입"), loaded = true),
+            onAction = {},
+        )
+    }
+
+    @Test
+    fun addSheetError() = captureAll("picker_add_error") {
         ProfilePickerScreen(
             ProfilePickerUiState(
                 profiles,
-                UnassignedTripItem("t-9", "09:00 본사 → 판교 거래처 · 23.4 km", profiles),
+                addForm = AddDriverForm(name = "김영업", dept = "영업1팀", error = AddDriverResult.Duplicate),
                 loaded = true,
             ),
             onAction = {},

@@ -5,7 +5,12 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.data.repository.ContextRepository
 import kr.autolog.vehicle.data.repository.ProfileRepository
+import kr.autolog.vehicle.data.repository.ReceiptRepository
+import kr.autolog.vehicle.data.repository.ReportRepository
+import kr.autolog.vehicle.data.repository.ReviewRepository
 import kr.autolog.vehicle.data.repository.SessionRepository
+import kr.autolog.vehicle.data.repository.SettingsRepository
+import kr.autolog.vehicle.data.repository.TripRepository
 import kr.autolog.vehicle.data.usage.VehicleUsageRepository
 import kr.autolog.vehicle.nav.Navigator
 
@@ -17,6 +22,11 @@ interface AppGraph {
     val usage: VehicleUsageRepository
     val profile: ProfileRepository
     val context: ContextRepository
+    val trips: TripRepository
+    val review: ReviewRepository
+    val receipts: ReceiptRepository
+    val reports: ReportRepository
+    val settings: SettingsRepository
 
     /** demo flavor 데모 패널. vehicle flavor는 null. */
     val demoOverlay: (@Composable () -> Unit)?
