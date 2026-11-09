@@ -51,7 +51,7 @@ AutoLog는 **운전하는 동안 쓰는 앱이 아니다.** 기록은 차가 백
 
 | 순위 | 신호 | 얻는 것 | 근거 |
 |---|---|---|---|
-| 1 | Pleos Vehicle SDK DrivingMode | 기어 P/D | Backend 기술명세 2.4 (제공 범위는 sdk-findings #5) |
+| 1 | Pleos Vehicle SDK **Gear** (`getCurrentGearSelectionState`·`registerGearSelection`, 권한 `pleos.car.permission.CAR_DRIVE`) | 기어 P/D (`VehicleGear.GEAR_PARK`·`GEAR_DRIVE` …) | Backend 기술명세 2.4, sdk-findings "Vehicle 2.3.2 AAR 정적 분석". Pleos `DrivingMode`는 주행 모드(NORMAL/ECO/SPORT)라 기어가 아니다(2026-11-09 정정) |
 | 2 | AAOS 표준 속성 `GEAR_SELECTION` / `CURRENT_GEAR` (`CarPropertyManager`) | 기어 P/D | 권한 `android.car.permission.CAR_POWERTRAIN` = **normal**(선언만, AOSP android14-release 소스 확인). Pleos FAQ도 속도를 `CarPropertyManager`로 읽도록 안내 |
 | 3 | `PARKING_BRAKE_ON` | 주차 브레이크 체결 = 주차 | 같은 권한 |
 | 4 | `IGNITION_STATE` (OFF / ACC / ON / START) | OFF·ACC가 되는 **그 순간** 운행 종료(5초 안내 없이 바로 확정) | 같은 권한. 그 순간 프로세스가 살아 있어야 함 |
@@ -158,7 +158,7 @@ AutoLog는 **운전하는 동안 쓰는 앱이 아니다.** 기록은 차가 백
 | D-25 | (알림 띠 부분은 **D-26으로 대체**) **Home은 "정상은 침묵, 필요한 것만"**: 알림은 칸이 아니라 상태 줄 아래 **알림 띠 — 있을 때만**(넘치면 "외 N건" → 목록 팝업). 기록 자체의 문제(계기판 거리 못 읽음 · 저장 지연 30초 초과 · 사내 서버 전송 실패)도 알림으로. 상태 표시는 **배경 없는 점 + 글자**(`● 기록 중 · 35분 경과`, Peek도 같음). 가운데 두 섹션 = 기록 중 "주행 거리"(72 sp) · "운행 경로"(경로 선: 출발 ○ → 흐르는 화살표 → 도착 ●, 목적지가 값·출발지는 작은 보조 글자, 목적지 두 줄까지), 대기 "이번 달 운행 정보" · **"최근 운행 기록"(최신 3건 목록, 목적 없으면 경고색 + 1탭 목적 확인)** | 사용자 결정(2026-11-09, 외부 리뷰 중 필요한 것만 수용). 주차 중 사용자가 궁금한 순서: 잘 기록되나 → 어디 가는 운행인가 → 얼마나 왔나 → 처리할 일. 거리는 계기판처럼 계속 볼 값이 아니다. 알림 없음은 늘 보여 줄 정보가 아니다 | 알림이 오른쪽 칸 전체 · 96 sp 거리 · 초록 알약 상태 배지(거리와 경쟁) · 하단 버튼 분리·주유 기록 제외·종료 확인(D-24·D-17과 충돌해 미수용) |
 | D-24 | **Home 위쪽 = 좌우 반반 두 섹션, 아래 = 같은 모양 타일 4개.** 왼쪽 섹션 "이번 달 운행 정보"(대기: 이번 달 요약) / "현재 운행 정보"(기록 중: 거리 + 경로), 오른쪽 섹션 "알림"(없으면 "새 알림이 없어요"로 칸 유지). 두 소제목은 같은 `SectionHeader`. 아래 타일: [기록 시작] · [주유 기록 추가] · [운행 기록 조회] · [설정](2026-11-09 사용자 결정 — 주 동작인 기록 시작·종료를 운전석 쪽 끝에) — 같은 크기·모양·간격, 아이콘만 다름. 아이콘 네모 위 · 이름 아래(이름은 작은 설명 글씨, 두 줄까지), 언제나 4칸 한 줄. 기록 중에는 첫 칸이 같은 자리에서 [기록 종료](파란 채움)로 바뀐다 | 사용자 결정(2026-11-09, D-23을 다듬음). 반반·같은 소제목·같은 타일이 정렬을 조화롭게 한다. 수동 시작은 드물지만 필요한 사람이 있어 남긴다. 위치가 고정된 [기록 시작/종료]는 손이 기억한다 | 주인공 55:45 + 알림 없으면 칸 사라짐 · 독 버튼 모양이 제각각(알약·아이콘만·글자 버튼) |
 | D-23 | **Home = 상태 한 줄 · 주인공 하나 · 알림 목록 · 하단 독.** 대기 주인공은 누적 거리 대신 **이번 달 요약**(운행 횟수·거리·업무 거리), 기록 중 주인공은 **이번 운행 거리 + 경로**(Peek과 같은 `RouteFlow`). 확인 필요·영수증 도착·놓친 운행은 **"알림" 목록 하나**로. [이력]+[운행기록부]는 **[운행 기록]** 하나(History 안에서 기록부 만들기·보내기). [운행 시작]은 독 끝의 작은 **"직접 시작"**으로 | 사용자 결정(2026-11-09). 누적 거리는 계기판에 이미 있고, 출발하면 자동으로 기록되므로 수동 시작이 가장 큰 버튼일 이유가 없다. 같은 성격(처리할 일)을 칩·칩·배너 세 모양으로 흩어 놓지 않는다. 독은 상태가 바뀌어도 자리가 같다(테슬라·CarPlay) | 누적 거리 hero + 보조 동작 4칸 + 큰 [운행 시작](주인공 다섯 개가 경쟁) |
-| D-18 | 기어·시동 판정 우선순위: Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙(다음 시동 때 자동 확정, 거리 불변 60초 = 주차) (1.1.1). 기어 P 자동 종료 대기 **5초** | 사용자 결정. Pleos SDK에 기어가 없어도 표준 속성(`CAR_POWERTRAIN`, normal)으로 대부분 해결되고, 최후에도 거리는 정확하다 | 다음 시동 때 매번 묻기(계기판이 같으면 물을 필요가 없음) · 기어 없으면 전체 앱 불가(파킹 후 목적 확인을 못 함) |
+| D-18 | 기어·시동 판정 우선순위: Pleos Gear → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙(다음 시동 때 자동 확정, 거리 불변 60초 = 주차) (1.1.1). 기어 P 자동 종료 대기 **5초** | 사용자 결정. Pleos Vehicle SDK 2.3.2에 `Gear` API가 있어 1순위로 해결되고(2026-11-09 AAR 확인), 없더라도 표준 속성(`CAR_POWERTRAIN`, normal)으로 대부분 해결되며, 최후에도 거리는 정확하다 | 다음 시동 때 매번 묻기(계기판이 같으면 물을 필요가 없음) · 기어 없으면 전체 앱 불가(파킹 후 목적 확인을 못 함) |
 
 ---
 
@@ -955,7 +955,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | R-4 | 사내 서버 취합: `UploadApi` 계약, `POST /v1/trips`, 서버 주소 런타임 설정, 운영 웹 조회 API(trips·expenses·summary·엑셀) | A·B | 기능명세 ② (8장) | 계약 11.20, API 11.27 |
 | R-5 | Backend `ops/` nginx 마운트를 Frontend 산출물로 변경 | 공동 | 9.3 | 11.27 |
 | R-6 | Backend `app/`·`web/` 삭제, CI `:app:assembleDebug` 제거, CONVENTIONS 1.2·기술명세 7·8장에 "화면은 AutoLog-Frontend" 반영 | 공동 | 같은 applicationId 앱이 두 곳에 있으면 혼란 | 11.30 |
-| R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos DrivingMode → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
+| R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos Gear → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
 | R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
 | R-9 | 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
 
@@ -980,7 +980,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | V-11 | Pleos가 **정차(IDLING, 기어 ≠ P·속도 0)** 중 DO 미선언 앱을 막는지 | 5.4 DO 결정 규칙, Peek | DO 선언 뺀 빌드로 기어 D·속도 0 주입 | 대기 |
 | V-12 | Pleos 멀티 윈도우에서 `moveTaskToBack(true)` 후 그 창을 다른 앱(내비)이 채우는지 | 6.9 BACKGROUND | 1:1 분할 상태에서 주행 주입 | 대기 |
 | V-13 | 헤즈업 알림의 카운트다운(`setChronometerCountDown`)과 액션 버튼이 Pleos 알림 UI에 보이는지 | 7.2.1, R-7 | 앱 A 알림으로 확인 | 대기 |
-| V-14 | Pleos DrivingMode SDK가 기어 P/D를 주는지(Backend sdk-findings #5) | 1.1.1 1순위 | Backend 검증 결과 확인 | 대기 |
+| V-14 | Pleos Gear SDK(`registerGearSelection`)가 에뮬레이터 VHAL `GEAR_SELECTION` 주입에 반응하는지(Backend sdk-findings #5). 시그니처는 AAR로 확인됨 — DrivingMode는 기어가 아님 | 1.1.1 1순위 | Backend 검증 결과 확인 | 대기 |
 | V-15 | Pleos에서 AAOS `GEAR_SELECTION`·`CURRENT_GEAR`·`PARKING_BRAKE_ON`·`IGNITION_STATE`가 읽히는지(권한 `CAR_POWERTRAIN`), 에뮬레이터 VHAL로 값이 바뀌는지 | 1.1.1 2~4순위 | `CarPropertyManager.getProperty`·`registerCallback` 로그 | 대기 |
 | V-16 | 시동 OFF→ON 뒤 앱 프로세스가 살아 있는지 / 부팅 후 서비스를 다시 띄울 수 있는지(Backend sdk-findings #4b) | 1.1.1 최후 규칙의 처리 시점 | 에뮬레이터 전원 OFF→ON | 대기 |
 | V-17 | 정차(PEEK, CarUxRestrictions 적용 중)에 Peek 경로 화살표의 반복 투명도 애니메이션이 Pleos 운전자 주의 분산 기준에 맞는지(안 되면 정차 중엔 정지 그림, `MotionTokens.ambient` 한 곳만 바꾸면 됨) | 7.0 | 맥 에뮬레이터 + Pleos 가이드 확인 | 대기 |
