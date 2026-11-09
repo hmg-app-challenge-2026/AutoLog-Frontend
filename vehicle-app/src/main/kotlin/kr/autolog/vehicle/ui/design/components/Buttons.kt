@@ -47,23 +47,29 @@ private fun ButtonBody(
     val view = LocalView.current
     Box(
         modifier =
-            modifier
-                .heightIn(min = height)
-                .defaultMinSize(minWidth = Size.touchMin)
-                .pressFeedback(interaction)
-                .clip(RoundedCornerShape(Radius.lg))
-                .background(if (active || loading) container else disabledContainer)
-                .clickable(interactionSource = interaction, indication = null, enabled = active, role = Role.Button) {
-                    view.confirmHaptic()
-                    onClick()
-                }.padding(horizontal = Space.s6),
+        modifier
+            .heightIn(min = height)
+            .defaultMinSize(minWidth = Size.touchMin)
+            .pressFeedback(interaction)
+            .clip(RoundedCornerShape(Radius.lg))
+            .background(if (active || loading) container else disabledContainer)
+            .clickable(interactionSource = interaction, indication = null, enabled = active, role = Role.Button) {
+                view.confirmHaptic()
+                onClick()
+            }.padding(horizontal = Space.s6),
         contentAlignment = Alignment.Center,
     ) {
         // 로딩 중에도 글자를 투명하게 남겨 버튼 폭이 흔들리지 않게 한다
         Text(
             text = text,
             style = AutoLogTheme.type.label,
-            color = if (loading) Color.Transparent else if (active) content else colors.textTertiary,
+            color = if (loading) {
+                Color.Transparent
+            } else if (active) {
+                content
+            } else {
+                colors.textTertiary
+            },
             textAlign = TextAlign.Center,
         )
         if (loading) {

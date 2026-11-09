@@ -67,12 +67,15 @@ internal fun reduceHome(
                 phase = HomePhase.AUTO_ENDING,
                 tripKm = formatKm(state.liveKm),
                 autoEnd =
-                    AutoEndUi(
-                        remainingSec = remainingSeconds(state.deadlineAt, now),
-                        progress = progressOf(state.since, state.deadlineAt, now),
-                        reason = state.reason,
-                    ),
+                AutoEndUi(
+                    remainingSec = remainingSeconds(state.deadlineAt, now),
+                    progress = progressOf(state.since, state.deadlineAt, now),
+                    reason = state.reason,
+                ),
             )
-        is SessionState.NeedsRecovery -> base.copy(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = formatKm(state.extraKm))
+        is SessionState.NeedsRecovery -> base.copy(
+            phase = HomePhase.NEEDS_RECOVERY,
+            recoveryExtraKm = formatKm(state.extraKm),
+        )
     }
 }

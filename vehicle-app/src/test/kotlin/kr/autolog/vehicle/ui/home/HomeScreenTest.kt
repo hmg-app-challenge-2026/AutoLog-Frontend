@@ -18,7 +18,13 @@ import org.robolectric.annotation.GraphicsMode
 
 private val driver = DriverProfile("u-1", "김영업", "영업1팀")
 private val recording =
-    HomeUiState(phase = HomePhase.RECORDING_PARKED, driver = driver, tripKm = "23.4", destination = "판교 테크노밸리 거래처", elapsedMin = 35)
+    HomeUiState(
+        phase = HomePhase.RECORDING_PARKED,
+        driver = driver,
+        tripKm = "23.4",
+        destination = "판교 테크노밸리 거래처",
+        elapsedMin = 35,
+    )
 private val autoEnding = recording.copy(phase = HomePhase.AUTO_ENDING, autoEnd = AutoEndUi(3, 0.6f, StopReason.GEAR_P))
 private val recovery = HomeUiState(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = "3.2")
 
@@ -55,13 +61,18 @@ class HomeScreenTest {
 @Config(sdk = [34])
 class HomeScreenshotTest {
     @Test
-    fun ready() =
-        captureAll("home_ready") {
-            HomeScreen(
-                HomeUiState(phase = HomePhase.READY, driver = driver, odometerKm = "18,420.5", reviewCount = 1, missedTripKm = "15.0"),
-                onAction = {},
-            )
-        }
+    fun ready() = captureAll("home_ready") {
+        HomeScreen(
+            HomeUiState(
+                phase = HomePhase.READY,
+                driver = driver,
+                odometerKm = "18,420.5",
+                reviewCount = 1,
+                missedTripKm = "15.0",
+            ),
+            onAction = {},
+        )
+    }
 
     @Test
     fun recording() = captureAll("home_recording") { HomeScreen(recording, onAction = {}) }

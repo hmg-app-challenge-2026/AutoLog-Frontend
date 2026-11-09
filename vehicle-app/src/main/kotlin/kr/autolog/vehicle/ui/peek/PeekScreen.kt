@@ -57,10 +57,22 @@ fun PeekScreen(state: PeekUiState, modifier: Modifier = Modifier) {
                         unavailableText = stringResource(R.string.distance_unavailable),
                         large = false,
                     )
-                    Text(state.destination ?: stringResource(R.string.peek_no_destination), style = t.title, color = c.textPrimary)
-                    Text(stringResource(R.string.peek_source_saved, state.savedSecondsAgo), style = t.body, color = c.textSecondary)
+                    Text(
+                        state.destination ?: stringResource(R.string.peek_no_destination),
+                        style = t.title,
+                        color = c.textPrimary,
+                    )
+                    Text(
+                        stringResource(R.string.peek_source_saved, state.savedSecondsAgo),
+                        style = t.body,
+                        color = c.textSecondary,
+                    )
                     state.autoEndInSec?.let {
-                        Text(stringResource(R.string.peek_auto_end, durationText(it)), style = t.body, color = c.warning)
+                        Text(
+                            stringResource(R.string.peek_auto_end, durationText(it)),
+                            style = t.body,
+                            color = c.warning,
+                        )
                     }
                 }
                 is PeekUiState.NoTrip -> {

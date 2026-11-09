@@ -31,14 +31,36 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
         Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             if (!confirmingDelete) {
                 Text(stringResource(R.string.recovery_title), style = t.headline, color = c.textPrimary)
-                extraKm?.let { Text(stringResource(R.string.recovery_body, it), style = t.title, color = c.textSecondary) }
-                PrimaryButton(stringResource(R.string.recovery_record), { onChoice(RecoveryChoice.RECORD) }, Modifier.fillMaxWidth())
-                SecondaryButton(stringResource(R.string.recovery_continue), { onChoice(RecoveryChoice.CONTINUE) }, Modifier.fillMaxWidth())
-                TertiaryButton(stringResource(R.string.recovery_delete), { confirmingDelete = true }, Modifier.fillMaxWidth())
+                extraKm?.let {
+                    Text(stringResource(R.string.recovery_body, it), style = t.title, color = c.textSecondary)
+                }
+                PrimaryButton(
+                    text = stringResource(R.string.recovery_record),
+                    onClick = { onChoice(RecoveryChoice.RECORD) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SecondaryButton(
+                    text = stringResource(R.string.recovery_continue),
+                    onClick = { onChoice(RecoveryChoice.CONTINUE) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                TertiaryButton(
+                    text = stringResource(R.string.recovery_delete),
+                    onClick = { confirmingDelete = true },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             } else {
                 Text(stringResource(R.string.recovery_delete_confirm), style = t.title, color = c.textPrimary)
-                DangerButton(stringResource(R.string.recovery_delete_yes), { onChoice(RecoveryChoice.DELETE) }, Modifier.fillMaxWidth())
-                SecondaryButton(stringResource(R.string.action_cancel), { confirmingDelete = false }, Modifier.fillMaxWidth())
+                DangerButton(
+                    text = stringResource(R.string.recovery_delete_yes),
+                    onClick = { onChoice(RecoveryChoice.DELETE) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SecondaryButton(
+                    text = stringResource(R.string.action_cancel),
+                    onClick = { confirmingDelete = false },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

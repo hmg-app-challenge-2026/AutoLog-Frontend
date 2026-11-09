@@ -12,7 +12,8 @@ class PeekReducerTest {
 
     @Test
     fun `기록 중이면 거리·목적지·저장 시각을 보여 준다`() {
-        val state = reducePeek(SessionState.Recording(trip, 23.4, lastSavedAt = 10_000), 18_443.9, "김영업", "판교", now = 13_000)
+        val state =
+            reducePeek(SessionState.Recording(trip, 23.4, lastSavedAt = 10_000), 18_443.9, "김영업", "판교", now = 13_000)
 
         val r = state as PeekUiState.Recording
         assertEquals("23.4", r.tripKm)

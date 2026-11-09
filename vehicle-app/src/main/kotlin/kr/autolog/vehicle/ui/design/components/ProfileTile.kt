@@ -72,7 +72,10 @@ fun ProfileTile(
             val framed = Modifier.padding(bottom = Space.s3).then(ring)
             Avatar(userId, name, tileSize - Space.s4, if (sharedKey != null) framed.sharedAvatar(sharedKey) else framed)
             if (scheduled || recent) {
-                TileBadge(stringResource(if (scheduled) R.string.badge_scheduled else R.string.badge_recent), emphasized = scheduled)
+                TileBadge(
+                    stringResource(if (scheduled) R.string.badge_scheduled else R.string.badge_recent),
+                    emphasized = scheduled,
+                )
             }
         }
         Text(name, style = t.title, color = c.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -89,9 +92,9 @@ private fun TileBadge(text: String, emphasized: Boolean) {
         style = AutoLogTheme.type.caption,
         color = if (emphasized) c.onAccent else c.textSecondary,
         modifier =
-            Modifier
-                .clip(CircleShape)
-                .background(if (emphasized) c.accentFill else c.surface3)
-                .padding(horizontal = Space.s3, vertical = Space.s1),
+        Modifier
+            .clip(CircleShape)
+            .background(if (emphasized) c.accentFill else c.surface3)
+            .padding(horizontal = Space.s3, vertical = Space.s1),
     )
 }

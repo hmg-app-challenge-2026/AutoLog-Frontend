@@ -53,13 +53,19 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
         tripKm?.let { Text("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
         destination?.let { Text(it, style = t.body, color = c.textSecondary) }
         Spacer(Modifier.height(Space.s3))
-        Text(stringResource(R.string.autoend_remaining, durationText(state.remainingSec)), style = t.body, color = c.textSecondary)
+        Text(
+            stringResource(R.string.autoend_remaining, durationText(state.remainingSec)),
+            style = t.body,
+            color = c.textSecondary,
+        )
         Spacer(Modifier.height(Space.s4))
         Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
             Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
         }
         Spacer(Modifier.height(Space.s6))
-        val keep: @Composable (Modifier) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_keep), onKeep, m) }
+        val keep: @Composable (
+            Modifier,
+        ) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_keep), onKeep, m) }
         val end: @Composable (Modifier) -> Unit = { m ->
             SecondaryButton(stringResource(R.string.autoend_end), onEnd, m, height = Size.buttonLg)
         }

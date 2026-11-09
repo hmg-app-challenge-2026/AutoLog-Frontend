@@ -26,26 +26,27 @@ class FakeTripSession(
 ) : TripSessionApi {
     private val _state = MutableStateFlow<SessionState>(SessionState.Idle)
     private val _motion = MutableStateFlow<VehicleMotion?>(VehicleMotion.PARKED)
-    private val _odometer = MutableStateFlow(initialOdometerKm)
-    private val _missed = MutableStateFlow<MissedTrip?>(null)
-    private val _driver = MutableStateFlow<String?>(null)
+    private val _totalOdometerKm = MutableStateFlow(initialOdometerKm)
+    private val _missedTrip = MutableStateFlow<MissedTrip?>(null)
+    private val _currentDriver = MutableStateFlow<String?>(null)
     private var autoEndJob: Job? = null
 
     override val state: StateFlow<SessionState> = _state.asStateFlow()
     override val motion: StateFlow<VehicleMotion?> = _motion.asStateFlow()
-    override val totalOdometerKm: StateFlow<Double?> = _odometer.asStateFlow()
-    override val missedTrip: StateFlow<MissedTrip?> = _missed.asStateFlow()
-    override val currentDriver: StateFlow<String?> = _driver.asStateFlow()
+    override val totalOdometerKm: StateFlow<Double?> = _totalOdometerKm.asStateFlow()
+    override val missedTrip: StateFlow<MissedTrip?> = _missedTrip.asStateFlow()
+    override val currentDriver: StateFlow<String?> = _currentDriver.asStateFlow()
 
     override suspend fun selectDriver(userId: String?) {
-        _driver.value = userId
+        _currentDriver.value = userId
     }
 
     override suspend fun startSession(): StartResult {
         if (_state.value !is SessionState.Idle) return StartResult.Failed("이미 기록 중입니다")
         val now = clock.nowMs()
-        val trip = LiveTrip("trip-$now", now, _odometer.value, "판교 테크노밸리 거래처", _driver.value)
-        _state.value = SessionState.Recording(trip, liveKm = if (_odometer.value == null) null else 0.0, lastSavedAt = now)
+        val trip = LiveTrip("trip-$now", now, _totalOdometerKm.value, "판교 테크노밸리 거래처", _currentDriver.value)
+        _state.value =
+            SessionState.Recording(trip, liveKm = if (_totalOdometerKm.value == null) null else 0.0, lastSavedAt = now)
         return StartResult.Started(trip.tripId)
     }
 
@@ -68,11 +69,11 @@ class FakeTripSession(
     override suspend fun assignDriver(tripId: String, userId: String, source: DriverSource) = Unit
 
     override suspend fun acceptMissedTrip() {
-        _missed.value = null
+        _missedTrip.value = null
     }
 
     override suspend fun ignoreMissedTrip() {
-        _missed.value = null
+        _missedTrip.value = null
     }
 
     override suspend fun resolveRecovery(choice: RecoveryChoice) {
@@ -102,7 +103,7 @@ class FakeTripSession(
     }
 
     fun addKm(km: Double) {
-        _odometer.value = _odometer.value?.plus(km)
+        _totalOdometerKm.value = _totalOdometerKm.value?.plus(km)
         val s = _state.value
         if (s is SessionState.Recording) {
             _state.value = s.copy(liveKm = s.liveKm?.plus(km), lastSavedAt = clock.nowMs())
@@ -110,12 +111,12 @@ class FakeTripSession(
     }
 
     fun setMissedTrip(missed: MissedTrip?) {
-        _missed.value = missed
+        _missedTrip.value = missed
     }
 
     fun enterRecovery(extraKm: Double?) {
         val now = clock.nowMs()
-        val trip = LiveTrip("trip-rec-$now", now - 3_600_000, _odometer.value, null, _driver.value)
+        val trip = LiveTrip("trip-rec-$now", now - 3_600_000, _totalOdometerKm.value, null, _currentDriver.value)
         _state.value = SessionState.NeedsRecovery(trip, extraKm)
     }
 

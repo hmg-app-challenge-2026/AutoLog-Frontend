@@ -13,16 +13,15 @@ class ContrastTest {
         }
     }
 
-    private fun AutoLogColors.textTokens() =
-        mapOf(
-            "textPrimary" to textPrimary,
-            "textSecondary" to textSecondary,
-            "textTertiary" to textTertiary,
-            "accent" to accent,
-            "success" to success,
-            "warning" to warning,
-            "danger" to danger,
-        )
+    private fun AutoLogColors.textTokens() = mapOf(
+        "textPrimary" to textPrimary,
+        "textSecondary" to textSecondary,
+        "textTertiary" to textTertiary,
+        "accent" to accent,
+        "success" to success,
+        "warning" to warning,
+        "danger" to danger,
+    )
 
     @Test
     fun `흰색과 검정의 대비는 21이다`() {

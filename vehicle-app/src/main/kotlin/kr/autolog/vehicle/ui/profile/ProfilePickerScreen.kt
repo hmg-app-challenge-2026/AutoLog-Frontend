@@ -68,7 +68,11 @@ fun ProfilePickerRoute() {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ProfilePickerScreen(state: ProfilePickerUiState, onAction: (ProfilePickerAction) -> Unit, modifier: Modifier = Modifier) {
+fun ProfilePickerScreen(
+    state: ProfilePickerUiState,
+    onAction: (ProfilePickerAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val layout = LocalWindowLayout.current
@@ -91,7 +95,12 @@ fun ProfilePickerScreen(state: ProfilePickerUiState, onAction: (ProfilePickerAct
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Space.s6, Alignment.CenterVertically),
         ) {
-            Text(stringResource(R.string.picker_title), style = t.display, color = c.textPrimary, textAlign = TextAlign.Center)
+            Text(
+                stringResource(R.string.picker_title),
+                style = t.display,
+                color = c.textPrimary,
+                textAlign = TextAlign.Center,
+            )
             if (state.loaded && state.profiles.isEmpty()) {
                 Text(stringResource(R.string.picker_empty), style = t.body, color = c.textSecondary)
             }
@@ -103,7 +112,9 @@ fun ProfilePickerScreen(state: ProfilePickerUiState, onAction: (ProfilePickerAct
                 state.visible.forEach { p -> ProfileTileOf(p, tile) { onAction(ProfilePickerAction.Select(p.userId)) } }
                 if (state.hasMore) MoreTile(tile) { onAction(ProfilePickerAction.ShowAll) }
             }
-            val later = @Composable { TertiaryButton(stringResource(R.string.picker_later), onClick = { onAction(ProfilePickerAction.Later) }) }
+            val later = @Composable {
+                TertiaryButton(stringResource(R.string.picker_later), onClick = { onAction(ProfilePickerAction.Later) })
+            }
             val previous =
                 @Composable {
                     state.unassigned?.let { item ->
@@ -141,23 +152,24 @@ fun ProfilePickerScreen(state: ProfilePickerUiState, onAction: (ProfilePickerAct
                         ProfileTileOf(p, Size.profileTileNarrow) { onAction(ProfilePickerAction.Select(p.userId)) }
                     }
                 }
-                TertiaryButton(stringResource(R.string.action_cancel), onClick = { onAction(ProfilePickerAction.HideAll) })
+                TertiaryButton(stringResource(R.string.action_cancel), onClick = {
+                    onAction(ProfilePickerAction.HideAll)
+                })
             }
         }
     }
 }
 
 @Composable
-private fun ProfileTileOf(p: DriverProfile, size: Dp, onClick: () -> Unit) =
-    ProfileTile(
-        userId = p.userId,
-        name = p.name,
-        dept = p.dept,
-        scheduled = p.badge == ProfileBadge.SCHEDULED,
-        recent = p.badge == ProfileBadge.RECENT,
-        onClick = onClick,
-        tileSize = size,
-    )
+private fun ProfileTileOf(p: DriverProfile, size: Dp, onClick: () -> Unit) = ProfileTile(
+    userId = p.userId,
+    name = p.name,
+    dept = p.dept,
+    scheduled = p.badge == ProfileBadge.SCHEDULED,
+    recent = p.badge == ProfileBadge.RECENT,
+    onClick = onClick,
+    tileSize = size,
+)
 
 @Composable
 private fun MoreTile(size: Dp, onClick: () -> Unit) {
@@ -206,7 +218,11 @@ private fun UnassignedRow(label: String, candidates: List<DriverProfile>, stacke
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) { picks() }
         }
     } else {
-        Row(box, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
+        Row(
+            box,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Space.s5),
+        ) {
             question()
             picks()
         }

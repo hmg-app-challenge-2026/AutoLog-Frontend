@@ -32,22 +32,42 @@ private val BannerInlineMinWidth = 720.dp
 @Composable
 fun Banner(text: String, actions: List<BannerAction>, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
-    BoxWithConstraints(modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.md)).background(c.surface2).padding(Space.s5)) {
+    BoxWithConstraints(
+        modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.md)).background(c.surface2).padding(Space.s5),
+    ) {
         val message =
             @Composable { m: Modifier ->
-                Row(m, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                    Icon(Icons.Rounded.Info, contentDescription = null, tint = c.accent, modifier = Modifier.size(Size.icon))
+                Row(
+                    m,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Space.s4),
+                ) {
+                    Icon(
+                        Icons.Rounded.Info,
+                        contentDescription = null,
+                        tint = c.accent,
+                        modifier = Modifier.size(Size.icon),
+                    )
                     Text(text, style = AutoLogTheme.type.body, color = c.textPrimary)
                 }
             }
         val buttons =
             @Composable {
                 actions.take(2).forEachIndexed { i, a ->
-                    if (i == 0) PrimaryButton(a.text, a.onClick, height = Size.buttonMd) else SecondaryButton(a.text, a.onClick)
+                    if (i ==
+                        0
+                    ) {
+                        PrimaryButton(a.text, a.onClick, height = Size.buttonMd)
+                    } else {
+                        SecondaryButton(a.text, a.onClick)
+                    }
                 }
             }
         if (maxWidth >= BannerInlineMinWidth) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Space.s4),
+            ) {
                 message(Modifier.weight(1f))
                 buttons()
             }

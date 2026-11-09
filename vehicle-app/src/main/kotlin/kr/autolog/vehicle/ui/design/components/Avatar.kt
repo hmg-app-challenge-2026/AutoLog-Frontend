@@ -45,7 +45,10 @@ fun Avatar(userId: String, name: String, size: Dp, modifier: Modifier = Modifier
     ) {
         Text(
             initialsOf(name),
-            style = AutoLogTheme.type.display.copy(fontSize = (size.value * 0.4f).sp, lineHeight = (size.value * 0.45f).sp),
+            style = AutoLogTheme.type.display.copy(
+                fontSize = (size.value * 0.4f).sp,
+                lineHeight = (size.value * 0.45f).sp,
+            ),
             color = Color.White,
         )
     }

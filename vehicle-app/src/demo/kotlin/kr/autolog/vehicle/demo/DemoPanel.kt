@@ -36,7 +36,11 @@ fun DemoPanelOverlay(scenario: DemoScenario) {
     if (open) {
         CompositionLocalProvider(LocalInputLocked provides false) {
             ScrimSheet {
-                Text(stringResource(R.string.demo_title), style = AutoLogTheme.type.headline, color = AutoLogTheme.colors.textPrimary)
+                Text(
+                    stringResource(R.string.demo_title),
+                    style = AutoLogTheme.type.headline,
+                    color = AutoLogTheme.colors.textPrimary,
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
                     val item =
                         @Composable { label: Int, action: () -> Unit ->

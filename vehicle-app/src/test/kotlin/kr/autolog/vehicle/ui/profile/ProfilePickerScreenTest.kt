@@ -33,7 +33,9 @@ class ProfilePickerScreenTest {
     fun `조작 예산 — 운전자 선택은 1탭`() {
         val actions = mutableListOf<ProfilePickerAction>()
         compose.setContent {
-            AutoLogTheme { ProfilePickerScreen(ProfilePickerUiState(profiles, loaded = true), onAction = { actions += it }) }
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, loaded = true), onAction = { actions += it })
+            }
         }
 
         compose.onNodeWithText("이현장").performClick()
@@ -47,11 +49,14 @@ class ProfilePickerScreenTest {
 @Config(sdk = [34])
 class ProfilePickerScreenshotTest {
     @Test
-    fun picker() =
-        captureAll("picker") {
-            ProfilePickerScreen(
-                ProfilePickerUiState(profiles, UnassignedTripItem("t-9", "09:00 본사 → 판교 거래처 · 23.4 km", profiles), loaded = true),
-                onAction = {},
-            )
-        }
+    fun picker() = captureAll("picker") {
+        ProfilePickerScreen(
+            ProfilePickerUiState(
+                profiles,
+                UnassignedTripItem("t-9", "09:00 본사 → 판교 거래처 · 23.4 km", profiles),
+                loaded = true,
+            ),
+            onAction = {},
+        )
+    }
 }

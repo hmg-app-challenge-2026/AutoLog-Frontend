@@ -36,7 +36,7 @@ fun FullApp(graph: AppGraph) {
                     fadeIn(motion.fadeStandard()) +
                         scaleIn(motion.gentle(), initialScale = 0.98f) +
                         slideInHorizontally(motion.gentle()) { it / 25 }
-                ) togetherWith fadeOut(motion.fadeQuick())
+                    ) togetherWith fadeOut(motion.fadeQuick())
             },
             label = "route",
         ) { route ->

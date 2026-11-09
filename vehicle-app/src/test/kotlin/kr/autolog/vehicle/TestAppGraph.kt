@@ -27,7 +27,8 @@ class TestAppGraph(
     override val navigator = Navigator(start)
     override val session = DefaultSessionRepository(trip)
     override val usage = DefaultVehicleUsageRepository(trip.motion, carUx.state, scope)
-    override val profile = DefaultProfileRepository(FakePurposeEngine(), FakeSettingsApi(), trip.currentDriver, { "veh-test" }, clock)
+    override val profile =
+        DefaultProfileRepository(FakePurposeEngine(), FakeSettingsApi(), trip.currentDriver, { "veh-test" }, clock)
     override val context = DefaultContextRepository(FakeContext())
     override val demoOverlay: (@Composable () -> Unit)? = null
 }

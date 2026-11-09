@@ -106,21 +106,28 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HomeChips(state: HomeUiState, onAction: (HomeAction) -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.s4), verticalArrangement = Arrangement.spacedBy(Space.s3)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(Space.s4),
+        verticalArrangement = Arrangement.spacedBy(Space.s3),
+    ) {
         val d = state.driver
         StatusChip(
             text = d?.name ?: stringResource(R.string.home_choose_driver),
             tone = if (d == null) ChipTone.ACCENT else ChipTone.NEUTRAL,
             leading =
-                if (d != null) {
-                    { Avatar(d.userId, d.name, Size.avatarChip, Modifier.sharedAvatar(d.userId)) }
-                } else {
-                    null
-                },
+            if (d != null) {
+                { Avatar(d.userId, d.name, Size.avatarChip, Modifier.sharedAvatar(d.userId)) }
+            } else {
+                null
+            },
             onClick = { onAction(HomeAction.OpenProfilePicker) },
         )
         if (state.reviewCount > 0) {
-            StatusChip(stringResource(R.string.home_review_chip, state.reviewCount), ChipTone.WARNING, icon = Icons.Rounded.ErrorOutline)
+            StatusChip(
+                stringResource(R.string.home_review_chip, state.reviewCount),
+                ChipTone.WARNING,
+                icon = Icons.Rounded.ErrorOutline,
+            )
         }
     }
 }
@@ -160,7 +167,9 @@ private fun ColumnScope.HomeHero(state: HomeUiState, onAction: (HomeAction) -> U
         )
         Spacer(Modifier.height(Space.s3))
         state.destination?.let { Text(it, style = t.title, color = c.textPrimary) }
-        state.elapsedMin?.let { Text(stringResource(R.string.home_elapsed, it), style = t.body, color = c.textSecondary) }
+        state.elapsedMin?.let {
+            Text(stringResource(R.string.home_elapsed, it), style = t.body, color = c.textSecondary)
+        }
     }
 }
 
@@ -168,9 +177,13 @@ private fun ColumnScope.HomeHero(state: HomeUiState, onAction: (HomeAction) -> U
 private fun HomePrimary(state: HomeUiState, onAction: (HomeAction) -> Unit) {
     when (state.phase) {
         HomePhase.READY ->
-            PrimaryButton(stringResource(R.string.home_start), { onAction(HomeAction.StartTrip) }, Modifier.fillMaxWidth(), height = Size.buttonXl)
+            PrimaryButton(stringResource(R.string.home_start), {
+                onAction(HomeAction.StartTrip)
+            }, Modifier.fillMaxWidth(), height = Size.buttonXl)
         HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
-            PrimaryButton(stringResource(R.string.home_end), { onAction(HomeAction.EndNow) }, Modifier.fillMaxWidth(), height = Size.buttonXl)
+            PrimaryButton(stringResource(R.string.home_end), {
+                onAction(HomeAction.EndNow)
+            }, Modifier.fillMaxWidth(), height = Size.buttonXl)
         HomePhase.NEEDS_RECOVERY -> Unit
     }
 }

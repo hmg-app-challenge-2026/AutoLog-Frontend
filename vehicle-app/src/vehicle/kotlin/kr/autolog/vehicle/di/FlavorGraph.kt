@@ -31,7 +31,8 @@ fun createAppGraph(app: Application): AppGraph {
         override val navigator = Navigator()
         override val session = DefaultSessionRepository(trip)
         override val usage = DefaultVehicleUsageRepository(trip.motion, carUx.state, scope)
-        override val profile = DefaultProfileRepository(FakePurposeEngine(), FakeSettingsApi(), trip.currentDriver, { "veh-1" }, appClock)
+        override val profile =
+            DefaultProfileRepository(FakePurposeEngine(), FakeSettingsApi(), trip.currentDriver, { "veh-1" }, appClock)
         override val context = DefaultContextRepository(FakeContext())
         override val demoOverlay: (@Composable () -> Unit)? = null
     }

@@ -42,44 +42,43 @@ private fun systemAnimationsOff(): Boolean {
 }
 
 /** 디자인 언어 5.5 M3 매핑. 화면 코드는 MaterialTheme이 아니라 AutoLogTheme.colors를 쓴다. */
-private fun AutoLogColors.toMaterial() =
-    if (isDark) {
-        darkColorScheme(
-            primary = accentFill,
-            onPrimary = onAccent,
-            background = bg,
-            surface = bg,
-            surfaceContainerLow = surface1,
-            surfaceContainer = surface2,
-            surfaceContainerHigh = surface3,
-            onBackground = textPrimary,
-            onSurface = textPrimary,
-            onSurfaceVariant = textSecondary,
-            outline = outlineStrong,
-            outlineVariant = outline,
-            error = danger,
-            onError = onAccent,
-            scrim = scrim,
-        )
-    } else {
-        lightColorScheme(
-            primary = accentFill,
-            onPrimary = onAccent,
-            background = bg,
-            surface = bg,
-            surfaceContainerLow = surface1,
-            surfaceContainer = surface2,
-            surfaceContainerHigh = surface3,
-            onBackground = textPrimary,
-            onSurface = textPrimary,
-            onSurfaceVariant = textSecondary,
-            outline = outlineStrong,
-            outlineVariant = outline,
-            error = danger,
-            onError = onAccent,
-            scrim = scrim,
-        )
-    }
+private fun AutoLogColors.toMaterial() = if (isDark) {
+    darkColorScheme(
+        primary = accentFill,
+        onPrimary = onAccent,
+        background = bg,
+        surface = bg,
+        surfaceContainerLow = surface1,
+        surfaceContainer = surface2,
+        surfaceContainerHigh = surface3,
+        onBackground = textPrimary,
+        onSurface = textPrimary,
+        onSurfaceVariant = textSecondary,
+        outline = outlineStrong,
+        outlineVariant = outline,
+        error = danger,
+        onError = onAccent,
+        scrim = scrim,
+    )
+} else {
+    lightColorScheme(
+        primary = accentFill,
+        onPrimary = onAccent,
+        background = bg,
+        surface = bg,
+        surfaceContainerLow = surface1,
+        surfaceContainer = surface2,
+        surfaceContainerHigh = surface3,
+        onBackground = textPrimary,
+        onSurface = textPrimary,
+        onSurfaceVariant = textSecondary,
+        outline = outlineStrong,
+        outlineVariant = outline,
+        error = danger,
+        onError = onAccent,
+        scrim = scrim,
+    )
+}
 
 @Composable
 fun AutoLogTheme(

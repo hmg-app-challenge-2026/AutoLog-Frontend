@@ -50,7 +50,11 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
     CompositionLocalProvider(LocalAppGraph provides graph) {
         AutoLogTheme(staticMotion = tier != UsageTier.FULL) {
             CompositionLocalProvider(LocalInputLocked provides (tier != UsageTier.FULL || entryGuard)) {
-                Box(Modifier.fillMaxSize().background(AutoLogTheme.colors.bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
+                Box(
+                    Modifier.fillMaxSize().background(
+                        AutoLogTheme.colors.bg,
+                    ).windowInsetsPadding(WindowInsets.safeDrawing),
+                ) {
                     WindowLayoutHost {
                         when (tier) {
                             UsageTier.FULL -> FullApp(graph)

@@ -33,11 +33,10 @@ class AndroidCarUxSource(private val context: Context) : CarUxSource {
         }
     }
 
-    private fun CarUxRestrictions.toState() =
-        CarUxState(
-            requiresDistractionOptimization = isRequiresDistractionOptimization,
-            noKeyboard = (activeRestrictions and CarUxRestrictions.UX_RESTRICTIONS_NO_KEYBOARD) != 0,
-        )
+    private fun CarUxRestrictions.toState() = CarUxState(
+        requiresDistractionOptimization = isRequiresDistractionOptimization,
+        noKeyboard = (activeRestrictions and CarUxRestrictions.UX_RESTRICTIONS_NO_KEYBOARD) != 0,
+    )
 
     private companion object {
         const val TAG = "AutoLog/ui"

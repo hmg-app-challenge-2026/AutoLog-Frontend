@@ -27,23 +27,22 @@ internal fun reducePeek(
     driverName: String?,
     destination: String?,
     now: Long,
-): PeekUiState =
-    when (state) {
-        is SessionState.Recording ->
-            PeekUiState.Recording(
-                driverName = driverName,
-                tripKm = formatKm(state.liveKm),
-                destination = destination,
-                savedSecondsAgo = ((now - state.lastSavedAt) / 1000).toInt().coerceAtLeast(0),
-                autoEndInSec = null,
-            )
-        is SessionState.StopCandidate ->
-            PeekUiState.Recording(
-                driverName = driverName,
-                tripKm = formatKm(state.liveKm),
-                destination = destination,
-                savedSecondsAgo = 0,
-                autoEndInSec = if (state.reason == StopReason.GEAR_P) null else remainingSeconds(state.deadlineAt, now),
-            )
-        else -> PeekUiState.NoTrip(formatKm(odometerKm))
-    }
+): PeekUiState = when (state) {
+    is SessionState.Recording ->
+        PeekUiState.Recording(
+            driverName = driverName,
+            tripKm = formatKm(state.liveKm),
+            destination = destination,
+            savedSecondsAgo = ((now - state.lastSavedAt) / 1000).toInt().coerceAtLeast(0),
+            autoEndInSec = null,
+        )
+    is SessionState.StopCandidate ->
+        PeekUiState.Recording(
+            driverName = driverName,
+            tripKm = formatKm(state.liveKm),
+            destination = destination,
+            savedSecondsAgo = 0,
+            autoEndInSec = if (state.reason == StopReason.GEAR_P) null else remainingSeconds(state.deadlineAt, now),
+        )
+    else -> PeekUiState.NoTrip(formatKm(odometerKm))
+}

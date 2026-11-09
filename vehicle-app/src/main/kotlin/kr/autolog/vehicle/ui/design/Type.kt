@@ -13,12 +13,11 @@ import androidx.compose.ui.unit.sp
 import kr.autolog.vehicle.R
 
 @OptIn(ExperimentalTextApi::class)
-private fun astaSans(weight: Int) =
-    Font(
-        R.font.asta_sans,
-        weight = FontWeight(weight),
-        variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
-    )
+private fun astaSans(weight: Int) = Font(
+    R.font.asta_sans,
+    weight = FontWeight(weight),
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
+)
 
 /** Asta Sans (42dot, OFL, 가변 300–800). 디자인 언어 6.1. */
 val AstaSans = FontFamily(astaSans(300), astaSans(400), astaSans(500), astaSans(600), astaSans(700))
@@ -39,25 +38,23 @@ data class AutoLogType(
 /** 한국어를 단어(어절) 중간에서 자르지 않는다 — "달 / 렸어요" 방지 (Android 13+ Phrase 줄바꿈, 미만은 기본 동작). */
 private val KoreanPhraseLineBreak = LineBreak.Paragraph.copy(wordBreak = LineBreak.WordBreak.Phrase)
 
-private fun style(sizeSp: Int, weight: Int, lineHeight: Float, trackingEm: Float, tnum: Boolean = false) =
-    TextStyle(
-        lineBreak = KoreanPhraseLineBreak,
-        fontFamily = AstaSans,
-        fontWeight = FontWeight(weight),
-        fontSize = sizeSp.sp,
-        lineHeight = (sizeSp * lineHeight).sp,
-        letterSpacing = trackingEm.em,
-        fontFeatureSettings = if (tnum) "tnum" else null,
-    )
+private fun style(sizeSp: Int, weight: Int, lineHeight: Float, trackingEm: Float, tnum: Boolean = false) = TextStyle(
+    lineBreak = KoreanPhraseLineBreak,
+    fontFamily = AstaSans,
+    fontWeight = FontWeight(weight),
+    fontSize = sizeSp.sp,
+    lineHeight = (sizeSp * lineHeight).sp,
+    letterSpacing = trackingEm.em,
+    fontFeatureSettings = if (tnum) "tnum" else null,
+)
 
-fun autoLogType(): AutoLogType =
-    AutoLogType(
-        hero = style(140, 300, 1.0f, -0.02f, tnum = true),
-        heroSmall = style(96, 300, 1.0f, -0.015f, tnum = true),
-        display = style(56, 600, 1.15f, -0.01f),
-        headline = style(44, 600, 1.2f, -0.005f),
-        title = style(36, 600, 1.25f, 0f),
-        body = style(28, 400, 1.4f, 0f),
-        label = style(28, 600, 1.2f, 0f),
-        caption = style(22, 500, 1.3f, 0.005f),
-    )
+fun autoLogType(): AutoLogType = AutoLogType(
+    hero = style(140, 300, 1.0f, -0.02f, tnum = true),
+    heroSmall = style(96, 300, 1.0f, -0.015f, tnum = true),
+    display = style(56, 600, 1.15f, -0.01f),
+    headline = style(44, 600, 1.2f, -0.005f),
+    title = style(36, 600, 1.25f, 0f),
+    body = style(28, 400, 1.4f, 0f),
+    label = style(28, 600, 1.2f, 0f),
+    caption = style(22, 500, 1.3f, 0.005f),
+)

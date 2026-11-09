@@ -41,19 +41,18 @@ class DefaultProfileRepository(
                     name = card.name,
                     dept = card.dept,
                     badge =
-                        when (card.badge) {
-                            UserBadge.SCHEDULED -> ProfileBadge.SCHEDULED
-                            UserBadge.RECENT -> ProfileBadge.RECENT
-                            null -> null
-                        },
+                    when (card.badge) {
+                        UserBadge.SCHEDULED -> ProfileBadge.SCHEDULED
+                        UserBadge.RECENT -> ProfileBadge.RECENT
+                        null -> null
+                    },
                 )
             }
         }
 
-    override fun currentDriver(): Flow<DriverProfile?> =
-        combine(currentDriverId, settings.users()) { id, users ->
-            users.firstOrNull { it.userId == id }?.let { DriverProfile(it.userId, it.name, it.dept) }
-        }.distinctUntilChanged()
+    override fun currentDriver(): Flow<DriverProfile?> = combine(currentDriverId, settings.users()) { id, users ->
+        users.firstOrNull { it.userId == id }?.let { DriverProfile(it.userId, it.name, it.dept) }
+    }.distinctUntilChanged()
 
     override suspend fun unassignedTrip(): UnassignedTripItem? {
         val trip = purpose.unassignedTrips(vehicleId(), clock.nowMs()).firstOrNull() ?: return null
