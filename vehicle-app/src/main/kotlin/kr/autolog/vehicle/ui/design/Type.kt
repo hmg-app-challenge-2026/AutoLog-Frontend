@@ -35,6 +35,8 @@ data class AutoLogType(
     val body: TextStyle,
     val label: TextStyle,
     val caption: TextStyle,
+    /** 영역 소제목("이번 달 운행 정보", "알림"). 크기는 caption과 같고 굵기로 제목임을 드러낸다 — 소제목보다 큰 설명 글씨를 두지 않는다. */
+    val section: TextStyle,
 )
 
 /** 한국어를 단어(어절) 중간에서 자르지 않는다 — "달 / 렸어요" 방지 (Android 13+ Phrase 줄바꿈, 미만은 기본 동작). */
@@ -60,6 +62,7 @@ fun autoLogType(): AutoLogType = AutoLogType(
     body = style(28, 400, 1.4f, 0f),
     label = style(28, 600, 1.2f, 0f),
     caption = style(22, 500, 1.3f, 0.005f),
+    section = style(22, 700, 1.3f, 0.01f),
 )
 
 /**

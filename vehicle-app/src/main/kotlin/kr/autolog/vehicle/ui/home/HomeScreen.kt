@@ -49,7 +49,7 @@ fun HomeRoute() {
 
 /**
  * 스펙 7.2 (D-23·D-24). 3단: 맨 위 상태 줄(오른쪽은 운전자 배지) / 가운데 두 섹션 / 맨 아래 같은 모양 타일 4개([HomeDock]).
- * 두 섹션 = 운행 정보([HomeHero] — 대기 "최근 운행 정보", 기록 중 "현재 운행 정보") · 알림([HomeNotices]).
+ * 두 섹션 = 운행 정보([HomeHero] — 대기 "이번 달 운행 정보", 기록 중 "현재 운행 정보") · 알림([HomeNotices]).
  * 소제목은 같은 [SectionHeader], 내용은 위쪽 정렬로 시작선을 맞춘다.
  */
 @Composable
@@ -109,10 +109,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
     }
 }
 
-/** 왼쪽 섹션 소제목: 대기 "최근 운행 정보", 기록 중 "현재 운행 정보". */
+/** 왼쪽 섹션 소제목: 대기 "이번 달 운행 정보", 기록 중 "현재 운행 정보". */
 @Composable
 private fun tripSectionTitle(phase: HomePhase): String = stringResource(
-    if (phase == HomePhase.READY) R.string.section_recent_trip else R.string.section_current_trip,
+    if (phase == HomePhase.READY) R.string.section_month_trip else R.string.section_current_trip,
 )
 
 /** 소제목 + 내용. 모든 섹션이 같은 모양. */

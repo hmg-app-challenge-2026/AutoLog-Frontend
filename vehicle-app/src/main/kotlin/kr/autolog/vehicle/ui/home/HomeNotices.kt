@@ -26,7 +26,7 @@ internal fun HomeNotices(notices: List<HomeNotice>, onAction: (HomeAction) -> Un
     Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
         // 없을 때도 칸을 지킨다 — 좌우 반반이 무너지지 않게(D-24)
         if (notices.isEmpty()) {
-            Text(stringResource(R.string.notices_empty), style = AutoLogTheme.type.body, color = c.textTertiary)
+            Text(stringResource(R.string.notices_empty), style = AutoLogTheme.type.caption, color = c.textTertiary)
         }
         notices.forEach { notice ->
             when (notice) {

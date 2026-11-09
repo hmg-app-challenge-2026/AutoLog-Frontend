@@ -84,7 +84,7 @@ class GalleryScreenshotTest {
                 AvatarFace("최", Brush.linearGradient(listOf(c.accent, c.accentFill)), Size.avatarSmall)
                 IconAvatar(Icons.Rounded.Person, Size.avatarSmall)
             }
-            SectionHeader("최근 운행 정보")
+            SectionHeader("이번 달 운행 정보")
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
                 DockTile(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {}, modifier = Modifier.weight(1f))
                 DockTile(Icons.Rounded.History, "운행 기록 조회", onClick = {}, modifier = Modifier.weight(1f))

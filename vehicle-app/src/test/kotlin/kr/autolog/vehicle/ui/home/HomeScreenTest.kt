@@ -115,7 +115,7 @@ class HomeScreenTest {
 
         compose.onNodeWithText("알림").assertIsDisplayed()
         compose.onNodeWithText("새 알림이 없어요").assertIsDisplayed()
-        compose.onNodeWithText("최근 운행 정보").assertIsDisplayed()
+        compose.onNodeWithText("이번 달 운행 정보").assertIsDisplayed()
     }
 
     @Test

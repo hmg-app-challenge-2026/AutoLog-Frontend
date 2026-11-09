@@ -18,7 +18,7 @@ import kr.autolog.vehicle.ui.design.components.RouteFlow
 
 /**
  * Home 왼쪽 섹션 내용(D-23·D-24).
- * - 대기("최근 운행 정보"): 이번 달 요약 — `이번 달 운행 23회` · `412.6 km` · `업무 388.1 km` + "출발하면 자동으로 기록해요".
+ * - 대기("이번 달 운행 정보"): 이번 달 요약 — `412.6 km` / `23회 운행 · 업무 388.1 km`.
  * - 기록 중("현재 운행 정보"): 이번 운행 거리 + 경로(Peek과 같은 [RouteFlow]). 경과 시간은 상태 줄이 말한다.
  */
 @Composable
@@ -29,23 +29,23 @@ internal fun ColumnScope.HomeHero(state: HomeUiState) {
     val narrow = layout == WindowLayout.NARROW
     when (state.phase) {
         HomePhase.READY -> {
+            // 위계: 소제목(22 굵게) → 값(숫자) → 보조 사실 한 줄(22 회색). 소제목보다 큰 회색 설명은 두지 않는다
             val month = state.month
             HeroMetric(
                 value = month?.totalKm,
                 unit = stringResource(R.string.unit_km),
-                label = stringResource(R.string.home_month_trips, month?.tripCount ?: 0),
+                label = null,
                 unavailableText = stringResource(R.string.home_month_loading),
                 size = if (narrow) MetricSize.COMPACT else MetricSize.MEDIUM,
             )
             month?.let {
+                Spacer(Modifier.height(Space.s2))
                 Text(
-                    stringResource(R.string.home_month_business, it.businessKm),
-                    style = t.body,
+                    stringResource(R.string.home_month_meta, it.tripCount, it.businessKm),
+                    style = t.caption,
                     color = c.textSecondary,
                 )
             }
-            Spacer(Modifier.height(Space.s5))
-            Text(stringResource(R.string.home_ready_hint), style = t.body, color = c.textSecondary)
         }
         HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING -> {
             HeroMetric(
