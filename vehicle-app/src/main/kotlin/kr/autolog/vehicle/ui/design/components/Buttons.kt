@@ -58,8 +58,8 @@ private fun ButtonBody(
         colors.textTertiary
     }
     if (dense) {
-        // dense(좁은 창에서 여러 개를 한 줄에): 보이는 면 56 dp·좌우 여백 16 dp·글자 caption 22 sp로 작게,
-        // 터치 영역은 76 dp 그대로(면 위아래 투명). 버튼 글자 28 sp 규칙의 예외(2026-11-09 사용자 결정, 디자인 언어 1.20)
+        // dense(좁은 창에서 여러 개를 한 줄에): 보이는 면 56 dp·좌우 여백 12 dp·글자 fine 20 sp(글자 하한)로 작게,
+        // 터치 영역은 76 dp 그대로(면 위아래 투명). 버튼 글자 28 sp 규칙의 예외(2026-11-09 사용자 결정, 디자인 언어 1.20·1.22)
         Box(
             modifier
                 .heightIn(min = Size.touchMin)
@@ -79,8 +79,8 @@ private fun ButtonBody(
                 textColor,
                 content,
                 loading,
-                Modifier.padding(horizontal = Space.s4),
-                AutoLogTheme.type.caption,
+                Modifier.padding(horizontal = Space.s3),
+                AutoLogTheme.type.fine,
             )
         }
         return

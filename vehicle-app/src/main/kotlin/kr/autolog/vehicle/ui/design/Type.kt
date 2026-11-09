@@ -37,6 +37,13 @@ data class AutoLogType(
     val caption: TextStyle,
     /** 영역 소제목("이번 달 운행 정보", "운행 경로"). 크기는 caption과 같고 굵기로 제목임을 드러낸다 — 소제목보다 큰 설명 글씨를 두지 않는다. */
     val section: TextStyle,
+    /**
+     * **글자 하한**(20 sp) — 공간이 정말 모자란 곳에만: 좁은 창에서 버튼 여러 개를 한 줄에 둘 때(dense 버튼).
+     * Pleos 보조 텍스트 높이 3 mm ≈ 19 sp(기준 밀도 160 dpi)에 맞춘 값. 이보다 작은 글자를 만들지 않는다.
+     */
+    val fine: TextStyle,
+    /** [section]의 좁은 창판(20 sp 굵게, 글자 하한) — 분할 화면처럼 세로 공간이 모자란 화면의 소제목. */
+    val sectionFine: TextStyle,
 )
 
 /** 한국어를 단어(어절) 중간에서 자르지 않는다 — "달 / 렸어요" 방지 (Android 13+ Phrase 줄바꿈, 미만은 기본 동작). */
@@ -63,6 +70,8 @@ fun autoLogType(): AutoLogType = AutoLogType(
     label = style(28, 600, 1.2f, 0f),
     caption = style(22, 500, 1.3f, 0.005f),
     section = style(22, 700, 1.3f, 0.01f),
+    fine = style(20, 500, 1.3f, 0.005f),
+    sectionFine = style(20, 700, 1.3f, 0.01f),
 )
 
 /**

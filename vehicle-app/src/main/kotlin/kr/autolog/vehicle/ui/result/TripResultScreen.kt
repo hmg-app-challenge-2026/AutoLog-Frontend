@@ -149,10 +149,12 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
     if (dense) {
         Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
-            Section(stringResource(R.string.section_distance_time), Modifier.weight(0.4f)) {
+            Section(stringResource(R.string.section_distance_time), Modifier.weight(0.4f), dense = true) {
                 DistanceTime(state, stacked = true)
             }
-            Section(stringResource(R.string.section_route), Modifier.weight(0.6f)) { Route(state, dense = true) }
+            Section(stringResource(R.string.section_route), Modifier.weight(0.6f), dense = true) {
+                Route(state, dense = true)
+            }
         }
         return
     }
@@ -204,7 +206,7 @@ private fun Route(state: TripResultUiState, dense: Boolean = false) {
 @Composable
 private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit, dense: Boolean = false) {
     val c = AutoLogTheme.colors
-    Section(stringResource(R.string.section_purpose)) {
+    Section(stringResource(R.string.section_purpose), dense = dense) {
         // dense 행은 면 위아래가 이미 비어 있어 간격 없이 쌓는다(면 사이 틈 20 dp)
         Column(verticalArrangement = if (dense) Arrangement.Top else Arrangement.spacedBy(Space.s2)) {
             PURPOSE_CHOICES.forEach { category ->
@@ -278,15 +280,15 @@ private fun CompactActions(state: TripResultUiState, onAction: (TripResultAction
 }
 
 /**
- * 좁은 창(분할 화면) 행동 버튼 — 한 줄, 같은 순서: [계속 기록](종료 대기 중에만) · [수정]/[저장] · [메인으로 · 3초].
- * 폭 440 dp에 버튼 글자 28 sp 그대로 세 개를 두려고 이 창에서만 짧은 이름 + 좌우 여백을 줄인 버튼(dense). [메인으로]가 남는 폭을 쓴다.
+ * 좁은 창(분할 화면) 행동 버튼 — 한 줄, 같은 순서·같은 이름: [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · 3초].
+ * 폭 440 dp에 셋을 두려고 dense 버튼(글자 fine 20 sp — 글자 하한, 좌우 여백 12 dp). 앞 둘은 글자 폭, [메인 화면으로]가 남는 폭을 쓴다.
  */
 @Composable
 private fun NarrowActions(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s3)) {
         if (state.canContinue) {
             SecondaryButton(
-                stringResource(R.string.result_continue_short),
+                stringResource(R.string.result_continue),
                 onClick = { onAction(TripResultAction.Continue) },
                 dense = true,
             )
@@ -300,21 +302,21 @@ private fun NarrowActions(state: TripResultUiState, onAction: (TripResultAction)
                 dense = true,
             )
             SecondaryButton(
-                stringResource(R.string.result_home_short),
+                stringResource(R.string.result_home),
                 onClick = { onAction(TripResultAction.GoHome) },
                 modifier = Modifier.weight(1f),
                 dense = true,
             )
         } else {
-            SecondaryButton(stringResource(R.string.result_edit_short), onClick = {
+            SecondaryButton(stringResource(R.string.result_edit), onClick = {
                 onAction(TripResultAction.Edit)
             }, dense = true)
             val sec = state.autoCloseSec
             PrimaryButton(
                 if (sec != null) {
-                    stringResource(R.string.result_home_short_in, durationText(sec))
+                    stringResource(R.string.result_home_in, durationText(sec))
                 } else {
-                    stringResource(R.string.result_home_short)
+                    stringResource(R.string.result_home)
                 },
                 onClick = { onAction(TripResultAction.GoHome) },
                 modifier = Modifier.weight(1f),

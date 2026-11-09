@@ -19,10 +19,22 @@ class TokenFloorTest {
     }
 
     @Test
-    fun `가장 작은 글자는 caption이고 22sp 이상`() {
-        val all = listOf(type.hero, type.heroSmall, type.display, type.headline, type.title, type.body, type.label)
+    fun `보조 글자 caption은 22sp, 가장 작은 글자 fine은 20sp 이상(Pleos 보조 3mm)`() {
+        val all =
+            listOf(
+                type.hero,
+                type.heroSmall,
+                type.display,
+                type.headline,
+                type.title,
+                type.body,
+                type.label,
+                type.section,
+            )
         assertTrue(all.all { it.fontSize.value >= type.caption.fontSize.value })
         assertTrue(type.caption.fontSize.value >= 22f)
+        assertTrue((all + type.caption).all { it.fontSize.value >= type.fine.fontSize.value })
+        assertTrue(type.fine.fontSize.value >= 20f)
     }
 
     @Test
