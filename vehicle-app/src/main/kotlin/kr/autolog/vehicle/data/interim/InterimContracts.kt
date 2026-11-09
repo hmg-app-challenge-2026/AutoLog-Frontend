@@ -1,9 +1,13 @@
 package kr.autolog.vehicle.data.interim
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kr.autolog.shared.ReceiptPayload
 import kr.autolog.vehicle.core.DriverSource
 import kr.autolog.vehicle.core.PurposeDetail
+import kr.autolog.vehicle.core.ReportFile
 import kr.autolog.vehicle.core.Suggestion
+import java.time.YearMonth
 
 // 앱 A 계약 초안 (스펙 6.6, R-2·R-7). 앱 A의 TripSessionApi가 core에 머지되면 이 파일을 지우고
 // Repository 구현만 고친다. ui/ 패키지는 이 파일을 import하지 않는다.
@@ -79,4 +83,85 @@ interface TripSessionApi {
     suspend fun ignoreMissedTrip()
 
     suspend fun resolveRecovery(choice: RecoveryChoice)
+}
+
+// ===== 앱 A 계약 초안 2 (스펙 6.6): 로컬 저장소·운행기록부·기기 등록·사내 서버 전송 =====
+
+enum class UploadState { PENDING, DONE, FAILED }
+
+/**
+ * 운행 기록 한 줄. 비어 있는 값은 "미확정"이다 — [purpose] null = 목적 확인 필요,
+ * [driverUserId] null = 운전자 미확정, [distanceKm] null = 거리 미확정(추정 금지).
+ * [upload] null = 사내 서버 전송을 쓰지 않음.
+ */
+data class TripRow(
+    val tripId: String,
+    val startTime: Long,
+    val endTime: Long?,
+    val driverUserId: String?,
+    val originLabel: String?,
+    val destinationLabel: String?,
+    val distanceKm: Double?,
+    val purpose: PurposeDetail?,
+    val note: String? = null,
+    val upload: UploadState? = null,
+)
+
+interface LocalStore {
+    /** [month](Asia/Seoul 기준)에 시작한 운행, 최신 순. */
+    fun trips(month: YearMonth): Flow<List<TripRow>>
+
+    /** 목적 확인이 필요한 운행(purpose == null), 최신 순. */
+    val pendingReviews: Flow<List<TripRow>>
+
+    /** inbox로 받은 영수증 OCR 결과 중 아직 확정하지 않은 것. */
+    val receiptInbox: Flow<List<ReceiptPayload>>
+
+    suspend fun trip(tripId: String): TripRow?
+}
+
+sealed interface ReportBuildResult {
+    data class Built(val file: ReportFile) : ReportBuildResult
+
+    data class Failed(val reason: String) : ReportBuildResult
+}
+
+interface ReportApi {
+    suspend fun build(month: YearMonth): ReportBuildResult
+}
+
+sealed interface ConnectionState {
+    data object NotRegistered : ConnectionState
+
+    data class Registered(val vehicleLabel: String, val serverUrl: String, val lastSyncAt: Long?) : ConnectionState
+
+    data class Unreachable(val vehicleLabel: String, val serverUrl: String) : ConnectionState
+}
+
+sealed interface RegisterResult {
+    data object Ok : RegisterResult
+
+    data class Invalid(val reason: String) : RegisterResult
+}
+
+/** 사내 서버(자체 호스팅 relay) 등록. 서버 주소는 런타임 설정(스펙 8.3, R-4). */
+interface DeviceApi {
+    val connection: StateFlow<ConnectionState>
+
+    suspend fun register(serverUrl: String, code: String): RegisterResult
+}
+
+data class UploadStatus(val enabled: Boolean, val pendingCount: Int, val lastUploadAt: Long?, val lastError: String?)
+
+sealed interface UploadResult {
+    data class Uploaded(val count: Int) : UploadResult
+
+    data class Failed(val reason: String) : UploadResult
+}
+
+/** 사내 서버 자동 취합용 운행 사본 전송 (기능명세 ②, 스펙 8장, R-4). */
+interface UploadApi {
+    val status: StateFlow<UploadStatus>
+
+    suspend fun uploadNow(): UploadResult
 }
