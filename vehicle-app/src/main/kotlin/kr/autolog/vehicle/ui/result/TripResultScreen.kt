@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
@@ -116,15 +116,21 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                 )
             }
             layout == WindowLayout.WIDE -> {
-                TwoColumns(Modifier.weight(1f)) {
-                    BoxWithConstraints(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
-                        val summaryGap = if (maxHeight >= 800.dp) Space.s7 * 2 + Space.s4 else Space.s7
-                        ScrollColumn(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
+                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                    val availableHeight = maxHeight
+                    val spacious = availableHeight >= 800.dp
+                    val summaryGap = if (spacious) Space.s7 * 2 + Space.s4 else Space.s7
+                    TwoColumns(
+                        Modifier
+                            .heightIn(max = availableHeight)
+                            .offset(y = if (spacious) -Space.s6 else 0.dp),
+                    ) {
+                        ScrollColumn(Modifier.weight(1f).heightIn(max = availableHeight)) {
                             TripSummary(state, gap = summaryGap)
                         }
-                    }
-                    BoxWithConstraints(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
-                        ScrollColumn(Modifier.fillMaxWidth().heightIn(max = maxHeight)) { Purpose(state, onAction) }
+                        ScrollColumn(Modifier.weight(1f).heightIn(max = availableHeight)) {
+                            Purpose(state, onAction)
+                        }
                     }
                 }
                 ClassificationSummary(state)
