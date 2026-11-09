@@ -1,5 +1,6 @@
 package kr.autolog.vehicle.ui.design.components
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -30,9 +31,15 @@ fun TopLine(modifier: Modifier = Modifier, content: @Composable RowScope.() -> U
     )
 }
 
-/** 위쪽 정렬로 쌓고, 넘치면 스크롤 + 더 있는 쪽 가장자리를 흐린다(디자인 언어 9장). 높이는 부모가 정한다. */
+/**
+ * 위쪽 정렬로 쌓고, 넘치면 스크롤 + 더 있는 쪽 가장자리를 흐린다(디자인 언어 9장). 높이는 부모가 정한다.
+ * 화면이 스크롤 위치를 움직여야 하면(예: 수정 모드에서 선택지를 보이게) [scroll]을 넘긴다.
+ */
 @Composable
-fun ScrollColumn(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    val scroll = rememberScrollState()
+fun ScrollColumn(
+    modifier: Modifier = Modifier,
+    scroll: ScrollState = rememberScrollState(),
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column(modifier.verticalScrollFade(scroll, Space.s7).verticalScroll(scroll), content = content)
 }

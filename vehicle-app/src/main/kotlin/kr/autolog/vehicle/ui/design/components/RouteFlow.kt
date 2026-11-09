@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.ui.design.AutoLogTheme
@@ -58,6 +59,7 @@ private const val GLOW_SPREAD = 1.2f
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
  * [live] = 지금 달리는 운행(흐르는 화살표). 끝난 운행(운행 결과·이력)은 false — 화살표 대신 ○와 ●를 잇는 가는 선(지도 앱 경로 요약처럼),
  * 흐름이 "진행 중"으로 잘못 읽히지 않게.
+ * [dense](좁은 창 반쪽 칸): 출발지·목적지를 **같은 크기**(`caption` 22 sp, 같은 글자색)로 맞추고 **굵기로만** 구분 — 목적지 굵게, 출발지 보통.
  */
 @Composable
 fun RouteFlow(
@@ -66,23 +68,33 @@ fun RouteFlow(
     modifier: Modifier = Modifier,
     destinationColor: Color = AutoLogTheme.colors.textPrimary,
     live: Boolean = true,
+    dense: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val density = LocalDensity.current
+    val originStyle = t.caption
+    val destinationStyle = if (dense) t.caption.copy(fontWeight = FontWeight.Bold) else t.label
+    val originColor = if (dense) destinationColor else c.textSecondary
     // 점을 그 줄 글자의 첫 줄 가운데에 맞추려고, 점 칸 높이를 글자 한 줄 높이로 둔다
-    val originLine = with(density) { t.caption.lineHeight.toDp() }
-    val destinationLine = with(density) { t.label.lineHeight.toDp() }
+    val originLine = with(density) { originStyle.lineHeight.toDp() }
+    val destinationLine = with(density) { destinationStyle.lineHeight.toDp() }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s1)) {
         if (origin != null) {
             RouteRow(markerHeight = originLine, marker = { OriginMarker() }) {
-                Text(origin, style = t.caption, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(origin, style = originStyle, color = originColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             RouteRow(markerHeight = null, marker = { if (live) FlowChevrons() else StaticConnector() }) {}
         }
         RouteRow(markerHeight = destinationLine, marker = { DestinationMarker() }) {
             // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
-            Text(destination, style = t.label, color = destinationColor, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(
+                destination,
+                style = destinationStyle,
+                color = destinationColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

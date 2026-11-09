@@ -55,12 +55,15 @@
     <string name="result_classified_no_km">%1$s으로 분류돼요</string>
     <string name="result_auto_close">%1$s 후 메인 화면으로 돌아가요</string>
     <string name="result_continue">계속 기록하기</string>
+    <string name="result_continue_short">계속 기록</string>
+    <string name="result_edit_short">수정</string>
+    <string name="result_home_short">메인으로</string>
+    <string name="result_home_short_in">메인으로 · %1$s</string>
     <string name="result_edit">수정하기</string>
     <string name="result_save">저장</string>
     <string name="result_home">메인 화면으로</string>
     <string name="result_home_in">메인 화면으로 · %1$s</string>
     <string name="result_not_found">운행을 찾지 못했어요</string>
-    <string name="trip_meta_pair">%1$s · %2$s</string>
     <string name="trip_minutes">%1$d분</string>
     <string name="trip_hours_minutes">%1$d시간 %2$d분</string>
     <string name="missed_title">놓친 운행</string>

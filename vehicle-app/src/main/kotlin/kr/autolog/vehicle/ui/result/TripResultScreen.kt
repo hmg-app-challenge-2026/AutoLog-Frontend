@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +61,7 @@ fun TripResultRoute(tripId: String) {
  * - 오른쪽 칸 = 운행 목적: 같은 폭 선택형 행 3개(8 dp 간격) → 바로 아래 "✓ 일반 업무용 거리 48.2 km로 분류돼요"(선택의 결과).
  * - 아래 행동 줄: [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · 3초]를
  *   콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 자동으로 눌릴 주 버튼 글자 + 맨 위 가장자리 막대.
- * NARROW·TALL은 한 칸(목적이 먼저 보이게) + 하단 고정 행동.
+ * NARROW·TALL: 넓은 창 순서를 세로 한 칸에(넘치면 그 칸만 스크롤) + 하단 고정 행동 — NARROW는 짧은 이름 한 줄, TALL은 두 줄.
  */
 @Composable
 fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> Unit, modifier: Modifier = Modifier) {
@@ -74,8 +76,17 @@ fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> U
 @Composable
 private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) -> Unit, layout: WindowLayout) {
     val c = AutoLogTheme.colors
+    // 좁은 창(분할 화면)은 한 단계 작은 글자·얇은 면(dense)으로 — 같은 내용을 덜 꽉 차게.
+    // 버튼은 화면 바닥 가까이(아래 여백 8 dp — 버튼 면 아래 투명 터치 영역 10 dp와 합쳐 바닥에서 18 dp), 그만큼 위 내용이 더 보인다
+    val dense = layout == WindowLayout.NARROW
+    val margin = screenMargin()
     Column(
-        Modifier.fillMaxSize().padding(screenMargin()),
+        Modifier.fillMaxSize().padding(
+            start = margin,
+            top = margin,
+            end = margin,
+            bottom = if (dense) Space.s2 else margin,
+        ),
         verticalArrangement = Arrangement.spacedBy(Space.s4),
     ) {
         TopLine {
@@ -83,7 +94,7 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                 stringResource(R.string.result_title),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
-                style = AutoLogTheme.type.title,
+                style = if (dense) AutoLogTheme.type.label else AutoLogTheme.type.title,
                 color = c.textPrimary,
             )
         }
@@ -108,15 +119,17 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                 WideActions(state, onAction)
             }
             else -> {
-                ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {
-                    // 한 칸: 목적이 첫 화면에 보이게 요약은 한 줄(48.2 km · 52분), 경로는 목적 아래로
-                    CompactMetrics(state)
-                    Spacer(Modifier.height(Space.s6))
-                    Purpose(state, onAction)
-                    Spacer(Modifier.height(Space.s6))
-                    Section(stringResource(R.string.section_route)) { Route(state) }
+                // 한 칸: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행) + 분류 문구.
+                // 분할 화면(504×640)에선 다 들어가지 않아 이 칸만 스크롤되고 버튼은 늘 보인다
+                val scroll = rememberScrollState()
+                // [수정]을 누르면 아래에 있는 운행 목적이 보이게 끝까지 내린다(좁은 창에선 첫 화면 밖)
+                LaunchedEffect(state.editing) { if (state.editing) scroll.animateScrollTo(scroll.maxValue) }
+                ScrollColumn(Modifier.weight(1f).fillMaxWidth(), scroll) {
+                    TripSummary(state, dense)
+                    Spacer(Modifier.height(if (dense) Space.s4 else Space.s6))
+                    Purpose(state, onAction, dense)
                 }
-                CompactActions(state, onAction)
+                if (layout == WindowLayout.NARROW) NarrowActions(state, onAction) else CompactActions(state, onAction)
             }
         }
     }
@@ -128,63 +141,78 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s7), content = content)
 }
 
-/** 왼쪽 칸: "운행 거리 · 시간"(큰 거리 + 작은 시간, 같은 기준선) → "운행 경로". 섹션 사이 32 dp. */
+/**
+ * 운행 요약: "운행 거리 · 시간" → "운행 경로". 넓은·세로 창은 위아래로(섹션 사이 32 dp).
+ * 좁은 창(dense)은 두 섹션을 **좌우 한 줄**에 — 위아래로 쌓으면 운행 목적이 첫 화면 밖으로 밀린다(높이 약 100 dp 절약).
+ */
 @Composable
-private fun TripSummary(state: TripResultUiState) {
-    val c = AutoLogTheme.colors
-    val t = AutoLogTheme.type
-    Section(stringResource(R.string.section_distance_time)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-            Text(
-                state.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown),
-                modifier = Modifier.alignByBaseline(),
-                style = t.headline,
-                color = if (state.km != null) c.textPrimary else c.textSecondary,
-            )
-            state.minutes?.let {
-                Text(minutesText(it), modifier = Modifier.alignByBaseline(), style = t.title, color = c.textSecondary)
+private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
+    if (dense) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
+            Section(stringResource(R.string.section_distance_time), Modifier.weight(0.4f)) {
+                DistanceTime(state, stacked = true)
             }
+            Section(stringResource(R.string.section_route), Modifier.weight(0.6f)) { Route(state, dense = true) }
         }
+        return
     }
+    Section(stringResource(R.string.section_distance_time)) { DistanceTime(state, stacked = false) }
     Spacer(Modifier.height(Space.s6))
     Section(stringResource(R.string.section_route)) { Route(state) }
 }
 
-/** 한 칸 창: `48.2 km · 52분` 한 줄. */
+/**
+ * 큰 거리 + 작은 시간(회색 — 보조 지표). 보통은 한 줄 같은 기준선(`headline` · `title`),
+ * [stacked](좁은 창 반쪽 칸)이면 거리 아래 줄에 시간 — 같은 28 sp, 거리 `label`(굵게) · 시간 `body`(보통).
+ */
 @Composable
-private fun CompactMetrics(state: TripResultUiState) {
+private fun DistanceTime(state: TripResultUiState, stacked: Boolean) {
+    val c = AutoLogTheme.colors
+    val t = AutoLogTheme.type
     val km = state.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown)
-    val time = state.minutes?.let { minutesText(it) }
-    Text(
-        if (time != null) stringResource(R.string.trip_meta_pair, km, time) else km,
-        style = AutoLogTheme.type.title,
-        color = AutoLogTheme.colors.textPrimary,
-    )
+    val kmColor = if (state.km != null) c.textPrimary else c.textSecondary
+    if (stacked) {
+        // 좁은 창 반쪽 칸: 거리 아래 줄에 시간(사이 8 dp). 둘 다 28 sp·같은 글자색, 굵기로만 구분 — 거리 굵게(label), 시간 보통(body)
+        Column(verticalArrangement = Arrangement.spacedBy(Space.s2)) {
+            Text(km, style = t.label, color = kmColor)
+            state.minutes?.let { Text(minutesText(it), style = t.body, color = c.textPrimary) }
+        }
+        return
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+        Text(km, modifier = Modifier.alignByBaseline(), style = t.headline, color = kmColor)
+        state.minutes?.let {
+            Text(minutesText(it), modifier = Modifier.alignByBaseline(), style = t.title, color = c.textSecondary)
+        }
+    }
 }
 
 /** 경로선 — 끝난 운행이라 ○—● 가는 선(흐름 모션 없음). 도착지를 모르면 "위치 미상". */
 @Composable
-private fun Route(state: TripResultUiState) {
+private fun Route(state: TripResultUiState, dense: Boolean = false) {
     val c = AutoLogTheme.colors
     RouteFlow(
         origin = state.origin,
         destination = state.destination ?: stringResource(R.string.place_unknown),
         destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
         live = false,
+        dense = dense,
     )
 }
 
 /** 오른쪽 칸: 운행 목적 — 같은 폭 선택형 행 3개(8 dp 간격, 보기 모드에선 누를 수 없음) + 바로 아래 분류 한 줄. */
 @Composable
-private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
+private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit, dense: Boolean = false) {
     val c = AutoLogTheme.colors
     Section(stringResource(R.string.section_purpose)) {
-        Column(verticalArrangement = Arrangement.spacedBy(Space.s2)) {
+        // dense 행은 면 위아래가 이미 비어 있어 간격 없이 쌓는다(면 사이 틈 20 dp)
+        Column(verticalArrangement = if (dense) Arrangement.Top else Arrangement.spacedBy(Space.s2)) {
             PURPOSE_CHOICES.forEach { category ->
                 ChoiceRow(
                     stringResource(choiceLabel(category)),
                     selected = category == state.selected,
                     onClick = if (state.editing) ({ onAction(TripResultAction.Select(category)) }) else null,
+                    dense = dense,
                 )
             }
         }
@@ -207,6 +235,10 @@ private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Un
     }
 }
 
+/**
+ * 넓은 창 행동 버튼(같은 폭, 이 순서): [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · n초].
+ * 보기: [메인 화면으로]가 주 버튼(시간이 다 되면 저절로 눌릴 버튼, 남은 시간을 글자에). 수정: [저장]이 주 버튼 — 자리는 그대로, 강조만 옮긴다(D-28).
+ */
 @Composable
 private fun WideActions(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
@@ -223,8 +255,8 @@ private fun WideActions(state: TripResultUiState, onAction: (TripResultAction) -
 }
 
 /**
- * 좁은 창 행동 버튼(같은 순서, 두 줄): [계속 기록하기 | 수정하기](종료 대기 중이 아니면 [수정하기]만) / [메인 화면으로 · 3초](전체 폭).
- * 한 줄 반반이면 "메인 화면으로 · 3초"가 두 줄로 꺾인다.
+ * 세로로 긴 창 행동 버튼(같은 순서, 두 줄): [계속 기록하기 | 수정하기](종료 대기 중이 아니면 [수정하기]만) / [메인 화면으로 · 3초](전체 폭).
+ * 한 줄 셋이면 "메인 화면으로 · 3초"가 두 줄로 꺾인다.
  */
 @Composable
 private fun CompactActions(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
@@ -242,6 +274,55 @@ private fun CompactActions(state: TripResultUiState, onAction: (TripResultAction
             }
         }
         Home(state, onAction, Modifier.fillMaxWidth(), countdownInLabel = true)
+    }
+}
+
+/**
+ * 좁은 창(분할 화면) 행동 버튼 — 한 줄, 같은 순서: [계속 기록](종료 대기 중에만) · [수정]/[저장] · [메인으로 · 3초].
+ * 폭 440 dp에 버튼 글자 28 sp 그대로 세 개를 두려고 이 창에서만 짧은 이름 + 좌우 여백을 줄인 버튼(dense). [메인으로]가 남는 폭을 쓴다.
+ */
+@Composable
+private fun NarrowActions(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s3)) {
+        if (state.canContinue) {
+            SecondaryButton(
+                stringResource(R.string.result_continue_short),
+                onClick = { onAction(TripResultAction.Continue) },
+                dense = true,
+            )
+        }
+        if (state.editing) {
+            PrimaryButton(
+                stringResource(R.string.result_save),
+                onClick = { onAction(TripResultAction.Save) },
+                height = Size.buttonMd,
+                loading = state.saving,
+                dense = true,
+            )
+            SecondaryButton(
+                stringResource(R.string.result_home_short),
+                onClick = { onAction(TripResultAction.GoHome) },
+                modifier = Modifier.weight(1f),
+                dense = true,
+            )
+        } else {
+            SecondaryButton(stringResource(R.string.result_edit_short), onClick = {
+                onAction(TripResultAction.Edit)
+            }, dense = true)
+            val sec = state.autoCloseSec
+            PrimaryButton(
+                if (sec != null) {
+                    stringResource(R.string.result_home_short_in, durationText(sec))
+                } else {
+                    stringResource(R.string.result_home_short)
+                },
+                onClick = { onAction(TripResultAction.GoHome) },
+                modifier = Modifier.weight(1f),
+                height = Size.buttonMd,
+                loading = state.saving,
+                dense = true,
+            )
+        }
     }
 }
 
