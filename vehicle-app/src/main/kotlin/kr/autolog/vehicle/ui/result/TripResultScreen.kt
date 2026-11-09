@@ -80,11 +80,11 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
     Column(
         Modifier.fillMaxSize().padding(
             start = margin,
-            top = if (layout == WindowLayout.WIDE) Space.s5 else margin,
+            top = if (layout == WindowLayout.WIDE) Space.s4 else margin,
             end = margin,
             bottom = when (layout) {
                 WindowLayout.NARROW -> Space.s2
-                WindowLayout.WIDE -> Space.s5
+                WindowLayout.WIDE -> Space.s4
                 WindowLayout.TALL -> margin
             },
         ),
@@ -145,7 +145,7 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 }
 
 /**
- * 운행 요약: "운행 거리 · 시간" → "운행 경로". 섹션 사이는 넓은·좁은 창 32 dp, 세로 창 48 dp.
+ * 운행 요약: "운행 거리 · 시간" → "운행 경로". 섹션 사이는 모든 창에서 48 dp.
  * 좁은 창에서는 거리·시간과 경로를 전폭으로 쌓아 커진 값이 잘리지 않게 한다. 아래 목적 선택은 같은 칸에서 스크롤한다.
  */
 @Composable
@@ -155,7 +155,7 @@ private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
             Section(stringResource(R.string.section_distance_time), dense = true) {
                 DistanceTime(state)
             }
-            Spacer(Modifier.height(Space.s6))
+            Spacer(Modifier.height(Space.s7))
             Section(stringResource(R.string.section_route), dense = true) {
                 Route(state)
             }
@@ -163,7 +163,7 @@ private fun TripSummary(state: TripResultUiState, dense: Boolean = false) {
         return
     }
     Section(stringResource(R.string.section_distance_time)) { DistanceTime(state) }
-    Spacer(Modifier.height(if (LocalWindowLayout.current == WindowLayout.TALL) Space.s7 else Space.s6))
+    Spacer(Modifier.height(Space.s7))
     Section(stringResource(R.string.section_route)) { Route(state) }
 }
 
