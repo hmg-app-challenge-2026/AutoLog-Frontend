@@ -47,11 +47,18 @@ class ProfileRepositoryTest {
     }
 
     @Test
-    fun `동명이인을 추가해도 새로 생긴 사람을 돌려준다`() = runTest {
-        val first = repo.addDriver("김영업", null) as AddDriverResult.Added
-        val second = repo.addDriver("김영업", null) as AddDriverResult.Added
+    fun `부서가 다른 동명이인은 새 사람으로 추가된다`() = runTest {
+        val first = repo.addDriver("김영업", "영업2팀") as AddDriverResult.Added
+        val second = repo.addDriver("김영업", "영업3팀") as AddDriverResult.Added
 
         assertNotEquals(first.userId, second.userId)
+    }
+
+    @Test
+    fun `이름과 부서가 같으면 이미 등록된 사용자다`() = runTest {
+        repo.addDriver("최신입", "영업2팀")
+
+        assertEquals(AddDriverResult.Duplicate, repo.addDriver(" 최신입 ", "영업2팀 "))
     }
 
     @Test

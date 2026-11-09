@@ -27,12 +27,15 @@ object Size {
     val iconLg = 48.dp
     val avatarChip = 48.dp
     val avatarSmall = 64.dp
+    val avatarLarge = 96.dp // 팝업 머리 아바타(새 운전자 미리보기)
     val chipHeight = 76.dp // StatusChip 터치 최소 높이(시각 높이 56 dp는 안쪽 여백으로)
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp
     val profileTileCompact = 128.dp
     val peekMaxWidth = 560.dp
     val sheetMaxWidth = 960.dp
+    val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
+    val hairline = 1.dp
     val progressBar = 8.dp
     val ring = 3.dp
 }

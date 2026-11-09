@@ -16,8 +16,8 @@ import kr.autolog.vehicle.data.interim.RecoveryChoice
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.DangerButton
+import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
-import kr.autolog.vehicle.ui.design.components.ScrimSheet
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
@@ -27,7 +27,7 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     var confirmingDelete by rememberSaveable { mutableStateOf(false) }
-    ScrimSheet {
+    ModalCard {
         Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             if (!confirmingDelete) {
                 Text(stringResource(R.string.recovery_title), style = t.headline, color = c.textPrimary)

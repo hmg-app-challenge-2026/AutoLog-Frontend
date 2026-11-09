@@ -39,8 +39,8 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ActionTile
+import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.ProfileTile
-import kr.autolog.vehicle.ui.design.components.ScrimSheet
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
 @Composable
@@ -111,8 +111,8 @@ fun ProfilePickerScreen(
             }
             TertiaryButton(stringResource(R.string.picker_later), onClick = { onAction(ProfilePickerAction.Later) })
         }
-        if (state.showAll) AllProfilesSheet(state.profiles, onAction)
-        state.addForm?.let { AddDriverSheet(it, onAction) }
+        if (state.showAll) AllProfilesDialog(state.profiles, onAction)
+        state.addForm?.let { AddDriverDialog(it, onAction) }
     }
 }
 
@@ -132,9 +132,18 @@ private fun PickerTileOf(tile: PickerTile, size: Dp, onAction: (ProfilePickerAct
 }
 
 @Composable
-private fun AllProfilesSheet(profiles: List<DriverProfile>, onAction: (ProfilePickerAction) -> Unit) {
+private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfilePickerAction) -> Unit) {
     val c = AutoLogTheme.colors
-    ScrimSheet {
+    ModalCard(
+        maxWidth = Size.sheetMaxWidth,
+        footer = {
+            TertiaryButton(
+                stringResource(R.string.action_cancel),
+                onClick = { onAction(ProfilePickerAction.HideAll) },
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+        },
+    ) {
         Text(stringResource(R.string.picker_all_title), style = AutoLogTheme.type.headline, color = c.textPrimary)
         Spacer(Modifier.height(Space.s5))
         LazyVerticalGrid(
@@ -144,13 +153,12 @@ private fun AllProfilesSheet(profiles: List<DriverProfile>, onAction: (ProfilePi
             modifier = Modifier.fillMaxWidth().height(Size.profileTileWide * 2),
         ) {
             items(profiles, key = { it.userId }) { p ->
-                // 뒤 화면의 같은 사람 타일과 shared element 키가 겹치지 않게 시트 쪽은 끈다
+                // 뒤 화면의 같은 사람 타일과 shared element 키가 겹치지 않게 팝업 쪽은 끈다
                 ProfileTileOf(p, Size.profileTileNarrow, sharedKey = null) {
                     onAction(ProfilePickerAction.Select(p.userId))
                 }
             }
         }
-        TertiaryButton(stringResource(R.string.action_cancel), onClick = { onAction(ProfilePickerAction.HideAll) })
     }
 }
 

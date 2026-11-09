@@ -40,7 +40,7 @@ fun DriverBadgeScaffold(onClick: (() -> Unit)?, content: @Composable () -> Unit)
 }
 
 /**
- * 화면 + 오른쪽 위 운전자 배지(넷플릭스식, 디자인 언어 11장). 모달(ScrimSheet)이 떠 있으면 배지를 숨긴다.
+ * 화면 + 오른쪽 위 운전자 배지(넷플릭스식, 디자인 언어 11장). 모달(ModalCard)이 떠 있으면 배지를 숨긴다.
  * 스크린샷 테스트도 이 함수로 실제와 같은 자리에 그린다. [onClick]이 null이면 표시 전용(Peek).
  */
 @Composable

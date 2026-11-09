@@ -23,6 +23,9 @@ sealed interface AddDriverResult {
 
     data object EmptyName : Failure
 
+    /** 이름과 부서가 모두 같은 직원이 이미 있다. 부서가 다른 동명이인은 추가할 수 있다. */
+    data object Duplicate : Failure
+
     /** 원천(SettingsApi)이 거절 — 사유 문구는 원천이 준다. */
     data class Rejected(val reason: String) : Failure
 }
@@ -74,9 +77,12 @@ class DefaultProfileRepository(
     override suspend fun addDriver(name: String, dept: String?): AddDriverResult {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return AddDriverResult.EmptyName
-        // 동명이인이 있을 수 있으므로 이름이 아니라 "추가 전에 없던 id"로 새 사람을 찾는다
-        val before = settings.users().first().mapTo(HashSet()) { it.userId }
-        return when (val r = settings.addUser(trimmed, dept?.trim()?.ifEmpty { null }, null)) {
+        val cleanDept = dept?.trim()?.ifEmpty { null }
+        val existing = settings.users().first()
+        if (existing.any { it.name == trimmed && it.dept == cleanDept }) return AddDriverResult.Duplicate
+        // 동명이인(부서가 다름)이 있을 수 있으므로 이름이 아니라 "추가 전에 없던 id"로 새 사람을 찾는다
+        val before = existing.mapTo(HashSet()) { it.userId }
+        return when (val r = settings.addUser(trimmed, cleanDept, null)) {
             is SettingsResult.Invalid -> AddDriverResult.Rejected(r.reason)
             SettingsResult.Ok ->
                 settings.users().first().firstOrNull { it.userId !in before }?.let { AddDriverResult.Added(it.userId) }

@@ -39,19 +39,24 @@ fun initialsOf(name: String): String {
 /** 아바타 모서리(크기의 20%). 사람 아바타와 아이콘 아바타가 같은 네모로 보이게 하는 단일 출처. */
 fun avatarShape(size: Dp): Shape = RoundedCornerShape(size * 0.2f)
 
-/** 이니셜 크기는 아바타 크기의 40%(토큰이 아니라 비율 — 아바타 크기 자체가 토큰). */
+/** 사람 아바타: userId 해시로 고른 그라데이션 + 이니셜. */
 @Composable
 fun Avatar(userId: String, name: String, size: Dp, modifier: Modifier = Modifier) {
     val (start, end) = AvatarGradients[avatarGradientIndex(userId)]
-    Box(
-        modifier
-            .size(size)
-            .clip(avatarShape(size))
-            .background(Brush.linearGradient(listOf(start, end), start = Offset.Zero, end = Offset.Infinite)),
-        contentAlignment = Alignment.Center,
-    ) {
+    AvatarFace(
+        initialsOf(name),
+        Brush.linearGradient(listOf(start, end), start = Offset.Zero, end = Offset.Infinite),
+        size,
+        modifier,
+    )
+}
+
+/** 아바타 얼굴(바탕 + 흰 이니셜). 이니셜 크기는 아바타 크기의 40%(토큰이 아니라 비율 — 아바타 크기 자체가 토큰). */
+@Composable
+fun AvatarFace(initials: String, background: Brush, size: Dp, modifier: Modifier = Modifier) {
+    Box(modifier.size(size).clip(avatarShape(size)).background(background), contentAlignment = Alignment.Center) {
         Text(
-            initialsOf(name),
+            initials,
             style = AutoLogTheme.type.display.copy(
                 fontSize = (size.value * 0.4f).sp,
                 lineHeight = (size.value * 0.45f).sp,

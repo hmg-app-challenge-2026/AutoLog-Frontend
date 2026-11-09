@@ -149,7 +149,7 @@ AutoLog의 UI는 존재감을 줄이는 쪽으로 설계한다. **주행 중에�
 | `warning` | `#F7B955` | 확인 필요 | 8.36 |
 | `danger` | `#FF6B6B` | 오류·막힘 텍스트 | 5.26 |
 | `dangerFill` | `#D93A3F` | 삭제 버튼 채움 | 흰 글씨 4.54 · 서피스 대비 3.22 |
-| `scrim` | `#000000` 56% | 시트 뒤 덮개 | — |
+| `scrim` | `#000000` 56% | 팝업 뒤 덮개 | — |
 
 ### 5.3 라이트 (주간)
 
@@ -281,7 +281,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 ### 6.6 모양과 깊이
 
 - 모서리: `radius.sm` 14 · `radius.md` 20(카드) · `radius.lg` 28(시트, 큰 버튼) · `radius.xl` 40(프로필 타일) · `radius.full`(칩, 원형 버튼). 버튼은 높이에 비례해 `radius.lg`를 기본으로 한다.
-- 깊이는 **그림자 대신 서피스 단계**(`bg` < `surface1` < `surface2` < `surface3`)로 표현한다. 그림자는 시트·다이얼로그에만, 다크에서는 쓰지 않고 `scrim`으로 분리한다.
+- 깊이는 **그림자 대신 서피스 단계**(`bg` < `surface1` < `surface2` < `surface3`)로 표현한다. 팝업도 그림자 없이 `surfaceRaised` + 머리카락 테두리 + `scrim`으로 분리한다(그림자는 렌더러마다 다르게 그려졌다, 2026-11-09).
 - 테두리는 입력 필드와 선택 상태에만. 카드에 테두리를 두르지 않는다.
 
 ---
@@ -294,7 +294,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 |---|---|---|---|
 | **Hero + Actions** (Home) | 맨 위 줄: 칩(전체 문구) · 배지. 동작 컬럼 45%(운전자 쪽, `ActionCard` 2×2) + hero 55% | 맨 위 줄: 축약 칩 · 배지 → hero(넘치면 스크롤 + 가장자리 흐림) → 보조 동작 → 하단 고정 주 버튼 | 맨 위 줄: 배지만 → 칩(전체 문구) → hero → 보조 동작 → 주 버튼 |
 | **Peek** (정차) | 가운데 카드(최대 폭 560 dp), 정보 늘리지 않음 | 세로 스택 가운데 정렬 — 기본 형태(사이드 창) | NARROW와 같음 |
-| **Countdown Sheet** (AutoEndPrompt) | 화면 아래 시트, 버튼 2개 가로(주 버튼이 운전자 쪽) | 시트, 버튼 2개 세로(주 버튼 아래) | NARROW와 같음 |
+| **Countdown** (AutoEndPrompt) | 가운데 카드, 버튼 2개 가로(주 버튼이 운전자 쪽) | 가운데 카드, 버튼 2개 세로(주 버튼 아래) | NARROW와 같음 |
+| **Form Dialog** (새 운전자 추가) | 두 칸: 왼쪽 머리(아바타·제목·설명) / 오른쪽 입력·버튼 | 한 줄, 머리는 제목만 | 한 줄, 머리 전체 |
 | **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
 | **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
 | **Master–Detail** (Settings) | 좌 목록 / 우 상세 | 목록 → 상세 push | NARROW와 같음 |
@@ -411,7 +412,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 컴포넌트 | 사양 |
 |---|---|
 | `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. 상태: 기본 / 눌림(0.97배) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자를 투명하게 남겨 폭 유지 + 진행 표시, 탭 무시). 로딩 회전은 무한 애니메이션이라 스크린샷 테스트에 넣지 않는다 |
-| `SecondaryButton` | 높이 `buttonMd`, `surface3` 바탕(시트 `surface2` 위에서도 면이 보이게), `textPrimary` 글자 |
+| `SecondaryButton` | 높이 `buttonMd`, `surface3` 바탕(팝업 `surface2` 위에서도 면이 보이게), `textPrimary` 글자 |
 | `TertiaryButton` | 바탕 없음, `accent` 글자, 최소 터치 76 dp 유지("나중에 선택" 등) |
 | `DangerButton` | `dangerFill` 바탕. 확인 다이얼로그 안에서만 |
 | `IconButtonXL` | 96 dp 원형, `surface2` 바탕, 아이콘 36 dp. 마이크·키패드 |
@@ -424,14 +425,15 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
 | `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 폭 720 dp 미만이면 버튼을 문장 아래로 내린다(문장이 3줄로 눌리지 않게). 놓친 운행 등 |
-| `Sheet` | 아래에서 올라오는 시트, `surface2`, 위 모서리 `radius.lg`, 뒤 `scrim`. 단계가 FULL에서 내려가면 즉시 닫힘 |
+| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
+| `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
 | `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중`. 운전자는 오른쪽 위 `DriverBadge`) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 목적지(`title`) ④ 기록 방식 한 줄(`body`, `textSecondary`: "계기판 거리 · 10초 전 저장") ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션 없음 |
-| `AutoEndPrompt` | 기어 P 자동 종료 시트. 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 뒤 자동으로 마쳐요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · [계속 기록](`PrimaryButton`, 운전자 쪽) · [기록 종료](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
+| `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 뒤 자동으로 마쳐요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · [계속 기록](`PrimaryButton`, 운전자 쪽) · [기록 종료](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
 
@@ -477,7 +479,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 선택 후 [확인]을 한 번 더 누르게 하는 2단계 조작, 되돌릴 수 있는 동작의 확인 다이얼로그
 - 남은 시간·취소 없이 자동으로 결정하는 것
 - 장식 애니메이션, 무한 반복 애니메이션(주차 중 로딩 제외)
-- 그림자로 계층 표현(시트 제외), 카드 테두리, 그라데이션 배경(아바타 제외)
+- 그림자로 계층 표현, 바텀 시트, 테두리만 있는 입력 칸, 그라데이션 배경(아바타 제외)
 - 강조색 두 번째 추가, 의미 없는 색
 - 일러스트·사진·이모지 장식
 - 아이콘만 있는 작은 버튼, 76 dp 미만 터치 대상
@@ -502,3 +504,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 |---|---|---|
 | 1.0 | 2026-11-09 | 최초 확정 (사용 3단계·조작 최소화 포함) |
 | 1.1 | 2026-11-09 | 운전자 배지 오른쪽 위 고정(D-19) · `DriverBadge`·`IconAvatar`·`ActionTile` 추가 · `ActionCard` 세로 배치 · 축약 `StatusChip` · 오른쪽 위 예약 자리(`LocalTopEndReserved`) · 스크롤 가장자리 흐림 · Home WIDE 45:55 · 주유 기록 버튼 하나로(D-20) |
+| 1.2 | 2026-11-09 | 팝업을 가운데 카드 `ModalCard` 하나로 통일(D-21, `ScrimSheet` 삭제) · `surfaceRaised` · 채움형 `InputField` · `AvatarFace` · 새 운전자 추가 팝업 고도화 |

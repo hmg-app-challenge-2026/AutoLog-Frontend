@@ -23,7 +23,7 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.components.ScrimSheet
+import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 
 /** 왼쪽 위 96 dp 영역(오른쪽 위는 운전자 배지) 길게 누르기 → 패널. 데모 전용이라 잠금을 무시한다(정차 중에도 주차로 되돌릴 수 있게). */
@@ -35,7 +35,7 @@ fun DemoPanelOverlay(scenario: DemoScenario) {
     }
     if (open) {
         CompositionLocalProvider(LocalInputLocked provides false) {
-            ScrimSheet {
+            ModalCard(maxWidth = Size.sheetMaxWidth) {
                 Text(
                     stringResource(R.string.demo_title),
                     style = AutoLogTheme.type.headline,

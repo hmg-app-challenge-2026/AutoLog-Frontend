@@ -26,6 +26,9 @@ data class AutoLogColors(
     val scrim: Color,
 ) {
     val surfaces: List<Color> get() = listOf(bg, surface1, surface2, surface3)
+
+    /** 떠 있는 면(팝업 카드). 다크는 한 단계 밝은 surface2, 라이트는 흰 surface1 — 둘 다 [surfaces] 안이라 대비 검사를 그대로 받는다. */
+    val surfaceRaised: Color get() = if (isDark) surface2 else surface1
 }
 
 val DarkColors =

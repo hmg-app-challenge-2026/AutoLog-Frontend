@@ -1,5 +1,6 @@
 package kr.autolog.vehicle.ui.profile
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -7,7 +8,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.data.repository.AddDriverResult
 import kr.autolog.vehicle.data.repository.DriverProfile
 import kr.autolog.vehicle.data.repository.ProfileBadge
-import kr.autolog.vehicle.screenshot.ShotSize
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import org.junit.Assert.assertEquals
@@ -57,6 +57,26 @@ class ProfilePickerScreenTest {
 
         assertEquals(listOf<ProfilePickerAction>(ProfilePickerAction.OpenAdd), actions)
     }
+
+    @Test
+    fun `추가 팝업 — 중복 안내를 보여 주고 주 버튼과 그 아래 취소로 끝낸다`() {
+        val actions = mutableListOf<ProfilePickerAction>()
+        val form = AddDriverForm(name = "김영업", dept = "영업1팀", error = AddDriverResult.Duplicate)
+        compose.setContent {
+            AutoLogTheme {
+                ProfilePickerScreen(ProfilePickerUiState(profiles, addForm = form, loaded = true), onAction = {
+                    actions +=
+                        it
+                })
+            }
+        }
+
+        compose.onNodeWithText("이미 등록된 사용자에요").assertIsDisplayed()
+        compose.onNodeWithText("추가 및 시작하기").performClick()
+        compose.onNodeWithText("취소").performClick()
+
+        assertEquals(listOf(ProfilePickerAction.SubmitAdd, ProfilePickerAction.CancelAdd), actions)
+    }
 }
 
 @RunWith(AndroidJUnit4::class)
@@ -83,11 +103,11 @@ class ProfilePickerScreenshotTest {
     }
 
     @Test
-    fun addSheetError() = captureAll("picker_add_error", sizes = listOf(ShotSize.WIDE)) {
+    fun addSheetError() = captureAll("picker_add_error") {
         ProfilePickerScreen(
             ProfilePickerUiState(
                 profiles,
-                addForm = AddDriverForm(name = "김영업", error = AddDriverResult.Rejected("이미 등록된 이름이에요")),
+                addForm = AddDriverForm(name = "김영업", dept = "영업1팀", error = AddDriverResult.Duplicate),
                 loaded = true,
             ),
             onAction = {},

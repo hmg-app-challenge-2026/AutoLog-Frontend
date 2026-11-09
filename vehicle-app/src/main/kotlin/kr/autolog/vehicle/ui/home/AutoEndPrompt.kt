@@ -27,8 +27,8 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
-import kr.autolog.vehicle.ui.design.components.ScrimSheet
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.durationText
 
@@ -46,23 +46,8 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
         animationSpec = if (motion.isStatic) snap() else tween(durationMillis = 1_000, easing = LinearEasing),
         label = "autoEndProgress",
     )
-    ScrimSheet {
-        Text(stringResource(R.string.autoend_title), style = t.headline, color = c.textPrimary)
-        Spacer(Modifier.height(Space.s3))
-        // 거리와 목적지를 나눈다 — 한 줄로 이으면 좁은 창에서 목적지가 단어 중간에서 끊긴다
-        tripKm?.let { Text("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
-        destination?.let { Text(it, style = t.body, color = c.textSecondary) }
-        Spacer(Modifier.height(Space.s3))
-        Text(
-            stringResource(R.string.autoend_remaining, durationText(state.remainingSec)),
-            style = t.body,
-            color = c.textSecondary,
-        )
-        Spacer(Modifier.height(Space.s4))
-        Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
-            Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
-        }
-        Spacer(Modifier.height(Space.s6))
+    // 결정 버튼은 카드 하단에 고정 — 내용이 넘쳐도 [계속 기록]이 스크롤 밖으로 밀리지 않는다
+    ModalCard(footer = {
         val keep: @Composable (
             Modifier,
         ) -> Unit = { m -> PrimaryButton(stringResource(R.string.autoend_keep), onKeep, m) }
@@ -84,6 +69,22 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
                 end(Modifier.fillMaxWidth())
                 keep(Modifier.fillMaxWidth())
             }
+        }
+    }) {
+        Text(stringResource(R.string.autoend_title), style = t.headline, color = c.textPrimary)
+        Spacer(Modifier.height(Space.s3))
+        // 거리와 목적지를 나눈다 — 한 줄로 이으면 좁은 창에서 목적지가 단어 중간에서 끊긴다
+        tripKm?.let { Text("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
+        destination?.let { Text(it, style = t.body, color = c.textSecondary) }
+        Spacer(Modifier.height(Space.s3))
+        Text(
+            stringResource(R.string.autoend_remaining, durationText(state.remainingSec)),
+            style = t.body,
+            color = c.textSecondary,
+        )
+        Spacer(Modifier.height(Space.s4))
+        Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
+            Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
         }
     }
 }

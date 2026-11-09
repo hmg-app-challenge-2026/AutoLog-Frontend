@@ -33,7 +33,7 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 
 /**
- * 디자인 언어 11장 InputField. 텍스트 입력은 최후의 수단(프리셋 → 최근값 → 음성 → 키보드).
+ * 디자인 언어 11장 InputField(채움형). 텍스트 입력은 최후의 수단(프리셋 → 최근값 → 음성 → 키보드).
  * 잠금이거나 [enabled]가 false면 비활성 + "지금은 입력할 수 없어요". [secret]이면 항상 가린다(앱 비밀번호).
  */
 @Composable
@@ -67,17 +67,14 @@ fun InputField(
             interactionSource = interaction,
             modifier = Modifier.fillMaxWidth(),
             decorationBox = { inner ->
+                // 채움형: 테두리 상자 대신 한 단계 위 면(surface3). 초점이면 accent 링 — 테두리만 있는 상자는 옛 안드로이드처럼 보였다
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .heightIn(min = Size.touchMin)
                         .clip(shape)
-                        .background(c.surface2)
-                        .border(
-                            if (focused) Size.ring else Space.s1 / 4,
-                            if (focused) c.accent else c.outlineStrong,
-                            shape,
-                        )
+                        .background(if (locked) c.surface2 else c.surface3)
+                        .then(if (focused) Modifier.border(Size.ring, c.accent, shape) else Modifier)
                         .padding(horizontal = Space.s5),
                     contentAlignment = Alignment.CenterStart,
                 ) {
