@@ -1,5 +1,7 @@
 package kr.autolog.vehicle.ui.home
 
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.runtime.Composable
 import kr.autolog.vehicle.data.repository.RecoveryAction
 
 /** 스펙 7.2 상태 4가지. 상태 계산은 [reduceHome](HomeReducer.kt). */
@@ -26,6 +28,9 @@ data class RecentTripUi(
     val purpose: String?,
 )
 
+/** Home 가운데 섹션 한 칸: 소제목 + 내용. **무엇을** 보여 줄지는 [homeSections], 창 크기별 **배치**는 [HomeScreen]이 정한다. */
+internal class HomeSection(val title: String, val content: @Composable ColumnScope.() -> Unit)
+
 data class HomeUiState(
     val phase: HomePhase = HomePhase.READY,
     val month: MonthUi? = null,
@@ -43,7 +48,7 @@ data class HomeUiState(
 )
 
 sealed interface HomeAction {
-    /** 수동 시작 — 보통은 출발하면 자동으로 시작된다(독 끝의 작은 "직접 시작"). */
+    /** 수동 시작 — 보통은 출발하면 자동으로 시작된다(타일 첫 칸 [기록 시작]). */
     data object StartTrip : HomeAction
 
     data object EndNow : HomeAction

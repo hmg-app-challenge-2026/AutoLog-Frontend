@@ -30,6 +30,8 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.Section
+import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.screenMargin
 import kr.autolog.vehicle.ui.design.verticalScrollFade
@@ -60,8 +62,7 @@ fun HomeRoute() {
 @Composable
 fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 섹션을 그리지 않는다
-    val showBody = state.phase != HomePhase.NEEDS_RECOVERY
+    val sections = homeSections(state, onAction)
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
             // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
@@ -70,11 +71,16 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 verticalArrangement = Arrangement.spacedBy(Space.s4),
             ) {
                 TopRow { HomeStatus(state) }
+                // 좌우 반반. 소제목은 위에 나란히 고정하고, 내용은 그 아래 남는 높이의 세로 가운데에 —
+                // 짧은 내용(기록 중 거리·경로)이 소제목 바로 밑에 붙어 위로 쏠리지 않게. 길면(최근 운행 3건) 칸을 다 쓰고 그 칸만 스크롤
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
-                    if (showBody) {
-                        // 좌우 반반. 섹션마다 넘치면 그 섹션만 스크롤
-                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { HomePrimarySection(state) }
-                        ScrollRegion(Modifier.weight(1f).fillMaxHeight()) { HomeSecondarySection(state, onAction) }
+                    sections.forEach { section ->
+                        Column(Modifier.weight(1f).fillMaxHeight()) {
+                            SectionHeader(section.title)
+                            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                                ScrollRegion(Modifier.fillMaxWidth(), content = section.content)
+                            }
+                        }
                     }
                 }
                 HomeDock(state, onAction)
@@ -87,11 +93,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 TopRow { HomeStatus(state) }
                 // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 타일은 늘 보인다
                 ScrollRegion(Modifier.weight(1f).fillMaxWidth()) {
-                    if (showBody) {
-                        // 한 칸에 위아래로: 값 → 맥락
-                        HomePrimarySection(state)
-                        Spacer(Modifier.height(Space.s6))
-                        HomeSecondarySection(state, onAction)
+                    // 한 칸에 위아래로: 값 → 맥락
+                    sections.forEachIndexed { i, section ->
+                        if (i > 0) Spacer(Modifier.height(Space.s6))
+                        Section(section.title, content = section.content)
                     }
                 }
                 HomeDock(state, onAction)

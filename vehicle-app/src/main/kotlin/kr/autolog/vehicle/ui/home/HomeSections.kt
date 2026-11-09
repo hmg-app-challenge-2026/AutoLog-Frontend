@@ -16,41 +16,38 @@ import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.RouteFlow
-import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.TripListRow
 
 /**
- * Home 가운데 두 섹션(D-25). 상태마다 "사용자가 지금 알고 싶은 것"을 왼쪽(값)·오른쪽(맥락)에 나눈다.
- * - 대기: 왼쪽 "이번 달 운행 정보"(누적 km + 보조 사실) · 오른쪽 "최근 운행 기록"(최신 3건 목록, 누르면 운행 기록 조회).
- * - 기록 중: 왼쪽 "주행 거리" · 오른쪽 "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
- * 모든 섹션은 공용 [Section](같은 소제목 모양·문구 — Peek도 같다), 거리 숫자는 72 sp(TALL만 96) — 계기판처럼 계속 보는 앱이 아니므로.
+ * Home 가운데 두 섹션(D-25). 상태마다 "사용자가 지금 알고 싶은 것"을 왼쪽(값)·오른쪽(맥락) 순서로 돌려준다.
+ * - 대기: "이번 달 운행 정보"(누적 km + 보조 사실) · "최근 운행 기록"(최신 3건 목록, 누르면 운행 기록 조회).
+ * - 기록 중: "주행 거리" · "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
+ * - 복구 중: 없음(팝업이 모든 정보를 말한다).
+ * 소제목 문구는 Peek과 같은 `section_*`. 거리 숫자는 72 sp(TALL만 96) — 계기판처럼 계속 보는 앱이 아니므로.
  */
 @Composable
-internal fun HomePrimarySection(state: HomeUiState) {
-    when (state.phase) {
-        HomePhase.READY -> Section(stringResource(R.string.section_month_trip)) { MonthSummary(state.month) }
-        HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
-            Section(stringResource(R.string.section_distance)) { TripDistance(state.tripKm) }
-        HomePhase.NEEDS_RECOVERY -> Unit
-    }
+internal fun homeSections(state: HomeUiState, onAction: (HomeAction) -> Unit): List<HomeSection> = when (state.phase) {
+    HomePhase.READY ->
+        listOf(
+            HomeSection(stringResource(R.string.section_month_trip)) { MonthSummary(state.month) },
+            HomeSection(stringResource(R.string.section_recent_trips)) { RecentTrips(state.recentTrips, onAction) },
+        )
+    HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
+        listOf(
+            HomeSection(stringResource(R.string.section_distance)) { TripDistance(state.tripKm) },
+            HomeSection(stringResource(R.string.section_route)) { TripRoute(state) },
+        )
+    HomePhase.NEEDS_RECOVERY -> emptyList()
 }
 
 @Composable
-internal fun HomeSecondarySection(state: HomeUiState, onAction: (HomeAction) -> Unit) {
-    when (state.phase) {
-        HomePhase.READY ->
-            Section(stringResource(R.string.section_recent_trips)) { RecentTrips(state.recentTrips, onAction) }
-        HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
-            Section(stringResource(R.string.section_route)) {
-                val c = AutoLogTheme.colors
-                RouteFlow(
-                    origin = state.origin,
-                    destination = state.destination ?: stringResource(R.string.peek_no_destination),
-                    destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
-                )
-            }
-        HomePhase.NEEDS_RECOVERY -> Unit
-    }
+private fun TripRoute(state: HomeUiState) {
+    val c = AutoLogTheme.colors
+    RouteFlow(
+        origin = state.origin,
+        destination = state.destination ?: stringResource(R.string.peek_no_destination),
+        destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
+    )
 }
 
 /** 큰 숫자 크기 — 높이 640 dp 창은 72 sp, 세로가 넉넉한 TALL은 96 sp. */

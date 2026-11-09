@@ -134,7 +134,7 @@ class HomeScreenTest {
     }
 
     @Test
-    fun `기록 중 — 상태 줄은 점 + 기록 중 · 경과, 4번째 타일은 기록 종료`() {
+    fun `기록 중 — 상태 줄은 점 + 기록 중 · 경과, 첫 칸 타일은 기록 종료`() {
         val actions = mutableListOf<HomeAction>()
         show(recording, actions)
 

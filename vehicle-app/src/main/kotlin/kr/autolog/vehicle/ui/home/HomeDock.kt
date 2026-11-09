@@ -35,15 +35,15 @@ private val START = DockItem(Icons.Rounded.PlayArrow, R.string.home_start_manual
 private val END = DockItem(Icons.Rounded.Stop, R.string.home_end, HomeAction.EndNow, emphasized = true)
 
 /**
- * 맨 아래 타일 4개(D-24): [주유 기록 추가] · [운행 기록 조회] · [설정] · [기록 시작].
- * 모두 같은 [DockTile] — 크기·모양·간격이 같고 아이콘만 다르다. 기록 중에는 4번째가 같은 자리에서 [기록 종료](파란 채움).
- * 언제나 4칸 한 줄. 순서는 `driverSide`(우핸들이면 좌우 반전).
+ * 맨 아래 타일 4개(D-24): [기록 시작] · [주유 기록 추가] · [운행 기록 조회] · [설정].
+ * 모두 같은 [DockTile] — 크기·모양·간격이 같고 아이콘만 다르다. 기록 중에는 첫 칸이 같은 자리에서 [기록 종료](파란 채움).
+ * 기록 시작·종료가 주 동작이라 운전석 쪽 끝(디자인 언어 6.3). 언제나 4칸 한 줄, 순서는 `driverSide`(우핸들이면 좌우 반전).
  */
 @Composable
 internal fun HomeDock(state: HomeUiState, onAction: (HomeAction) -> Unit) {
     if (state.phase == HomePhase.NEEDS_RECOVERY) return
-    val last = if (state.phase == HomePhase.READY) START else END
-    val ordered = listOf(FUEL, RECORDS, SETTINGS, last)
+    val record = if (state.phase == HomePhase.READY) START else END
+    val ordered = listOf(record, FUEL, RECORDS, SETTINGS)
     val items = if (LocalDriverSide.current == DriverSide.START) ordered else ordered.reversed()
     // 4칸 등분 — 네모가 같은 간격으로 놓인다. 좁은 창에서도 한 줄(이름은 필요하면 두 줄)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
