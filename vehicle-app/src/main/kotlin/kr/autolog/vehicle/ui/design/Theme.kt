@@ -3,7 +3,6 @@ package kr.autolog.vehicle.ui.design
 import android.provider.Settings
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -96,7 +95,7 @@ fun AutoLogTheme(
     ) {
         MaterialTheme(
             colorScheme = colors.toMaterial(),
-            typography = Typography(bodyLarge = type.body, labelLarge = type.label, titleLarge = type.title),
+            typography = autoLogMaterialTypography(type),
             content = content,
         )
     }

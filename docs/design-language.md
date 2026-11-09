@@ -216,6 +216,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - **Asta Sans**(42dot, SIL OFL 1.1, 가변 굵기 300–800, 한글·라틴). Pleos 시스템 UI 서체와 같다.
 - 파일: `vehicle-app/src/main/res/font/asta_sans.ttf`(google/fonts의 `AstaSans[wght].ttf`) + `OFL.txt`. 설정 > 정보 > 오픈소스 라이선스에 표기한다.
 - Compose: 굵기별 `Font(R.font.asta_sans, weight = FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w)))`로 `FontFamily`를 만든다(가변 서체, API 26+).
+- **차량 앱 어디에도 다른 서체가 나오지 않는다.** 화면 글자는 모두 `AutoLogTheme.type.*`(Asta Sans) style을 쓰고, Material 3 글자 슬롯 15개(`autoLogMaterialTypography`)와 XML 앱 테마(`android:fontFamily`, View 기반 시스템 대화상자·토스트)도 Asta Sans다. 코드에서 `fontFamily`·`FontFamily`·`Typeface`를 직접 지정하지 않는다(`Type.kt` 제외). `FontCoverageTest`가 이를 지킨다. 앱이 보여 주는 모든 글자가 Asta Sans 글리프 안에 있음을 2026-11-09 확인(대체 서체로 떨어지는 글자 없음)
 - 운영 웹: `@fontsource-variable/asta-sans`(self-host). 카메라 페이지: 시스템 서체(설계 스펙 D-15).
 
 ### 6.2 글자 크기 (`AutoLogTheme.type.*`)

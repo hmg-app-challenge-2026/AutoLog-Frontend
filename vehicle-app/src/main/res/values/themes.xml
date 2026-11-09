@@ -3,6 +3,8 @@
 <resources>
     <style name="Theme.AutoLog" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/window_bg</item>
+        <!-- Compose 밖(View 기반 시스템 대화상자·토스트 등)도 Asta Sans -->
+        <item name="android:fontFamily">@font/asta_sans</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
