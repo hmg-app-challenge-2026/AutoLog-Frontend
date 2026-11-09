@@ -16,4 +16,11 @@
     <string name="peek_no_trip">기록 중인 운행이 없어요</string>
     <string name="peek_no_trip_hint">출발하면 자동으로 기록해요</string>
     <string name="odometer_label">누적 거리</string>
+    <string name="picker_title">누가 운전하나요?</string>
+    <string name="picker_later">나중에 선택</string>
+    <string name="picker_more">다른 사람</string>
+    <string name="picker_unassigned_title">이전 운행 운전자는 누구였나요?</string>
+    <string name="picker_empty">아직 등록된 직원이 없어요</string>
+    <string name="picker_all_title">운전자 선택</string>
+    <string name="action_cancel">취소</string>
 </resources>

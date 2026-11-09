@@ -13,7 +13,7 @@ enum class WindowLayout { NARROW, WIDE, TALL }
 
 const val WIDE_MIN_ASPECT = 1.25f
 const val WIDE_MIN_WIDTH_DP = 840f
-const val TALL_MAX_ASPECT = 0.80f
+const val TALL_MAX_ASPECT = 0.70f // 0.80이면 분할 화면 한 칸(≈504×640, 0.79)까지 TALL로 잡혀 바꿈(2026-11-09)
 
 fun windowLayoutOf(widthDp: Float, heightDp: Float): WindowLayout {
     val aspect = widthDp / heightDp

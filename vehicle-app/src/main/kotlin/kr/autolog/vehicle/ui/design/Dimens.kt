@@ -26,9 +26,11 @@ object Size {
     val icon = 36.dp
     val iconLg = 48.dp
     val avatarChip = 48.dp
+    val avatarSmall = 64.dp
     val chipHeight = 76.dp // StatusChip 터치 최소 높이(시각 높이 56 dp는 안쪽 여백으로)
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp
+    val profileTileCompact = 128.dp
     val peekMaxWidth = 560.dp
     val sheetMaxWidth = 960.dp
     val progressBar = 8.dp

@@ -17,12 +17,13 @@ class WindowLayoutTest {
 
     @Test
     fun `세로로 긴 창은 TALL`() {
-        assertEquals(WindowLayout.TALL, windowLayoutOf(800f, 1000f)) // aspect 0.80
+        assertEquals(WindowLayout.TALL, windowLayoutOf(700f, 1000f)) // aspect 0.70
         assertEquals(WindowLayout.TALL, windowLayoutOf(720f, 1100f))
     }
 
     @Test
     fun `분할 화면 한 칸과 정사각에 가까운 창은 NARROW`() {
+        assertEquals(WindowLayout.NARROW, windowLayoutOf(504f, 640f)) // aspect 0.79 — 분할 화면 한 칸
         assertEquals(WindowLayout.NARROW, windowLayoutOf(504f, 600f)) // aspect 0.84
         assertEquals(WindowLayout.NARROW, windowLayoutOf(900f, 800f)) // aspect 1.125
     }
