@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** 방금 끝난 운행 — 보기 모드, 5초 중 3초 남음. */
+/** 기어 P로 종료 대기 — 보기 모드, 3초 남음, [계속 기록하기] 가능. */
 private val viewing =
     TripResultUiState(
         loading = false,
@@ -25,7 +25,11 @@ private val viewing =
         origin = "판교 테크노밸리",
         destination = "서울 강남구 역삼동",
         autoCloseSec = 3,
+        canContinue = true,
     )
+
+/** 이미 끝난 운행(직접 [기록 종료]·이력에서 열기) — [계속 기록하기] 없음. */
+private val ended = viewing.copy(canContinue = false)
 
 /** [수정하기] 뒤 — 카운트다운 멈춤, 출퇴근을 고름. */
 private val editing = viewing.copy(editing = true, autoCloseSec = null, selected = PurposeCategory.COMMUTE)
@@ -47,12 +51,20 @@ class TripResultScreenTest {
 
         compose.onNodeWithText("운행 기록을 완료했어요").assertIsDisplayed()
         compose.onNodeWithText("일반 업무용 거리 48.2 km로 분류돼요").assertIsDisplayed()
-        compose.onNodeWithText("3초 후 메인 화면으로 돌아가요").assertIsDisplayed()
+        compose.onNodeWithText("메인 화면으로 · 3초").assertIsDisplayed() // 넓은 창: 남은 시간은 주 버튼 글자에
         compose.onNodeWithText("출퇴근").performClick()
+        compose.onNodeWithText("계속 기록하기").performClick()
         compose.onNodeWithText("수정하기").performClick()
-        compose.onNodeWithText("메인 화면으로").performClick()
+        compose.onNodeWithText("메인 화면으로 · 3초").performClick()
 
-        assertEquals(listOf(TripResultAction.Edit, TripResultAction.GoHome), actions)
+        assertEquals(listOf(TripResultAction.Continue, TripResultAction.Edit, TripResultAction.GoHome), actions)
+    }
+
+    @Test
+    fun `이미 끝난 운행엔 계속 기록하기가 없다`() {
+        show(ended, mutableListOf())
+
+        compose.onNodeWithText("계속 기록하기").assertDoesNotExist()
     }
 
     @Test
@@ -79,4 +91,7 @@ class TripResultScreenshotTest {
     fun editing() = captureAll("trip_result_editing") {
         TripResultScreen(editing, onAction = {})
     }
+
+    @Test
+    fun ended() = captureAll("trip_result_ended") { TripResultScreen(ended, onAction = {}) }
 }

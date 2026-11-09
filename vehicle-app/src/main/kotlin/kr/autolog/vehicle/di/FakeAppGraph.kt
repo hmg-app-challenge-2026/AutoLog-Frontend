@@ -62,7 +62,8 @@ open class FakeAppGraph(
         DefaultProfileRepository(sources.purpose, sources.settingsApi, sources.trip.currentDriver, { vehicleId }, clock)
     override val context = DefaultContextRepository(sources.context)
     override val trips = DefaultTripRepository(sources.store, sources.settingsApi)
-    override val tripResults = DefaultTripResultRepository(sources.store, sources.trip, sources.purpose) { vehicleId }
+    override val tripResults =
+        DefaultTripResultRepository(sources.store, sources.trip, sources.purpose, clock) { vehicleId }
     override val receipts =
         DefaultReceiptRepository(sources.receiptApi, sources.store, sources.voice, clock) {
             sources.store.ackReceipt(it)

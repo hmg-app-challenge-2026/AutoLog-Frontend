@@ -1,7 +1,9 @@
 package kr.autolog.vehicle.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.common.AppZone
 import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.core.PurposeDetail
@@ -9,6 +11,7 @@ import kr.autolog.vehicle.core.PurposeEngine
 import kr.autolog.vehicle.core.TripFacts
 import kr.autolog.vehicle.data.interim.InputMode
 import kr.autolog.vehicle.data.interim.LocalStore
+import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.interim.TripRow
 import kr.autolog.vehicle.data.interim.TripSessionApi
 import java.time.Instant
@@ -16,6 +19,8 @@ import java.time.Instant
 /**
  * 운행 결과 카드에 보일 한 운행(스펙 7.3, D-27). [category] = 저장된 분류, 아직 없으면 [DefaultPurposePolicy]의 기본값.
  * [classified] = 분류가 이미 저장돼 있는지(운행 기록 조회에서 다시 열었을 때 true).
+ * [endsAt] = 종료 조건은 됐지만 아직 끝나지 않은 운행(앱 A `StopCandidate`)의 종료 시각 — 그 전엔 [계속 기록하기]로 되돌릴 수 있다.
+ * null이면 이미 끝나 저장된 운행. 끝나기 전 [endTime]은 지금 시각(경과 시간 표시용).
  */
 data class TripResult(
     val tripId: String,
@@ -26,6 +31,7 @@ data class TripResult(
     val destination: String?,
     val category: PurposeCategory,
     val classified: Boolean,
+    val endsAt: Long? = null,
 )
 
 /**
@@ -41,10 +47,13 @@ val BusinessByDefault = DefaultPurposePolicy { PurposeCategory.BUSINESS }
 
 /** 운행 결과(스펙 7.3, F-08). 화면은 큰 분류 3가지만 고르고, 저장할 세부 목적은 여기 한곳에서 정한다([detailFor]). */
 interface TripResultRepository {
-    /** 운행이 없으면 null. */
+    /**
+     * 운행이 없으면 null. **계속 흐른다**: 종료 대기 중이면 세션의 지금 값([TripResult.endsAt] 있음),
+     * 끝나 저장되면 저장소 값으로 바뀐다(같은 카드가 "끝나기 전 → 끝남"을 이어서 보여 준다).
+     */
     fun result(tripId: String): Flow<TripResult?>
 
-    /** [category]로 분류해 저장한다(다시 부르면 바꾼다). */
+    /** [category]로 분류해 저장한다(다시 부르면 바꾼다). 아직 끝나지 않은 운행이면 아무것도 하지 않는다. */
     suspend fun classify(tripId: String, category: PurposeCategory)
 }
 
@@ -52,34 +61,53 @@ class DefaultTripResultRepository(
     private val store: LocalStore,
     private val session: TripSessionApi,
     private val purpose: PurposeEngine,
+    private val clock: AppClock,
     private val defaults: DefaultPurposePolicy = BusinessByDefault,
     private val vehicleId: () -> String,
 ) : TripResultRepository {
-    override fun result(tripId: String): Flow<TripResult?> = flow {
-        val row = store.trip(tripId)
-        if (row == null) {
-            emit(null)
-            return@flow
-        }
-        val saved = row.purpose?.category?.takeIf { it != PurposeCategory.UNDETERMINED }
-        emit(
-            TripResult(
-                tripId = row.tripId,
-                startTime = row.startTime,
-                endTime = row.endTime,
-                distanceKm = row.distanceKm,
-                origin = row.originLabel,
-                destination = row.destinationLabel,
-                category = saved ?: defaults.defaultFor(row.facts()),
-                classified = saved != null,
-            ),
-        )
-    }
+    override fun result(tripId: String): Flow<TripResult?> = session.state.map { s ->
+        if (s is SessionState.StopCandidate && s.trip.tripId == tripId) s.toResult() else store.trip(tripId)?.toResult()
+    }.distinctUntilChanged()
 
     override suspend fun classify(tripId: String, category: PurposeCategory) {
         val row = store.trip(tripId) ?: return
         val suggested = purpose.suggest(row.facts()).detail
         session.confirmPurpose(tripId, detailFor(category, row.purpose, suggested, row.startTime), null, InputMode.TAP)
+    }
+
+    /** 종료 대기 중인 운행 — 아직 저장소에 없다. 경과 시간은 지금까지. */
+    private suspend fun SessionState.StopCandidate.toResult() = TripResult(
+        tripId = trip.tripId,
+        startTime = trip.startTime,
+        endTime = clock.nowMs(),
+        distanceKm = liveKm,
+        origin = trip.originLabel,
+        destination = trip.destinationLabel,
+        category = defaults.defaultFor(
+            TripFacts(
+                tripId = trip.tripId,
+                vehicleId = vehicleId(),
+                startTime = trip.startTime,
+                destinationLabel = trip.destinationLabel,
+                driverUserId = trip.driverUserId,
+            ),
+        ),
+        classified = false,
+        endsAt = deadlineAt,
+    )
+
+    private suspend fun TripRow.toResult(): TripResult {
+        val saved = purpose?.category?.takeIf { it != PurposeCategory.UNDETERMINED }
+        return TripResult(
+            tripId = tripId,
+            startTime = startTime,
+            endTime = endTime,
+            distanceKm = distanceKm,
+            origin = originLabel,
+            destination = destinationLabel,
+            category = saved ?: defaults.defaultFor(facts()),
+            classified = saved != null,
+        )
     }
 
     private fun TripRow.facts() = TripFacts(

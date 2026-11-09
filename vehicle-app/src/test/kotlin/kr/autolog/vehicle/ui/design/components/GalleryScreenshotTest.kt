@@ -96,7 +96,6 @@ class GalleryScreenshotTest {
             ChoiceRow("일반 업무", selected = true, onClick = {})
             ChoiceRow("출퇴근", selected = false, onClick = {})
             ChoiceRow("개인 용무", selected = false, onClick = null) // 보기 전용
-            CountdownBar(0.6f)
             ConfidenceRow("상호", "SK 판교주유소", 0.98, onClick = {})
             ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
             ConfidenceRow("금액", null, null, onClick = {})

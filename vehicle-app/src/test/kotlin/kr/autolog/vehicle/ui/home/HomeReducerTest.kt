@@ -42,14 +42,12 @@ class HomeReducerTest {
     }
 
     @Test
-    fun `기어 P 카운트다운은 남은 초와 진행률`() {
-        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.GEAR_P, since = 0, deadlineAt = 5_000)
+    fun `종료 대기여도 Home은 기록 중 그대로 — 남은 시간은 운행 결과 카드가 보여 준다`() {
+        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.GEAR_P, deadlineAt = 5_000)
 
         val s = reduceHome(candidate, null, destination = "판교", now = 2_000)
 
-        assertEquals(HomePhase.AUTO_ENDING, s.phase)
-        assertEquals(3, s.autoEnd!!.remainingSec)
-        assertEquals(0.6f, s.autoEnd!!.progress, 0.001f)
+        assertEquals(HomePhase.RECORDING_PARKED, s.phase)
         assertEquals("23.4", s.tripKm)
     }
 

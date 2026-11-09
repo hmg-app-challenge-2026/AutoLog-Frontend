@@ -3,15 +3,19 @@ package kr.autolog.vehicle.ui.result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kr.autolog.vehicle.TestAppGraph
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.PurposeCategory
+import kr.autolog.vehicle.data.interim.SessionState
+import kr.autolog.vehicle.data.interim.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -30,7 +34,7 @@ class TripResultViewModelTest {
     private fun TestScope.open(tripId: String = "t-s1"): Pair<TestAppGraph, TripResultViewModel> {
         val g = TestAppGraph(backgroundScope, AppClock { testScheduler.currentTime }, start = Route.Home)
         g.navigator.push(Route.TripResult(tripId))
-        return g to TripResultViewModel(tripId, g.tripResults, g.navigator)
+        return g to TripResultViewModel(tripId, g.tripResults, g.session, g.navigator, g.clock)
     }
 
     private suspend fun TestScope.purposeOf(g: TestAppGraph, tripId: String = "t-s1") = g.store.trip(tripId)!!.purpose
@@ -91,5 +95,72 @@ class TripResultViewModelTest {
 
         assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
         assertTrue(g.navigator.current == Route.Home)
+    }
+
+    /** 기록 중 → 기어 P(종료 대기, 5초 뒤 종료) → Home 위 운행 결과 카드. */
+    private fun TestScope.ending(): Triple<TestAppGraph, TripResultViewModel, String> {
+        val g = TestAppGraph(backgroundScope, AppClock { testScheduler.currentTime }, start = Route.Home)
+        runCurrentStart(g)
+        val tripId = (g.trip.state.value as SessionState.StopCandidate).trip.tripId
+        g.navigator.push(Route.TripResult(tripId))
+        return Triple(g, TripResultViewModel(tripId, g.tripResults, g.session, g.navigator, g.clock), tripId)
+    }
+
+    private fun TestScope.runCurrentStart(g: TestAppGraph) {
+        backgroundScope.launch { g.trip.startSession() }
+        runCurrent()
+        g.trip.addKm(12.3)
+        g.trip.setMotion(VehicleMotion.PARKED)
+    }
+
+    @Test
+    fun `종료 대기 — 남은 시간은 앱 A 종료 시각, 계속 기록하기면 되돌리고 돌아간다`() = runTest {
+        val (g, vm) = ending()
+        val s = vm.uiState.first { !it.loading }
+        assertTrue(s.canContinue)
+        assertEquals(5, s.autoCloseSec)
+
+        vm.onAction(TripResultAction.Continue)
+        runCurrent()
+
+        assertTrue(g.trip.state.value is SessionState.Recording)
+        assertEquals(Route.Home, g.navigator.current)
+    }
+
+    @Test
+    fun `종료 대기 — 아무것도 안 누르면 종료 시각에 끝나고 일반 업무로 저장해 돌아간다`() = runTest {
+        val (g, vm, tripId) = ending()
+        vm.uiState.first { !it.loading }
+
+        advanceTimeBy(5_100)
+
+        assertEquals(Route.Home, g.navigator.current)
+        assertEquals(PurposeCategory.BUSINESS, g.store.trip(tripId)!!.purpose!!.category)
+    }
+
+    @Test
+    fun `종료 대기 — 메인 화면으로는 바로 끝내고 저장`() = runTest {
+        val (g, vm, tripId) = ending()
+        vm.uiState.first { !it.loading }
+
+        vm.onAction(TripResultAction.GoHome)
+        runCurrent()
+
+        assertEquals(Route.Home, g.navigator.current)
+        assertEquals(PurposeCategory.BUSINESS, g.store.trip(tripId)!!.purpose!!.category)
+    }
+
+    @Test
+    fun `종료 대기 중 수정하기 — 끝나도 카드에 남고 고른 목적으로 저장된다`() = runTest {
+        val (g, vm, tripId) = ending()
+        vm.uiState.first { !it.loading }
+
+        vm.onAction(TripResultAction.Edit)
+        vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
+        advanceTimeBy(5_100) // 운행은 앱 A 시각에 끝난다
+
+        assertEquals(Route.TripResult(tripId), g.navigator.current)
+        assertEquals(PurposeCategory.COMMUTE, g.store.trip(tripId)!!.purpose!!.category)
+        assertTrue(!vm.uiState.first().canContinue)
     }
 }

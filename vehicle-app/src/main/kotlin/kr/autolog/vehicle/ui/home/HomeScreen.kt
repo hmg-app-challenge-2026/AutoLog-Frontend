@@ -96,16 +96,6 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 HomeDock(state, onAction)
             }
         }
-        val autoEnd = state.autoEnd
-        if (state.phase == HomePhase.AUTO_ENDING && autoEnd != null) {
-            AutoEndPrompt(
-                autoEnd,
-                state.tripKm,
-                state.destination,
-                onKeep = { onAction(HomeAction.KeepRecording) },
-                onEnd = { onAction(HomeAction.EndNow) },
-            )
-        }
         if (state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
         }
@@ -124,7 +114,7 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
 @Composable
 private fun HomeStatus(state: HomeUiState) {
     val c = AutoLogTheme.colors
-    val recording = state.phase == HomePhase.RECORDING_PARKED || state.phase == HomePhase.AUTO_ENDING
+    val recording = state.phase == HomePhase.RECORDING_PARKED
     if (recording) {
         StatusLine(
             text = stringResource(R.string.status_recording),

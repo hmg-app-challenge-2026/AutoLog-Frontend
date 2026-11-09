@@ -41,6 +41,7 @@ object Size {
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
     val hairline = 1.dp
     val progressBar = 8.dp
+    val edgeBar = 4.dp // EdgeCountdownBar — 화면 맨 위 가는 남은 시간 막대
     val ring = 3.dp
 }
 

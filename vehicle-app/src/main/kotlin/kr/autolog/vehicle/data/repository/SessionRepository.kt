@@ -23,13 +23,8 @@ sealed interface TripSession {
     data class Recording(val trip: ActiveTrip, val liveKm: Double?) : TripSession
 
     /** 자동 종료 대기. [deadlineAt]이 유일한 시계다 — 화면은 남은 시간만 계산한다(스펙 7.2.1). */
-    data class AutoEnding(
-        val trip: ActiveTrip,
-        val liveKm: Double?,
-        val reason: AutoEndReason,
-        val since: Long,
-        val deadlineAt: Long,
-    ) : TripSession
+    data class AutoEnding(val trip: ActiveTrip, val liveKm: Double?, val reason: AutoEndReason, val deadlineAt: Long) :
+        TripSession
 
     /** 운행이 끝나 목적 확인을 기다린다 — Home이 운행 결과 카드를 자동으로 연다. */
     data class PendingReview(val tripId: String) : TripSession
@@ -115,7 +110,6 @@ internal fun SessionState.toTripSession(): TripSession = when (this) {
         trip.toActive(),
         liveKm,
         reason.toAutoEnd(),
-        since,
         deadlineAt,
     )
     is SessionState.PendingReview -> TripSession.PendingReview(trip.tripId)
