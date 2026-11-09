@@ -223,7 +223,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 토큰 | 크기 | 굵기 | 행간 | 자간 | 용도 |
 |---|---|---|---|---|---|
 | `hero` | 140 sp | 300 | 1.0 | −2% | 이번 운행 거리 숫자(Home RecordingParked) |
-| `heroSmall` | 96 sp | 300 | 1.0 | −1.5% | Peek의 이번 운행 거리, 누적거리, 요약 숫자 |
+| `heroSmall` | 96 sp | 300 | 1.0 | −1.5% | Peek의 이번 운행 거리, 좁은 창의 이번 운행 거리, 요약 숫자 |
+| `heroCompact` | 72 sp | 300 | 1.0 | −1.5% | 자릿수가 많은 누적거리(18,420.5)를 좁은 창·Peek에 쓸 때 |
 | `display` | 56 sp | 600 | 1.15 | −1% | 화면 제목 ("누가 운전하나요?") |
 | `headline` | 44 sp | 600 | 1.2 | −0.5% | 섹션 제목, 다이얼로그 제목 |
 | `title` | 36 sp | 600 | 1.25 | 0 | **주요 정보 하한**: 목적지, 추천 목적, 카드 제목 |
@@ -231,10 +232,12 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `label` | 28 sp | 600 | 1.2 | 0 | 버튼, 칩 |
 | `caption` | 22 sp | 500 | 1.3 | +0.5% | **보조 하한**: 메타 정보. **Peek에 쓰지 않는다** |
 
+- 숫자와 단위는 **줄바꿈하지 않는다**("k / m" 방지). 넘치면 크기 단계를 `hero` → `heroSmall` → `heroCompact`로 낮춘다(`HeroMetric`의 `MetricSize`).
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
 - `caption`보다 작은 글자를 만들지 않는다.
+- 모든 글자 스타일은 한국어를 어절 중간에서 자르지 않는 줄바꿈(`LineBreak.WordBreak.Phrase`, Android 13+)을 쓴다. 단, Robolectric 스크린샷에서는 적용되지 않아(2026-11-09 확인) 끊김 위험이 있는 곳은 문장을 나눠 설계한다(예: 자동 종료 시트의 거리·목적지 두 줄).
 
 ### 6.3 운전자 쪽 (`driverSide`)
 
@@ -269,7 +272,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `size.touchMin` | 76 | 모든 터치 대상의 최소 높이·너비 |
 | `size.buttonMd` | 76 | 보조 버튼, 리스트 행 |
 | `size.buttonLg` | 96 | 주 버튼 |
-| `size.buttonXl` | 120 | Home의 [운행 시작]·[운행 종료] |
+| `size.buttonXl` | 120 | Home의 [운행 시작]·[기록 종료] (NARROW에서는 높이가 모자라 `buttonLg` 96) |
 | `size.iconButton` | 96 | 마이크, 키패드 키 |
 | `size.icon` | 36 | 버튼 안 아이콘 |
 | `size.iconLg` | 48 | 상태 아이콘 |
@@ -405,16 +408,16 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 | 컴포넌트 | 사양 |
 |---|---|
-| `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. 상태: 기본 / 눌림(0.97배, 밝기 +6%) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자 자리에 진행 표시, 탭 무시) |
-| `SecondaryButton` | 높이 `buttonMd`, `surface2` 바탕, `textPrimary` 글자 |
+| `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. 상태: 기본 / 눌림(0.97배) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자를 투명하게 남겨 폭 유지 + 진행 표시, 탭 무시). 로딩 회전은 무한 애니메이션이라 스크린샷 테스트에 넣지 않는다 |
+| `SecondaryButton` | 높이 `buttonMd`, `surface3` 바탕(시트 `surface2` 위에서도 면이 보이게), `textPrimary` 글자 |
 | `TertiaryButton` | 바탕 없음, `accent` 글자, 최소 터치 76 dp 유지("나중에 선택" 등) |
 | `DangerButton` | `dangerFill` 바탕. 확인 다이얼로그 안에서만 |
 | `IconButtonXL` | 96 dp 원형, `surface2` 바탕, 아이콘 36 dp. 마이크·키패드 |
-| `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(`display`, 흰색) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 우상단 "배차" 칩. 누르면 `press` |
+| `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusChip` | `radius.full`, 높이 56 dp, 아이콘 + 글자(`label`). 의미색 글자 + `surface3` 바탕 |
 | `ActionCard` | `surface1`, `radius.md`, 안쪽 `space.5`. 아이콘 + 제목(`title`) + 한 줄 설명. 카드 전체가 터치 대상 |
-| `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 놓친 운행 등 |
+| `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 폭 720 dp 미만이면 버튼을 문장 아래로 내린다(문장이 3줄로 눌리지 않게). 놓친 운행 등 |
 | `Sheet` | 아래에서 올라오는 시트, `surface2`, 위 모서리 `radius.lg`, 뒤 `scrim`. 단계가 FULL에서 내려가면 즉시 닫힘 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |

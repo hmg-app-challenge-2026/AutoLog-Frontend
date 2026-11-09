@@ -176,7 +176,7 @@ AutoLog-Frontend/
 │   ├── src/vehicle/              # VehicleAppGraph
 │   ├── src/main/res/font/        # asta_sans.ttf (가변) + OFL.txt
 │   ├── src/test/                 # ViewModel·Navigator·토큰 테스트, Roborazzi
-│   └── src/test/screenshots/     # Roborazzi 기준 이미지(커밋)
+│   └── src/test/screenshots/     # Roborazzi 출력(로컬 검토용, .gitignore — 2026-11-09 사용자 결정)
 ├── web/
 │   ├── admin/                    # 운영 웹
 │   └── camera/index.html         # 폰 카메라 페이지
@@ -568,13 +568,13 @@ fun windowLayoutOf(widthDp: Float, heightDp: Float): WindowLayout {
     val aspect = widthDp / heightDp
     return when {
         aspect >= 1.25f && widthDp >= 840f -> WindowLayout.WIDE   // 가로 창 (앱 1개가 2칸 사용)
-        aspect <= 0.80f                    -> WindowLayout.TALL   // 세로로 긴 창 (12.9″ portrait 등)
+        aspect <= 0.70f                    -> WindowLayout.TALL   // 세로로 긴 창 (12.9″ portrait 등)
         else                               -> WindowLayout.NARROW // 분할 화면의 한 칸, 정사각에 가까운 창
     }
 }
 ```
 
-- 임계값(1.25, 0.80, 840 dp)은 **잠정값 [검증 필요 V-01]**이다. FormFactorConsole 프리셋을 측정한 뒤 고친다.
+- 임계값(1.25, 0.70, 840 dp)은 **잠정값 [검증 필요 V-01]**이다. (TALL 기준은 처음 0.80이었으나 분할 화면 한 칸 ≈504×640dp(0.79)까지 TALL로 잡혀 2026-11-09 구현 중 0.70으로 바꿈) FormFactorConsole 프리셋을 측정한 뒤 고친다.
 - `AutoLogRoot`가 `BoxWithConstraints`로 계산해 `LocalWindowLayout` CompositionLocal로 내려 준다. 화면은 이 값으로 배치만 바꾸고, **상태·기능은 3단계 모두 같다**(Pleos: 어떤 창 크기에서도 핵심 기능 사용 가능).
 - 창 크기 변경은 Activity 재생성 없이 리컴포즈된다(5.4 `configChanges`). 레이아웃 전환은 주차(FULL) 중 `motion.layout`, Peek에서는 즉시 교체(D-11).
 - 시스템 UI(상태 표시줄, GNB, 공조 패널, 키보드)는 앱 위에 겹칠 수 있다. 루트에서 `WindowInsets.safeDrawing`을 패딩으로 적용하고, 핵심 정보(거리, 주 버튼)를 창 가장자리 24 dp 안쪽에 두지 않는다.
@@ -876,7 +876,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | `UsageTier` 판정 | 6.9 표의 모든 조합: motion(PARKED·STOPPED·MOVING·null) × carUx(DO 필요·불필요·연결 실패) → 기대 tier | JUnit4 |
 | Navigator | tier 하락 → `[Home]`로 축소, FULL이 아니면 push 무시, 딥링크 | JUnit4 |
 | 조작 예산 | 1.2 표의 작업별 탭 수를 UI 테스트로 센다(운전자 선택 1, P 자동 종료 0, 목적 확정 1, 영수증 1, 발송 2) | Compose UI test on Robolectric |
-| `windowLayoutOf` | 경계값(aspect 1.25·0.80, width 840) | JUnit4 |
+| `windowLayoutOf` | 경계값(aspect 1.25·0.70, width 840) | JUnit4 |
 | 디자인 토큰 | **모든 텍스트 색 × 배경 색 조합의 대비 ≥ 4.5:1**, 주 버튼 위 텍스트 ≥ 4.5:1, 최소 터치 크기 상수 ≥ 76 dp, 본문 최소 28 sp | JUnit4 (`ContrastTest`) |
 | 화면 스크린샷 | 화면별 {WIDE, NARROW, TALL} × {dark, light}. Home은 {Ready, RecordingParked, AutoEnding, NeedsRecovery}, Peek은 {기록 중, 자동 종료 대기, 운행 없음} 추가 | Roborazzi(`@GraphicsMode(NATIVE)`, `@Config(qualifiers=…)`) |
 | 잠금 UI | PEEK이면 클릭 가능한 노드 0개, FULL→PEEK 전환 시 시트·다이얼로그 닫힘, BACKGROUND에서 `moveTaskToBack` 호출 | Compose UI test on Robolectric |
@@ -898,7 +898,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 
 ### 10.4 완료 정의
 
-기능 하나가 "완료"이려면: 화면 3레이아웃 × 2테마 스크린샷이 커밋돼 있고, ViewModel 테스트가 있고, 사용 단계(FULL 전용·PEEK·BACKGROUND) 규칙이 적용돼 있고, 1.2 조작 예산 안에 있고, `design-language.md` 13장 체크리스트를 통과하고, 맥 에뮬레이터에서 한 번 실행해 봤다(못 했으면 PR에 적는다).
+기능 하나가 "완료"이려면: 화면 3레이아웃 × 2테마 스크린샷을 로컬에 기록해 확인했고(현재 커밋하지 않음), ViewModel 테스트가 있고, 사용 단계(FULL 전용·PEEK·BACKGROUND) 규칙이 적용돼 있고, 1.2 조작 예산 안에 있고, `design-language.md` 13장 체크리스트를 통과하고, 맥 에뮬레이터에서 한 번 실행해 봤다(못 했으면 PR에 적는다).
 
 ---
 

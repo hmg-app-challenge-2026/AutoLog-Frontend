@@ -19,3 +19,12 @@ git submodule update --init --recursive
 ```
 
 요구: JDK 17, Android SDK 35, Node 20. 실행 검증은 Apple Silicon 맥의 Pleos Connect Emulator(API 34)에서 한다(스펙 5.5).
+
+## 실행
+
+```bash
+./gradlew :vehicle-app:installDemoDebug     # 전부 Fake. 오른쪽 위를 길게 누르면 데모 패널
+./gradlew :vehicle-app:installVehicleDebug  # Pleos 에뮬레이터용(CarUxRestrictions 실제, 나머지는 앱 A·B 연결 전까지 Fake)
+```
+
+개발 환경은 [docs/dev-setup.md](docs/dev-setup.md), 디자인 게이트는 [docs/design-gate-2026-11-11.md](docs/design-gate-2026-11-11.md).

@@ -1,0 +1,54 @@
+# 디자인 게이트 (2026-11-11)
+
+차량 앱 기반 계획(`docs/superpowers/plans/2026-11-09-vehicle-app-foundation.md`)의 마지막 단계. 사용자 승인 전에 아래를 본다.
+스크린샷 위치: `vehicle-app/src/test/screenshots/` (Linux 기준 렌더링, 50장).
+
+## 볼 것
+
+| 화면 | 파일 | 확인 포인트 |
+|---|---|---|
+| 운전자 선택 | `picker_*` | 제목·타일이 주인공, 배차 운전자 링·첫 자리, 배지가 이니셜을 가리지 않음, 미확정 운행 질문은 하단 보조 |
+| Home 대기 | `home_ready_*` | 누적거리 숫자, 놓친 운행 배너, [운행 시작]이 운전자 쪽(WIDE 왼쪽) 아래 |
+| Home 기록 중(주차) | `home_recording_*` | 거리 숫자(WIDE·TALL 140 sp), 목적지·경과 |
+| 자동 종료 안내 | `home_autoend_*` | "N초 뒤 자동으로 마쳐요", 진행 막대, [계속 기록]이 주 버튼 |
+| 복구 | `home_recovery_*` | 삭제만 한 번 더 확인, 뒤 화면에 거리 경고 없음 |
+| Peek | `peek_*` | 누를 것 없음, 5줄 이하, 사이드 창(NARROW)에서 읽힘 |
+| 컴포넌트 | `components_tall_*` | 버튼·칩·숫자·배너 |
+
+## 맥 에뮬레이터에서 (스펙 10.3)
+
+1. `./gradlew :vehicle-app:installDemoDebug` → 앱 실행 → 운전자 선택 → Home
+2. 오른쪽 위를 길게 누르기 → 데모 패널 → [주행 시나리오 재생] → 앱이 물러남(V-12) → 약 25초 뒤 앱을 다시 열면 자동 종료 안내 또는 "확인 필요 1건"
+3. 데모 패널 [정차(신호 대기)] → Peek, 누를 것 없음
+4. 윈도 바로 portrait ↔ landscape, 다른 앱과 1:1 분할 → 잘림·겹침 없음, 상태 유지
+5. 차량 설정에서 주간·야간 전환 → 깜빡임 없음(V-08)
+6. FormFactorConsole 프리셋별 dp·DPI·px 기록(V-01) → `docs/verification.md`
+7. 한국어 어절 줄바꿈이 실기기에서 적용되는지("앱이 꺼진 동안 15.0 km를 달렸어요" 배너)
+8. vehicle flavor 설치 후 VHAL로 기어 D·속도 주입 → `adb logcat -s AutoLog/ui`로 CarUxRestrictions 값(V-04, V-11)
+
+## 구현 중 계획과 달라진 점 (다른 사람이 이어받을 때 참고)
+
+| 계획 | 실제 | 이유 |
+|---|---|---|
+| `HeroMetric`의 숫자 교체를 `AnimatedContent`로 | 항상 `Text` + 값이 바뀔 때만 투명도 0.4→1 | `AnimatedContent`는 베이스라인이 없고 자기 영역을 잘라 숫자가 잘렸다 |
+| `HeroMetric(large: Boolean)` | `size: MetricSize` (HERO 140 / MEDIUM 96 / COMPACT 72 sp), 숫자·단위 줄바꿈 금지 | 좁은 창에서 "k / m" 줄바꿈과 넘침 |
+| 로딩 버튼은 글자 대신 회전 표시 | 글자를 투명하게 남기고 회전 표시를 겹침 | 로딩 때 버튼 폭이 흔들렸다 |
+| `SecondaryButton` 바탕 `surface2` | `surface3` | 시트(`surface2`) 위에서 버튼 면이 안 보였다 |
+| `Banner` 항상 한 줄 | 폭 720 dp 미만이면 버튼을 문장 아래로 | WIDE 오른쪽 컬럼에서 문장이 3줄로 눌렸다 |
+| ProfilePicker: 미확정 운행 카드가 위 | 제목·타일이 가운데 주인공, 미확정 질문은 하단 한 줄(작은 아바타) | 보조 질문이 화면을 차지해 타일이 밀렸다 |
+| 프로필 배지는 우상단 `StatusChip` | 아바타 아래 가장자리에 걸친 작은 배지 | 배지가 이니셜을 가렸다 |
+| 미확정 카드 타일 키 `userId + "-prev"` | `ProfileTile(sharedKey = null)` | 키를 바꾸면 아바타 색(userId 해시)도 바뀌었다 |
+| TALL 판정 aspect ≤ 0.80 | ≤ 0.70 | 분할 화면 한 칸(≈504×640, 0.79)이 TALL로 잡혔다 (스펙 6.8 갱신) |
+| NARROW 타일 160 dp·2열 | 128 dp·3열 | 세 명이 스크롤 없이 한 줄에 |
+| Home NARROW: Spacer weight로 배치 | 가운데 영역은 남으면 가운데·모자라면 스크롤, 주 버튼 96 dp | 내용이 넘쳐 주 버튼이 찌그러졌다 |
+| 자동 종료 시트 "23.4 km · 목적지" 한 줄 | 거리·목적지 두 줄 | 좁은 창에서 목적지가 어절 중간에서 끊겼다 |
+| 모든 TextStyle | 한국어 어절 단위 줄바꿈(`WordBreak.Phrase`) 추가 | 어절 중간 줄바꿈 방지(실기기 확인 필요) |
+| 취소 문구 `android.R.string.cancel` | 앱 문자열 `action_cancel` | 서체·말투 일관성 |
+| `MotionTokensTest`의 `is SnapSpec` | `is SnapSpec<*>` | 제네릭 타입 검사 컴파일 오류(계획서 코드 버그) |
+| 스크린샷 기록 `recordRoborazziDemoDebug --tests` | `testDemoDebugUnitTest --tests … -Proborazzi.test.record=true` | 기록 태스크는 `--tests`를 받지 않는다 |
+
+## 결정이 필요한 것
+
+- 토큰 값 조정(색·크기)이 있으면 `docs/design-language.md`를 먼저 고치고 `ContrastTest`를 통과시킨다.
+- V-01 측정값으로 `WindowLayout.kt` 임계값과 `Screenshots.kt` 크기를 바꾼다.
+- NARROW에서 ProfilePicker의 [나중에 선택]이 스크롤해야 보인다(미확정 운행 질문이 있을 때). 그대로 둘지 결정.
