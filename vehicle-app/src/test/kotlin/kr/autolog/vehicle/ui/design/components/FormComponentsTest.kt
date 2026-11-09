@@ -1,27 +1,18 @@
 package kr.autolog.vehicle.ui.design.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kr.autolog.vehicle.screenshot.ShotSize
-import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
-import kr.autolog.vehicle.ui.design.Space
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -80,25 +71,5 @@ class FormComponentsTest {
 
         assertTrue(m.width >= 21 + 8)
         assertTrue((0 until 4).all { !m.get(it, it) }) // 왼쪽 위 여백은 비어 있다
-    }
-}
-
-@RunWith(AndroidJUnit4::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [34])
-class FormComponentsScreenshotTest {
-    @Test
-    fun forms() = captureAll("components_forms", listOf(ShotSize.TALL)) {
-        Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
-            ActionCard(Icons.Rounded.Settings, "설정", onClick = {})
-            OptionButton("거래처 방문", selected = true, onClick = {})
-            OptionButton("외근", selected = false, onClick = {})
-            InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
-            ConfidenceRow("상호", "SK 판교주유소", 0.98, onClick = {})
-            ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
-            ConfidenceRow("금액", null, null, onClick = {})
-            QrImage("https://autolog.example/r/abcd1234?t=demo", Space.s9 * 2)
-            NumericKeypad(onDigit = {}, onDelete = {}, allowDecimal = false)
-        }
     }
 }

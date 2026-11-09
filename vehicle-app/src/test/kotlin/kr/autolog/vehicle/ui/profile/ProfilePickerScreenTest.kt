@@ -95,6 +95,12 @@ class ProfilePickerScreenshotTest {
     }
 
     @Test
+    fun allProfiles() = captureAll("picker_all") {
+        val many = profiles + listOf("정다은", "최민수", "한지민").mapIndexed { i, n -> DriverProfile("u-${i + 4}", n, "영업2팀") }
+        ProfilePickerScreen(ProfilePickerUiState(many, showAll = true, loaded = true), onAction = {})
+    }
+
+    @Test
     fun addSheet() = captureAll("picker_add") {
         ProfilePickerScreen(
             ProfilePickerUiState(profiles, addForm = AddDriverForm(name = "최신입"), loaded = true),

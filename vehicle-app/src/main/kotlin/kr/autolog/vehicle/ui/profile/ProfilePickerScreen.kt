@@ -11,9 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -131,6 +128,7 @@ private fun PickerTileOf(tile: PickerTile, size: Dp, onAction: (ProfilePickerAct
         }, tileSize = size)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfilePickerAction) -> Unit) {
     val c = AutoLogTheme.colors
@@ -146,13 +144,13 @@ private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfileP
     ) {
         Text(stringResource(R.string.picker_all_title), style = AutoLogTheme.type.headline, color = c.textPrimary)
         Spacer(Modifier.height(Space.s5))
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(Size.profileTileNarrow),
-            horizontalArrangement = Arrangement.spacedBy(Space.s5),
+        // 카드 하나의 스크롤로 흐른다 — 높이 고정 격자를 카드 안에 넣으면 스크롤이 두 겹이 되고 줄이 잘렸다
+        FlowRow(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Space.s5, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(Space.s5),
-            modifier = Modifier.fillMaxWidth().height(Size.profileTileWide * 2),
         ) {
-            items(profiles, key = { it.userId }) { p ->
+            profiles.forEach { p ->
                 // 뒤 화면의 같은 사람 타일과 shared element 키가 겹치지 않게 팝업 쪽은 끈다
                 ProfileTileOf(p, Size.profileTileNarrow, sharedKey = null) {
                     onAction(ProfilePickerAction.Select(p.userId))

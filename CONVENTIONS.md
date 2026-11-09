@@ -43,6 +43,7 @@
 | ViewModel | 화면마다 1개 이상. 정상·오류·잠금 상태 각 1개 이상 |
 | 디자인 토큰 | 토큰을 바꾸면 `ContrastTest` 통과 필수 |
 | 스크린샷 | 화면을 추가·변경하면 `./gradlew :vehicle-app:recordRoborazziDemoDebug`로 로컬에 기록해 검토한다. **현재는 리포에 커밋하지 않는다**(`.gitignore`, 2026-11-09 사용자 결정 — 로컬 검토용). 그래서 CI의 `verifyRoborazzi`는 비교할 기준이 없어 회귀를 잡지 못한다. 기준 이미지를 커밋하기로 바꾸면 `.gitignore`에서 빼고 이 행을 고친다 |
+| 컴포넌트 갤러리 | `ui/design/components/` 컴포넌트를 추가·변경하면 `GalleryScreenshotTest`(components·components_tiles·components_forms·components_modal)도 같이 고친다. 갤러리는 지금 컴포넌트 목록과 같아야 한다. UI를 바꾸면 `src/test/screenshots/`를 지우고 전부 다시 기록한다(옛 캡처를 남기지 않는다) |
 | 웹 | 폼·API 오류 문구 테스트 |
 
 테스트 이름은 백틱 문장: ``fun `주행이 시작되면 보조 화면을 모두 닫는다`()``.

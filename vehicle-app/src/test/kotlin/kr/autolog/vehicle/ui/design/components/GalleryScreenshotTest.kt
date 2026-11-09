@@ -1,0 +1,129 @@
+package kr.autolog.vehicle.ui.design.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.LocalGasStation
+import androidx.compose.material.icons.rounded.MoreHoriz
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import kr.autolog.vehicle.screenshot.ShotSize
+import kr.autolog.vehicle.screenshot.captureAll
+import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.Size
+import kr.autolog.vehicle.ui.design.Space
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+/**
+ * 디자인 언어 11장 컴포넌트 갤러리. 컴포넌트를 추가·변경하면 여기도 같이 고친다 — 갤러리가 지금 컴포넌트 목록과 같아야 한다.
+ * 역할별로 나눠 TALL 한 장씩: 기본(버튼·칩·배지·숫자·배너) · 타일(사람·동작·아바타·동작 카드) · 입력 · 팝업.
+ */
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [34])
+class GalleryScreenshotTest {
+    private val tall = listOf(ShotSize.TALL)
+
+    @Test
+    fun basics() = captureAll("components", tall) {
+        Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
+            PrimaryButton("계속 기록", onClick = {}, modifier = Modifier.fillMaxWidth())
+            SecondaryButton("기록 종료", onClick = {}, modifier = Modifier.fillMaxWidth())
+            TertiaryButton("나중에 선택", onClick = {})
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+                StatusChip("확인 필요 1건", ChipTone.WARNING, icon = Icons.Rounded.ErrorOutline, onClick = {})
+                StatusChip("1", ChipTone.ACCENT, icon = Icons.AutoMirrored.Rounded.ReceiptLong, onClick = {}) // 축약형
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s6)) {
+                DriverBadge("u-1", "김영업", onClick = {})
+                DriverBadge(null, null, onClick = {})
+            }
+            HeroMetric("23.4", "km", "이번 운행", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
+            Banner("앱이 꺼진 동안 15.0 km를 달렸어요", listOf(BannerAction("추가") {}, BannerAction("무시") {}))
+        }
+    }
+
+    @Test
+    fun tiles() = captureAll("components_tiles", tall) {
+        val c = AutoLogTheme.colors
+        Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s6)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
+                ProfileTile("u-1", "김영업", "영업1팀", scheduled = true, recent = false, onClick = {})
+                ProfileTile("u-2", "이현장", "기술지원팀", scheduled = false, recent = true, onClick = {})
+                ProfileTile("u-3", "박관리", "총무팀", scheduled = false, recent = false, onClick = {})
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
+                ActionTile(Icons.Rounded.MoreHoriz, "다른 사람", onClick = {})
+                ActionTile(Icons.Rounded.Add, "새 운전자 추가", onClick = {})
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
+                Avatar("u-4", "정다은", Size.avatarLarge)
+                AvatarFace("최", Brush.linearGradient(listOf(c.accent, c.accentFill)), Size.avatarLarge)
+                IconAvatar(Icons.Rounded.Person, Size.avatarLarge, iconSize = Size.iconLg)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+                ActionCard(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {}, modifier = Modifier.weight(1f))
+                ActionCard(Icons.Rounded.History, "이력", onClick = {}, modifier = Modifier.weight(1f), badge = 2)
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                QuickAction(Icons.Rounded.LocalGasStation, "주유 기록 추가", onClick = {})
+                QuickAction(Icons.Rounded.History, "이력", onClick = {})
+                QuickAction(Icons.Rounded.Settings, "설정", onClick = {})
+            }
+        }
+    }
+
+    @Test
+    fun forms() = captureAll("components_forms", tall) {
+        Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
+            InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
+            InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
+            OptionButton("거래처 방문", selected = true, onClick = {})
+            OptionButton("외근", selected = false, onClick = {})
+            ConfidenceRow("상호", "SK 판교주유소", 0.98, onClick = {})
+            ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
+            ConfidenceRow("금액", null, null, onClick = {})
+            QrImage("https://autolog.example/r/abcd1234?t=demo", Space.s9 * 2)
+            NumericKeypad(onDigit = {}, onDelete = {}, allowDecimal = false)
+        }
+    }
+
+    @Test
+    fun modal() = captureAll("components_modal", tall) {
+        Box {
+            Text(
+                "뒤 화면",
+                Modifier.padding(Space.s6),
+                style = AutoLogTheme.type.display,
+                color = AutoLogTheme.colors.textPrimary,
+            )
+            ModalCard(footer = {
+                PrimaryButton("확인", onClick = {}, modifier = Modifier.fillMaxWidth(), height = Size.buttonMd)
+                TertiaryButton("취소", onClick = {}, modifier = Modifier.align(Alignment.CenterHorizontally))
+            }) {
+                Text("가운데 카드", style = AutoLogTheme.type.headline, color = AutoLogTheme.colors.textPrimary)
+                Text(
+                    "모든 팝업은 이 모양이에요. 결정 버튼은 아래에 고정돼요.",
+                    style = AutoLogTheme.type.body,
+                    color = AutoLogTheme.colors.textSecondary,
+                )
+            }
+        }
+    }
+}
