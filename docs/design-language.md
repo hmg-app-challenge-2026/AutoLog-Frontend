@@ -433,7 +433,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `SegmentedPurpose` | 목적 선택지 그룹. 카테고리 제목(`caption`) 아래 선택지 버튼들(`buttonMd`), 선택되면 `accent` 링 + 체크 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusChip` 모양이지만 터치 불가: `● 기록 중`. 운전자는 오른쪽 위 `DriverBadge`) ② 이번 운행 거리(`HeroMetric`, `heroSmall`) ③ 목적지(`title`) ④ 기록 방식 한 줄(`body`, `textSecondary`: "계기판 거리 · 10초 전 저장") ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션 없음 |
-| `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 뒤 자동으로 마쳐요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · [계속 기록](`PrimaryButton`, 운전자 쪽) · [기록 종료](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
+| `AutoEndPrompt` | 기어 P 자동 종료 팝업(`ModalCard`, 버튼은 footer). 제목 "기록을 마칠까요?"(`headline`) · 요약 `23.4 km · 목적지`(`title`) · 남은 시간 `5초 후 기록이 자동 종료돼요`(`body`, tnum, 1초마다 숫자만 교체 5→1) · 줄어드는 진행 막대(높이 8 dp, `radius.full`, 채움 `accent`, 바탕 `surface3`, 선형) · [계속 기록](`PrimaryButton`, 운전자 쪽) · [기록 종료](`SecondaryButton`). 남은 시간은 `deadlineAt − now`로 계산하고 컴포넌트가 타이머를 갖지 않는다 |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
 
