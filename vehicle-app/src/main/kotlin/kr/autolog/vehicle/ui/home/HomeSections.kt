@@ -55,12 +55,9 @@ internal fun HomeSecondarySection(state: HomeUiState, onAction: (HomeAction) -> 
 
 /** 큰 숫자 크기 — 높이 640 dp 창은 72 sp, 세로가 넉넉한 TALL은 96 sp. */
 @Composable
-private fun metricSize(): MetricSize = if (LocalWindowLayout.current ==
-    WindowLayout.TALL
-) {
-    MetricSize.MEDIUM
-} else {
-    MetricSize.COMPACT
+private fun metricSize(): MetricSize = when (LocalWindowLayout.current) {
+    WindowLayout.TALL -> MetricSize.MEDIUM
+    WindowLayout.WIDE, WindowLayout.NARROW -> MetricSize.COMPACT
 }
 
 @Composable

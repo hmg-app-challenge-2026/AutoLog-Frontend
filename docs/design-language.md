@@ -520,3 +520,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.7 | 2026-11-09 | 소제목 통일: "이번 운행" → "주행 거리", 공용 `Section`으로 Home·Peek이 같은 소제목(주행 거리·운행 경로·누적 거리). 상태 문구 키 `status_recording`·`status_ready` 하나로 |
 | 1.8 | 2026-11-09 | `RouteFlow`를 경로 선으로: 출발 ○ · 흐르는 화살표 · 도착 ● 표시 칸 + 글자 칸. 출발지 caption(보조) · 목적지 label(값)으로 위계를 되돌림(1.6의 "같은 스타일"은 좁은 창에서 출발지가 소제목보다 커 보이는 역전을 만들었다). 화살표 칸 16 → 12 dp로 줄여 504×640에서도 목적지까지 스크롤 없이. `Size.routeDot` 추가 |
 | 1.9 | 2026-11-09 | 앱 안 알림 없음(스펙 D-26): `NoticeRow`·`NoticePill`·`OverflowRow` 삭제, Home은 상태 줄 → 두 섹션 → 타일. `TripListRow` 경고색 제거(목적 없음은 회색 문장). 놓친 운행은 `ModalCard` 팝업(X = 무시, `ModalCard.closeLabel`로 접근성 이름을 그 뜻으로) |
+| 1.10 | 2026-11-09 | 누를 수 있는 요소의 공통 동작을 `Modifier.tappable` 하나로(입력 잠금·누름 0.97배·햅틱, 물결 없음) — `ConfidenceRow`도 누름 피드백·햅틱을 갖게 됨. 화면 바깥 여백 `screenMargin()` 하나로 |

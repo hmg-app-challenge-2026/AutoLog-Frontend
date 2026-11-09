@@ -14,10 +14,10 @@ import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.common.currentMonth
 import kr.autolog.vehicle.common.tickerFlow
-import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.repository.ContextRepository
 import kr.autolog.vehicle.data.repository.SessionRepository
 import kr.autolog.vehicle.data.repository.TripRepository
+import kr.autolog.vehicle.data.repository.TripSession
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
 
@@ -31,7 +31,7 @@ class HomeViewModel(
 ) : ViewModel() {
     val uiState: StateFlow<HomeUiState> =
         combine(
-            combine(session.state, session.missedTrip, context.destinationLabel, ::Triple),
+            combine(session.state, session.missedKm, context.destinationLabel, ::Triple),
             // 대기 왼쪽 = 이번 달 요약, 오른쪽 = 최근 운행 기록(D-25). 화면이 열려 있는 동안 달이 바뀌는 경우는 다음 진입 때 맞춘다
             combine(trips.summary(clock.currentMonth()), trips.recent(RECENT_TRIPS), ::Pair),
             ticker,
@@ -44,8 +44,8 @@ class HomeViewModel(
         viewModelScope.launch {
             var opened: String? = null
             session.state
-                .filterIsInstance<SessionState.PendingReview>()
-                .map { it.trip.tripId }
+                .filterIsInstance<TripSession.PendingReview>()
+                .map { it.tripId }
                 .distinctUntilChanged()
                 .collect { id -> if (id != opened && navigator.push(Route.ReviewTrip(id))) opened = id }
         }
@@ -59,7 +59,7 @@ class HomeViewModel(
                 HomeAction.KeepRecording -> session.keepRecording()
                 HomeAction.AcceptMissedTrip -> session.acceptMissedTrip()
                 HomeAction.IgnoreMissedTrip -> session.ignoreMissedTrip()
-                is HomeAction.Recover -> session.resolveRecovery(action.choice)
+                is HomeAction.Recover -> session.resolveRecovery(action.action)
                 HomeAction.AddFuelRecord -> navigator.push(Route.ReceiptQr)
                 HomeAction.OpenRecords -> navigator.push(Route.History)
                 HomeAction.OpenSettings -> navigator.push(Route.Settings)

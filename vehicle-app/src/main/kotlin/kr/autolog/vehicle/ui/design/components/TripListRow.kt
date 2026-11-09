@@ -1,8 +1,6 @@
 package kr.autolog.vehicle.ui.design.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,19 +13,14 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /**
  * 디자인 언어 11장 TripListRow — 운행 한 건 목록 줄(Home "최근 운행 기록", 이력). `surface1`, `radius.md`, 최소 높이 76 dp.
@@ -38,19 +31,14 @@ import kr.autolog.vehicle.ui.design.confirmHaptic
 fun TripListRow(title: String, subtitle: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
-    val interaction = remember { MutableInteractionSource() }
-    val view = LocalView.current
     Row(
         modifier
             .fillMaxWidth()
             .heightIn(min = Size.touchMin)
-            .pressFeedback(interaction)
+            .tappable(onClick)
             .clip(RoundedCornerShape(Radius.md))
             .background(c.surface1)
-            .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
-                view.confirmHaptic()
-                onClick()
-            }.padding(horizontal = Space.s5, vertical = Space.s3),
+            .padding(horizontal = Space.s5, vertical = Space.s3),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Space.s1)) {

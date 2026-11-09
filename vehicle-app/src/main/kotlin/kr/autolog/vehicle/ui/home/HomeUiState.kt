@@ -1,22 +1,11 @@
 package kr.autolog.vehicle.ui.home
 
-import kr.autolog.vehicle.common.AppZone
-import kr.autolog.vehicle.data.interim.MissedTrip
-import kr.autolog.vehicle.data.interim.RecoveryChoice
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.StopReason
-import kr.autolog.vehicle.data.repository.HistoryItem
-import kr.autolog.vehicle.data.repository.MonthSummary
-import kr.autolog.vehicle.ui.design.formatKm
-import kr.autolog.vehicle.ui.design.progressOf
-import kr.autolog.vehicle.ui.design.remainingSeconds
-import java.time.Instant
-import java.time.format.DateTimeFormatter
+import kr.autolog.vehicle.data.repository.RecoveryAction
 
-/** 스펙 7.2 상태 4가지. */
+/** 스펙 7.2 상태 4가지. 상태 계산은 [reduceHome](HomeReducer.kt). */
 enum class HomePhase { READY, RECORDING_PARKED, AUTO_ENDING, NEEDS_RECOVERY }
 
-data class AutoEndUi(val remainingSec: Int, val progress: Float, val reason: StopReason)
+data class AutoEndUi(val remainingSec: Int, val progress: Float)
 
 /** 대기 상태의 주인공 — 이번 달 요약(스펙 7.2, D-23). */
 data class MonthUi(val tripCount: Int, val totalKm: String, val businessKm: String)
@@ -65,7 +54,7 @@ sealed interface HomeAction {
 
     data object IgnoreMissedTrip : HomeAction
 
-    data class Recover(val choice: RecoveryChoice) : HomeAction
+    data class Recover(val action: RecoveryAction) : HomeAction
 
     /** 주유 기록 추가 — 영수증 QR로 들어간다(스펙 7.4). */
     data object AddFuelRecord : HomeAction
@@ -78,75 +67,3 @@ sealed interface HomeAction {
 
 /** "최근 운행 기록"에 보이는 최대 건수(D-25). */
 const val RECENT_TRIPS = 3
-
-internal fun reduceHome(
-    state: SessionState,
-    missed: MissedTrip?,
-    destination: String?,
-    now: Long,
-    month: MonthSummary? = null,
-    recent: List<HistoryItem> = emptyList(),
-): HomeUiState {
-    val idle = state is SessionState.Idle || state is SessionState.PendingReview
-    // 놓친 운행은 운행이 없을 때만 묻는다 — 기록 중엔 지금 운행이 먼저
-    val missedKm = if (idle) formatKm(missed?.gapKm) else null
-    val base =
-        HomeUiState(
-            month = month?.let {
-                MonthUi(it.tripCount, formatKm(it.totalKm).orEmpty(), formatKm(it.businessKm).orEmpty())
-            },
-            destination = destination,
-            missedKm = missedKm,
-            recentTrips = recent.take(RECENT_TRIPS).map { it.toRecentUi(now) },
-        )
-    return when (state) {
-        SessionState.Idle, is SessionState.PendingReview -> base
-        is SessionState.Recording ->
-            base.copy(
-                phase = HomePhase.RECORDING_PARKED,
-                tripKm = formatKm(state.liveKm),
-                origin = state.trip.originLabel,
-                elapsedMin = ((now - state.trip.startTime) / 60_000).toInt().coerceAtLeast(0),
-            )
-        is SessionState.StopCandidate ->
-            base.copy(
-                phase = HomePhase.AUTO_ENDING,
-                tripKm = formatKm(state.liveKm),
-                origin = state.trip.originLabel,
-                elapsedMin = ((now - state.trip.startTime) / 60_000).toInt().coerceAtLeast(0),
-                autoEnd =
-                AutoEndUi(
-                    remainingSec = remainingSeconds(state.deadlineAt, now),
-                    progress = progressOf(state.since, state.deadlineAt, now),
-                    reason = state.reason,
-                ),
-            )
-        is SessionState.NeedsRecovery ->
-            base.copy(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = formatKm(state.extraKm))
-    }
-}
-
-private val TIME = DateTimeFormatter.ofPattern("HH:mm")
-
-/** [AppZone] 기준으로 오늘·어제·그 전을 가른다. 문구는 화면이 strings.xml로 만든다. */
-private fun HistoryItem.toRecentUi(now: Long): RecentTripUi {
-    val start = Instant.ofEpochMilli(startTime).atZone(AppZone)
-    val today = Instant.ofEpochMilli(now).atZone(AppZone).toLocalDate()
-    val day =
-        when (start.toLocalDate()) {
-            today -> TripDay.TODAY
-            today.minusDays(1) -> TripDay.YESTERDAY
-            else -> TripDay.EARLIER
-        }
-    return RecentTripUi(
-        tripId = tripId,
-        origin = origin,
-        destination = destination,
-        km = formatKm(distanceKm),
-        day = day,
-        month = start.monthValue,
-        dayOfMonth = start.dayOfMonth,
-        time = start.format(TIME),
-        purpose = purpose?.labelKo,
-    )
-}

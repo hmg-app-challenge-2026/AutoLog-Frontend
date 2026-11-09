@@ -31,6 +31,7 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.StatusLine
+import kr.autolog.vehicle.ui.design.screenMargin
 import kr.autolog.vehicle.ui.design.verticalScrollFade
 
 @Composable
@@ -64,7 +65,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
             // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
-            Column(Modifier.fillMaxSize().padding(Space.s7), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
+            Column(
+                Modifier.fillMaxSize().padding(screenMargin()),
+                verticalArrangement = Arrangement.spacedBy(Space.s4),
+            ) {
                 TopRow { HomeStatus(state) }
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     if (showBody) {
@@ -76,8 +80,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 HomeDock(state, onAction)
             }
         } else {
-            val margin = if (layout == WindowLayout.TALL) Space.tallMargin else Space.s6
-            Column(Modifier.fillMaxSize().padding(margin), verticalArrangement = Arrangement.spacedBy(Space.s5)) {
+            Column(
+                Modifier.fillMaxSize().padding(screenMargin()),
+                verticalArrangement = Arrangement.spacedBy(Space.s5),
+            ) {
                 TopRow { HomeStatus(state) }
                 // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 타일은 늘 보인다
                 ScrollRegion(Modifier.weight(1f).fillMaxWidth()) {

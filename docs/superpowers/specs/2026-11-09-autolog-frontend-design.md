@@ -501,7 +501,7 @@ class HomeViewModel(
 
 | Repository (인터페이스) | 감싸는 계약 | 화면 | 비고 |
 |---|---|---|---|
-| `SessionRepository` | `TripSessionApi`(A, interim) | Home, Peek, ReviewTrip, ProfilePicker | 운행 상태·시작/종료·자동 종료 카운트다운·목적 확정·운전자 지정·놓친 운행·복구 |
+| `SessionRepository` | `TripSessionApi`(A, interim) | Home, Peek, ReviewTrip, ProfilePicker | 운행 상태·시작/종료·자동 종료 카운트다운·목적 확정·운전자 지정·놓친 운행·복구. 화면에는 자기 값 타입(`TripSession`·`ActiveTrip`·`AutoEndReason`·`RecoveryAction`, 놓친 운행은 `missedKm`)만 내보내고, interim `SessionState`에서의 변환은 구현 안 한곳(`toTripSession`) |
 | `VehicleUsageRepository` | `TripSessionApi.motion`(기어·움직임) + AAOS `CarUxRestrictionsManager` | Root | `val tier: StateFlow<UsageTier>` (6.9) |
 | `ProfileRepository` | `PurposeEngine.orderedUsers`·`unassignedTrips`, `SettingsApi.users`·`addUser`, interim 운전자 선택 | ProfilePicker, Home 상단 칩 | |
 | `ContextRepository` | `ContextApi` | Home, ReviewTrip | 목적지·최근 목적지 |
@@ -1030,3 +1030,4 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 |---|---|---|
 | 1.0 | 2026-11-09 | 최초 확정 (사용 3단계·조작 최소화, 리포 구조, 스택, MVVM·Repository, 가변 레이아웃, 사용 단계 잠금, 화면 명세(Peek·AutoEndPrompt 포함), 사내 서버 취합, 웹, 품질 게이트, 일정) |
 | 1.1 | 2026-11-09 | D-26 앱 안 알림 없음(시스템 알림만): Home 알림 띠·목록 삭제, 놓친 운행은 대기 Home 팝업, 목적 없는 운행은 운행 기록 조회에서 직접, 미확정 영수증은 [주유 기록 추가] 진입 때 바로 입력 창 |
+| 1.2 | 2026-11-09 | 구조 점검: `SessionRepository`가 화면용 세션 타입을 내보내 `ui/`의 interim 의존 제거(6.5·6.6), Home·Peek 상태 계산을 `XxxReducer.kt`로 분리 |

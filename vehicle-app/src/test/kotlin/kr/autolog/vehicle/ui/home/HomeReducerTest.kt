@@ -1,23 +1,22 @@
 package kr.autolog.vehicle.ui.home
 
 import kr.autolog.vehicle.core.PurposeDetail
-import kr.autolog.vehicle.data.interim.LiveTrip
-import kr.autolog.vehicle.data.interim.MissedTrip
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.StopReason
+import kr.autolog.vehicle.data.repository.ActiveTrip
+import kr.autolog.vehicle.data.repository.AutoEndReason
 import kr.autolog.vehicle.data.repository.HistoryItem
 import kr.autolog.vehicle.data.repository.MonthSummary
+import kr.autolog.vehicle.data.repository.TripSession
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
 class HomeReducerTest {
-    private val trip = LiveTrip("t-1", startTime = 0L, 18_420.5, "판교", "u-1", originLabel = "본사")
+    private val trip = ActiveTrip("t-1", startTime = 0L, origin = "본사")
     private val month = MonthSummary(tripCount = 23, totalKm = 412.6, businessKm = 388.1, reviewCount = 1)
 
     @Test
     fun `대기면 이번 달 요약이 주인공이고 놓친 운행 거리를 묻는다`() {
-        val s = reduceHome(SessionState.Idle, MissedTrip(15.0, 0), destination = null, now = 0, month = month)
+        val s = reduceHome(TripSession.Idle, 15.0, destination = null, now = 0, month = month)
 
         assertEquals(HomePhase.READY, s.phase)
         assertEquals(MonthUi(23, "412.6", "388.1"), s.month)
@@ -26,14 +25,14 @@ class HomeReducerTest {
 
     @Test
     fun `기록 중에는 놓친 운행을 묻지 않는다 — 지금 운행이 먼저`() {
-        val s = reduceHome(SessionState.Recording(trip, 23.4, 0), MissedTrip(15.0, 0), "판교", now = 0)
+        val s = reduceHome(TripSession.Recording(trip, 23.4), 15.0, "판교", now = 0)
 
         assertNull(s.missedKm)
     }
 
     @Test
     fun `기록 중이면 거리·경로·경과 분`() {
-        val s = reduceHome(SessionState.Recording(trip, 23.4, 0), null, destination = "판교", now = 35 * 60_000L)
+        val s = reduceHome(TripSession.Recording(trip, 23.4), null, destination = "판교", now = 35 * 60_000L)
 
         assertEquals(HomePhase.RECORDING_PARKED, s.phase)
         assertEquals("23.4", s.tripKm)
@@ -44,7 +43,7 @@ class HomeReducerTest {
 
     @Test
     fun `기어 P 카운트다운은 남은 초와 진행률`() {
-        val candidate = SessionState.StopCandidate(trip, 23.4, StopReason.GEAR_P, since = 0, deadlineAt = 5_000)
+        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.GEAR_P, since = 0, deadlineAt = 5_000)
 
         val s = reduceHome(candidate, null, destination = "판교", now = 2_000)
 
@@ -56,7 +55,7 @@ class HomeReducerTest {
 
     @Test
     fun `복구 상황이면 늘어난 거리를 보여 준다`() {
-        val s = reduceHome(SessionState.NeedsRecovery(trip, 3.2), null, destination = null, now = 0)
+        val s = reduceHome(TripSession.NeedsRecovery(3.2), null, destination = null, now = 0)
 
         assertEquals(HomePhase.NEEDS_RECOVERY, s.phase)
         assertEquals("3.2", s.recoveryExtraKm)
@@ -64,7 +63,7 @@ class HomeReducerTest {
 
     @Test
     fun `계기판 거리를 못 읽으면 거리는 비우고 추정하지 않는다`() {
-        val s = reduceHome(SessionState.Recording(trip, liveKm = null, lastSavedAt = 0), null, "판교", now = 0)
+        val s = reduceHome(TripSession.Recording(trip, liveKm = null), null, "판교", now = 0)
 
         assertEquals(HomePhase.RECORDING_PARKED, s.phase)
         assertNull(s.tripKm)
@@ -102,7 +101,7 @@ class HomeReducerTest {
                 item("d", at(5, 8), PurposeDetail.FIELD_WORK),
             )
 
-        val s = reduceHome(SessionState.Idle, null, null, now = now, recent = recent)
+        val s = reduceHome(TripSession.Idle, null, null, now = now, recent = recent)
 
         assertEquals(listOf("a", "b", "c"), s.recentTrips.map { it.tripId })
         assertEquals(listOf(TripDay.TODAY, TripDay.YESTERDAY, TripDay.EARLIER), s.recentTrips.map { it.day })

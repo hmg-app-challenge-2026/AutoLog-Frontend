@@ -17,19 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.LocalTopEndReserved
-import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.DriverBadge
 import kr.autolog.vehicle.ui.design.components.LocalModalCount
-
-/** 화면 바깥 여백(디자인 언어 6.4)과 같은 자리에 붙인다 — 화면 콘텐츠의 오른쪽 위 모서리와 맞물린다. */
-@Composable
-fun screenMargin() = when (LocalWindowLayout.current) {
-    WindowLayout.WIDE -> Space.s7
-    WindowLayout.TALL -> Space.tallMargin
-    WindowLayout.NARROW -> Space.s6
-}
+import kr.autolog.vehicle.ui.design.screenMargin
 
 /** 실제 앱: 현재 운전자로 [BadgeScaffold]를 그린다. */
 @Composable
@@ -47,6 +38,7 @@ fun DriverBadgeScaffold(onClick: (() -> Unit)?, content: @Composable () -> Unit)
 fun BadgeScaffold(userId: String?, name: String?, onClick: (() -> Unit)?, content: @Composable () -> Unit) {
     val modal = remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    // 배지는 화면 바깥 여백과 같은 자리 — 화면 콘텐츠의 오른쪽 위 모서리와 맞물린다
     val margin = screenMargin()
     // 배지 폭을 재서 화면 위 줄이 비워 둘 폭으로 알린다 — 이름 길이가 달라도 겹치지 않는다.
     // 화면 콘텐츠는 screenMargin()만큼 안쪽에서 끝나고 배지는 그보다 s3 바깥까지 나가므로, 콘텐츠 기준 예약 폭 = 배지 폭 - s3 + 간격

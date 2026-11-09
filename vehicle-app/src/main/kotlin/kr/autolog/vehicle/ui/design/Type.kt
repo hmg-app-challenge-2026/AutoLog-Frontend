@@ -35,7 +35,7 @@ data class AutoLogType(
     val body: TextStyle,
     val label: TextStyle,
     val caption: TextStyle,
-    /** 영역 소제목("이번 달 운행 정보", "알림"). 크기는 caption과 같고 굵기로 제목임을 드러낸다 — 소제목보다 큰 설명 글씨를 두지 않는다. */
+    /** 영역 소제목("이번 달 운행 정보", "운행 경로"). 크기는 caption과 같고 굵기로 제목임을 드러낸다 — 소제목보다 큰 설명 글씨를 두지 않는다. */
     val section: TextStyle,
 )
 

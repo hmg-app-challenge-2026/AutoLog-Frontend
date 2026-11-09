@@ -21,10 +21,16 @@ enum class ShotSize(val qualifier: String) {
 /** 실제 앱처럼 오른쪽 위 운전자 배지를 얹을 때. [clickable]=false는 Peek(표시 전용). */
 data class ShotDriver(val userId: String?, val name: String?, val clickable: Boolean = true)
 
+/** 스크린샷 기록 위치(로컬 검토용, 커밋하지 않음 — CONVENTIONS 4장). */
+const val SCREENSHOT_DIR = "src/test/screenshots"
+
 /** 스크린샷 공통 운전자(배차된 김영업). */
 val SampleDriver = ShotDriver("u-1", "김영업")
 
-/** 레이아웃 × 테마마다 한 장씩. 파일: src/test/screenshots/<name>_<size>_<theme>.png. [driver]가 있으면 실제 앱과 같은 [BadgeScaffold]로 감싼다. */
+/**
+ * 레이아웃 × 테마마다 한 장씩. 파일: `src/test/screenshots/<size>/<name>_<theme>.png` — 창 크기(wide·narrow·tall)마다 폴더를 나눠
+ * 같은 크기끼리 넘겨 보며 비교한다(2026-11-09 사용자 결정). [driver]가 있으면 실제 앱과 같은 [BadgeScaffold]로 감싼다.
+ */
 fun captureAll(
     name: String,
     sizes: List<ShotSize> = ShotSize.entries,
@@ -35,7 +41,7 @@ fun captureAll(
         for (dark in listOf(true, false)) {
             RuntimeEnvironment.setQualifiers("${size.qualifier}-${if (dark) "night" else "notnight"}-xhdpi")
             val theme = if (dark) "dark" else "light"
-            captureRoboImage("src/test/screenshots/${name}_${size.name.lowercase()}_$theme.png") {
+            captureRoboImage("$SCREENSHOT_DIR/${size.name.lowercase()}/${name}_$theme.png") {
                 // 반복 상태 모션(경로 화살표 등)은 멈춘 그림으로 — 무한 애니메이션은 캡처를 끝나지 않게 한다
                 AutoLogTheme(darkTheme = dark, ambientMotion = false) {
                     Box(Modifier.fillMaxSize().background(AutoLogTheme.colors.bg)) {

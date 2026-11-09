@@ -68,6 +68,9 @@ fun ProfilePickerScreen(
             WindowLayout.NARROW -> Size.profileTileCompact
         }
     val gap = if (layout == WindowLayout.NARROW) Space.s5 else Space.s6
+    // 분할 화면 한 칸(NARROW)은 한 줄에 안 들어간다 — 어절 단위 두 줄을 문자열로 정해 둔다
+    // (Phrase 줄바꿈은 기기에선 되지만 Robolectric 스크린샷에선 글자 단위로 꺾인다)
+    val title = if (layout == WindowLayout.NARROW) R.string.picker_title_two_lines else R.string.picker_title
     BoxWithConstraints(modifier.fillMaxSize()) {
         Column(
             Modifier
@@ -79,17 +82,7 @@ fun ProfilePickerScreen(
             verticalArrangement = Arrangement.spacedBy(Space.s6, Alignment.CenterVertically),
         ) {
             Text(
-                // 분할 화면 한 칸(NARROW)은 한 줄에 안 들어간다 — 어절 단위 두 줄을 문자열로 정해 둔다
-                // (Phrase 줄바꿈은 기기에선 되지만 Robolectric 스크린샷에선 글자 단위로 꺾인다)
-                stringResource(
-                    if (layout ==
-                        WindowLayout.NARROW
-                    ) {
-                        R.string.picker_title_two_lines
-                    } else {
-                        R.string.picker_title
-                    },
-                ),
+                stringResource(title),
                 style = t.display,
                 color = c.textPrimary,
                 textAlign = TextAlign.Center,

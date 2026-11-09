@@ -1,8 +1,6 @@
 package kr.autolog.vehicle.ui.design.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,20 +10,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /**
  * 디자인 언어 11장 DockTile — 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식).
@@ -43,17 +36,11 @@ fun DockTile(
     emphasized: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
-    val interaction = remember { MutableInteractionSource() }
-    val view = LocalView.current
     Column(
         modifier
             .widthIn(min = Size.touchMin)
-            .pressFeedback(interaction)
-            .clip(RoundedCornerShape(Radius.md))
-            .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
-                view.confirmHaptic()
-                onClick()
-            },
+            .tappable(onClick)
+            .clip(RoundedCornerShape(Radius.md)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {

@@ -17,8 +17,9 @@ dist/
 .DS_Store
 
 
-# Roborazzi 비교 산출물(기준 이미지는 src/test/screenshots에 커밋)
+# Roborazzi 비교 산출물
 vehicle-app/build/outputs/roborazzi/
 
-# 스크린샷은 로컬 검토용으로만 둔다(2026-11-09 사용자 결정). 기록: ./gradlew :vehicle-app:recordRoborazziDemoDebug
+# 스크린샷은 로컬 검토용으로만 둔다(2026-11-09 사용자 결정). 창 크기별 폴더 wide/·narrow/·tall/.
+# 기록: ./gradlew :vehicle-app:recordRoborazziDemoDebug
 vehicle-app/src/test/screenshots/

@@ -6,8 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kr.autolog.vehicle.data.interim.RecoveryChoice
-import kr.autolog.vehicle.data.interim.StopReason
+import kr.autolog.vehicle.data.repository.RecoveryAction
 import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.ShotDriver
 import kr.autolog.vehicle.screenshot.captureAll
@@ -49,7 +48,7 @@ private val recordingTrouble =
         tripKm = null,
         destination = "경기도 성남시 분당구 판교역로 테크노밸리 제2캠퍼스 거래처 본관",
     )
-private val autoEnding = recording.copy(phase = HomePhase.AUTO_ENDING, autoEnd = AutoEndUi(3, 0.6f, StopReason.GEAR_P))
+private val autoEnding = recording.copy(phase = HomePhase.AUTO_ENDING, autoEnd = AutoEndUi(3, 0.6f))
 private val recovery = HomeUiState(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = "3.2")
 
 @RunWith(AndroidJUnit4::class)
@@ -80,7 +79,7 @@ class HomeScreenTest {
         compose.onNodeWithText("삭제").performClick()
         compose.onNodeWithText("지우기").performClick()
 
-        assertEquals(listOf<HomeAction>(HomeAction.Recover(RecoveryChoice.DELETE)), actions)
+        assertEquals(listOf<HomeAction>(HomeAction.Recover(RecoveryAction.DELETE)), actions)
     }
 
     @Test

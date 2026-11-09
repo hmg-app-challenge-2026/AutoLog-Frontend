@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import kr.autolog.vehicle.R
-import kr.autolog.vehicle.data.interim.RecoveryChoice
+import kr.autolog.vehicle.data.repository.RecoveryAction
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.DangerButton
@@ -24,7 +24,7 @@ import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
 /** Backend F-10 복구. 되돌릴 수 없는 [삭제]만 한 번 더 묻는다(디자인 언어 2.6). */
 @Composable
-fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
+fun RecoveryDialog(extraKm: String?, onAction: (RecoveryAction) -> Unit) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     var confirmingDelete by rememberSaveable { mutableStateOf(false) }
@@ -38,12 +38,12 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
                 }
                 PrimaryButton(
                     text = stringResource(R.string.recovery_record),
-                    onClick = { onChoice(RecoveryChoice.RECORD) },
+                    onClick = { onAction(RecoveryAction.RECORD) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 SecondaryButton(
                     text = stringResource(R.string.recovery_continue),
-                    onClick = { onChoice(RecoveryChoice.CONTINUE) },
+                    onClick = { onAction(RecoveryAction.CONTINUE) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 TertiaryButton(
@@ -55,7 +55,7 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
                 ModalText(stringResource(R.string.recovery_delete_confirm), style = t.title, color = c.textPrimary)
                 DangerButton(
                     text = stringResource(R.string.recovery_delete_yes),
-                    onClick = { onChoice(RecoveryChoice.DELETE) },
+                    onClick = { onAction(RecoveryAction.DELETE) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

@@ -1,8 +1,6 @@
 package kr.autolog.vehicle.ui.design.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,21 +13,16 @@ import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /** 디자인 언어 11장 NumericKeypad: 3×4, 키 96 dp, 간격 16 dp. 키보드 대신 숫자를 넣는다(연결 코드·금액·리터). */
 @Composable
@@ -75,18 +68,12 @@ private fun KeyText(text: String) =
 
 @Composable
 private fun Key(width: Dp, onClick: () -> Unit, content: @Composable () -> Unit) {
-    val interaction = remember { MutableInteractionSource() }
-    val view = LocalView.current
     Box(
         Modifier
             .size(width, Size.iconButton)
-            .pressFeedback(interaction)
+            .tappable(onClick)
             .clip(RoundedCornerShape(Radius.lg))
-            .background(AutoLogTheme.colors.surface2)
-            .clickable(interaction, null, enabled = !LocalInputLocked.current, role = Role.Button) {
-                view.confirmHaptic()
-                onClick()
-            },
+            .background(AutoLogTheme.colors.surface2),
         contentAlignment = Alignment.Center,
     ) { content() }
 }

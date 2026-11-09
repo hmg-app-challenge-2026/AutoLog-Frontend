@@ -1,10 +1,6 @@
 package kr.autolog.vehicle.ui.peek
 
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.StopReason
-import kr.autolog.vehicle.ui.design.formatKm
-import kr.autolog.vehicle.ui.design.remainingSeconds
-
+/** 정차 패널 상태(스펙 7.0). 계산은 [reducePeek](PeekReducer.kt). */
 sealed interface PeekUiState {
     data object Loading : PeekUiState
 
@@ -14,23 +10,3 @@ sealed interface PeekUiState {
 
     data class NoTrip(val odometerKm: String?) : PeekUiState
 }
-
-/** 스펙 7.0 내용 ①~⑤. 순수 함수(테스트 대상). */
-internal fun reducePeek(state: SessionState, odometerKm: Double?, destination: String?, now: Long): PeekUiState =
-    when (state) {
-        is SessionState.Recording ->
-            PeekUiState.Recording(
-                tripKm = formatKm(state.liveKm),
-                origin = state.trip.originLabel,
-                destination = destination,
-                autoEndInSec = null,
-            )
-        is SessionState.StopCandidate ->
-            PeekUiState.Recording(
-                tripKm = formatKm(state.liveKm),
-                origin = state.trip.originLabel,
-                destination = destination,
-                autoEndInSec = if (state.reason == StopReason.GEAR_P) null else remainingSeconds(state.deadlineAt, now),
-            )
-        else -> PeekUiState.NoTrip(formatKm(odometerKm))
-    }

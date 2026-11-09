@@ -32,6 +32,9 @@
 - Kotlin: Backend CONVENTIONS 6장(ktlint, 이름, 단위 접미어)을 그대로 따른다. 커밋 전 `./gradlew ktlintFormat`.
 - Compose 파일 구성: 화면 하나 = `XxxRoute.kt`(ViewModel 연결) · `XxxScreen.kt`(순수 UI + Preview) · `XxxViewModel.kt` · `XxxUiState.kt`(UiState·Action·Effect).
 - Composable 이름은 PascalCase 명사, 파라미터 순서: 필수 데이터 → `onXxx` 콜백 → `modifier: Modifier = Modifier` (마지막).
+- **누를 수 있는 요소는 모두 `Modifier.tappable`**(`ui/design/components/Press.kt`)로 만든다. 입력 잠금(스펙 6.9)·누름 피드백·햅틱이 한곳에 있다 — `clickable`을 직접 쓰지 않는다.
+- 화면 바깥 여백은 `screenMargin()`(창 크기별 하나). 화면마다 `Space.s7`/`tallMargin`을 따로 고르지 않는다.
+- 화면 하나의 상태 계산은 `XxxReducer.kt`의 순수 함수(`reduceXxx`)로 두고 Repository 값 타입만 입력으로 받는다. `data/interim` 타입은 `ui/`에 들어오지 않는다(스펙 6.6).
 - 색·글자·간격·모양·모션은 **반드시 `AutoLogTheme` 토큰**. 리터럴 `Color(0xFF…)`, `16.dp`, `24.sp`를 화면 코드에 쓰지 않는다(토큰 정의 파일 제외).
 - 문자열은 `strings.xml`. 화면 코드에 한국어 리터럴을 쓰지 않는다(Preview·테스트 제외).
 - TypeScript(web/admin): ESLint 기본 + `strict: true`. 컴포넌트 PascalCase, 훅 `useXxx`, API 함수 동사형.
@@ -42,7 +45,7 @@
 |---|---|
 | ViewModel | 화면마다 1개 이상. 정상·오류·잠금 상태 각 1개 이상 |
 | 디자인 토큰 | 토큰을 바꾸면 `ContrastTest` 통과 필수 |
-| 스크린샷 | 화면을 추가·변경하면 `./gradlew :vehicle-app:recordRoborazziDemoDebug`로 로컬에 기록해 검토한다. **현재는 리포에 커밋하지 않는다**(`.gitignore`, 2026-11-09 사용자 결정 — 로컬 검토용). 그래서 CI의 `verifyRoborazzi`는 비교할 기준이 없어 회귀를 잡지 못한다. 기준 이미지를 커밋하기로 바꾸면 `.gitignore`에서 빼고 이 행을 고친다 |
+| 스크린샷 | 화면을 추가·변경하면 `./gradlew :vehicle-app:recordRoborazziDemoDebug`로 로컬에 기록해 검토한다. 파일은 창 크기별 폴더 `src/test/screenshots/{wide,narrow,tall}/<이름>_<dark|light>.png`(`captureAll`이 정한다). **현재는 리포에 커밋하지 않는다**(`.gitignore`, 2026-11-09 사용자 결정 — 로컬 검토용). 그래서 CI의 `verifyRoborazzi`는 비교할 기준이 없어 회귀를 잡지 못한다. 기준 이미지를 커밋하기로 바꾸면 `.gitignore`에서 빼고 이 행을 고친다 |
 | 컴포넌트 갤러리 | `ui/design/components/` 컴포넌트를 추가·변경하면 `GalleryScreenshotTest`(components·components_tiles·components_forms·components_modal)도 같이 고친다. 갤러리는 지금 컴포넌트 목록과 같아야 한다. UI를 바꾸면 `src/test/screenshots/`를 지우고 전부 다시 기록한다(옛 캡처를 남기지 않는다) |
 | 웹 | 폼·API 오류 문구 테스트 |
 

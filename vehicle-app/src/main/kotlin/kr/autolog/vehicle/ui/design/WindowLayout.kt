@@ -7,6 +7,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 
 /** 스펙 6.8. 임계값은 잠정값(V-01) — FormFactorConsole 측정 후 고친다. */
 enum class WindowLayout { NARROW, WIDE, TALL }
@@ -29,6 +30,17 @@ enum class DriverSide { START, END }
 
 val LocalWindowLayout = compositionLocalOf { WindowLayout.NARROW }
 val LocalDriverSide = staticCompositionLocalOf { DriverSide.START }
+
+/**
+ * 화면 바깥 여백(디자인 언어 6.4) — 창 크기마다 하나. 화면 콘텐츠와 운전자 배지가 같은 값을 써서 오른쪽 위 모서리가 맞물린다.
+ * 화면은 이 값을 직접 계산하지 않는다.
+ */
+@Composable
+fun screenMargin(): Dp = when (LocalWindowLayout.current) {
+    WindowLayout.WIDE -> Space.s7
+    WindowLayout.TALL -> Space.tallMargin
+    WindowLayout.NARROW -> Space.s6
+}
 
 /** 현재 창 크기로 [LocalWindowLayout]을 계산해 내려 준다. 루트와 스크린샷 테스트가 쓴다. */
 @Composable

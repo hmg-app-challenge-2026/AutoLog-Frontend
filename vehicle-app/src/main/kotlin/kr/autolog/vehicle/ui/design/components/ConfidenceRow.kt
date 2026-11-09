@@ -2,7 +2,6 @@ package kr.autolog.vehicle.ui.design.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,10 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
@@ -64,10 +61,10 @@ fun ConfidenceRow(
         modifier
             .fillMaxWidth()
             .heightIn(min = Size.touchMin)
+            .tappable(onClick)
             .clip(shape)
             .background(c.surface1)
             .then(if (level == ConfidenceLevel.OK) Modifier else Modifier.border(Size.ring, tone, shape))
-            .clickable(enabled = !LocalInputLocked.current, role = Role.Button, onClick = onClick)
             .padding(horizontal = Space.s5, vertical = Space.s3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Space.s4),
