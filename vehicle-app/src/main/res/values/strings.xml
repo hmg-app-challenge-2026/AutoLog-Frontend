@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AutoLog</string>
+    <string name="duration_sec">%1$d초</string>
+    <string name="duration_min_sec">%1$d분 %2$d초</string>
+    <string name="unit_km">km</string>
+    <string name="distance_unavailable">계기판 거리를 읽지 못했어요</string>
 </resources>

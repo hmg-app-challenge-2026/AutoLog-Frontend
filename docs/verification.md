@@ -8,11 +8,11 @@
 | V-02 | 성공 — `includeBuild("backend") { dependencySubstitution { substitute(module("kr.autolog:vehicle-core")).using(project(":vehicle-core")) } }` 그대로 동작. 대안(include) 불필요 | WSL | 2026-11-09 | `:backend:vehicle-core` 태스크로 빌드됨 |
 | V-03 | | 맥 에뮬레이터 | | |
 | V-04 | | 맥 에뮬레이터 | | |
-| V-05 | | WSL | | |
+| V-05 | 지원 — Asta Sans GSUB 기능 목록에 `tnum` 있음(aalt·calt·ccmp·frac·fwid·liga·ordn·sinf·ss01·subs·sups·tnum·vert·vrt2) | WSL | 2026-11-09 | `fontFeatureSettings = "tnum"` 그대로 사용 |
 | V-06 | | 맥 에뮬레이터 | | |
 | V-07 | | 실차 | | |
 | V-08 | | 맥 에뮬레이터 | | |
-| V-09 | | WSL | | |
+| V-09 | 정상 — Roborazzi 1.32.2 + Robolectric 4.14.1(SDK 34, NATIVE)에서 Asta Sans 한글·숫자 렌더링 확인(`components_tall_*.png`) | WSL | 2026-11-09 | **무한 애니메이션(CircularProgressIndicator 등)이 화면에 있으면 캡처 1장당 약 3분 대기** → 스크린샷에는 로딩 회전을 넣지 않는다 |
 | V-10 | | WSL | | |
 | V-11 | | 맥 에뮬레이터 | | |
 | V-12 | | 맥 에뮬레이터 | | |
