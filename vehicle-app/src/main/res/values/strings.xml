@@ -5,4 +5,6 @@
     <string name="duration_min_sec">%1$d분 %2$d초</string>
     <string name="unit_km">km</string>
     <string name="distance_unavailable">계기판 거리를 읽지 못했어요</string>
+    <string name="badge_scheduled">배차</string>
+    <string name="badge_recent">최근</string>
 </resources>
