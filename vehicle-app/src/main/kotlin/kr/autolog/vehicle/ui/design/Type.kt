@@ -7,6 +7,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import kr.autolog.vehicle.R
@@ -35,8 +36,12 @@ data class AutoLogType(
     val caption: TextStyle,
 )
 
+/** 한국어를 단어(어절) 중간에서 자르지 않는다 — "달 / 렸어요" 방지 (Android 13+ Phrase 줄바꿈, 미만은 기본 동작). */
+private val KoreanPhraseLineBreak = LineBreak.Paragraph.copy(wordBreak = LineBreak.WordBreak.Phrase)
+
 private fun style(sizeSp: Int, weight: Int, lineHeight: Float, trackingEm: Float, tnum: Boolean = false) =
     TextStyle(
+        lineBreak = KoreanPhraseLineBreak,
         fontFamily = AstaSans,
         fontWeight = FontWeight(weight),
         fontSize = sizeSp.sp,

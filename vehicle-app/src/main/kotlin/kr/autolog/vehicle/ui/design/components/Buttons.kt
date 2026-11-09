@@ -94,7 +94,8 @@ fun SecondaryButton(
     enabled: Boolean = true,
 ) {
     val c = AutoLogTheme.colors
-    ButtonBody(text, onClick, modifier, height, c.surface2, c.textPrimary, c.surface2, enabled)
+    // surface3: 시트(surface2) 위에서도 버튼 면이 보이게 한 단계 위 서피스
+    ButtonBody(text, onClick, modifier, height, c.surface3, c.textPrimary, c.surface3, enabled)
 }
 
 @Composable

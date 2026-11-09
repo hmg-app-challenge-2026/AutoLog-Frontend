@@ -235,6 +235,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
 - `caption`보다 작은 글자를 만들지 않는다.
+- 모든 글자 스타일은 한국어를 어절 중간에서 자르지 않는 줄바꿈(`LineBreak.WordBreak.Phrase`, Android 13+)을 쓴다. 단, Robolectric 스크린샷에서는 적용되지 않아(2026-11-09 확인) 끊김 위험이 있는 곳은 문장을 나눠 설계한다(예: 자동 종료 시트의 거리·목적지 두 줄).
 
 ### 6.3 운전자 쪽 (`driverSide`)
 
@@ -405,16 +406,16 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 | 컴포넌트 | 사양 |
 |---|---|
-| `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. 상태: 기본 / 눌림(0.97배, 밝기 +6%) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자 자리에 진행 표시, 탭 무시) |
-| `SecondaryButton` | 높이 `buttonMd`, `surface2` 바탕, `textPrimary` 글자 |
+| `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. 상태: 기본 / 눌림(0.97배) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자를 투명하게 남겨 폭 유지 + 진행 표시, 탭 무시). 로딩 회전은 무한 애니메이션이라 스크린샷 테스트에 넣지 않는다 |
+| `SecondaryButton` | 높이 `buttonMd`, `surface3` 바탕(시트 `surface2` 위에서도 면이 보이게), `textPrimary` 글자 |
 | `TertiaryButton` | 바탕 없음, `accent` 글자, 최소 터치 76 dp 유지("나중에 선택" 등) |
 | `DangerButton` | `dangerFill` 바탕. 확인 다이얼로그 안에서만 |
 | `IconButtonXL` | 96 dp 원형, `surface2` 바탕, 아이콘 36 dp. 마이크·키패드 |
-| `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(`display`, 흰색) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 우상단 "배차" 칩. 누르면 `press` |
+| `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusChip` | `radius.full`, 높이 56 dp, 아이콘 + 글자(`label`). 의미색 글자 + `surface3` 바탕 |
 | `ActionCard` | `surface1`, `radius.md`, 안쪽 `space.5`. 아이콘 + 제목(`title`) + 한 줄 설명. 카드 전체가 터치 대상 |
-| `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 놓친 운행 등 |
+| `Banner` | 화면 상단 전폭, `surface2`, 왼쪽 의미색 아이콘, 문장 + 버튼 최대 2개. 폭 720 dp 미만이면 버튼을 문장 아래로 내린다(문장이 3줄로 눌리지 않게). 놓친 운행 등 |
 | `Sheet` | 아래에서 올라오는 시트, `surface2`, 위 모서리 `radius.lg`, 뒤 `scrim`. 단계가 FULL에서 내려가면 즉시 닫힘 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
