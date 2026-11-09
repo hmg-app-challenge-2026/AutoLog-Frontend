@@ -1,0 +1,23 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  vehicle-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive # backend 리포가 비공개면 secrets.BACKEND_TOKEN 으로 token: 을 지정한다
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: ktlint
+        run: ./gradlew ktlintCheck
+      - name: Unit tests + screenshot verify
+        run: ./gradlew :vehicle-app:testDemoDebugUnitTest :vehicle-app:verifyRoborazziDemoDebug
+      - name: Build
+        run: ./gradlew :vehicle-app:assembleDemoDebug :vehicle-app:assembleVehicleDebug

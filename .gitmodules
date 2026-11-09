@@ -1,0 +1,3 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/hmg-app-challenge-2026/AutoLog-Backend
