@@ -80,6 +80,19 @@ class ScreenRepositoriesTest {
     }
 
     @Test
+    fun `주유 초안은 영수증 출처에 따라 확정하거나 직접 입력으로 저장한다`() = runTest {
+        val g = TestAppGraph(backgroundScope, AppClock { now })
+        val receipt = FakeReceiptApi.SAMPLE_RECEIPT
+
+        val ocr = g.receipts.add(FuelDraft(receipt, receipt.fields, "t-1"))
+        val manual = g.receipts.add(FuelDraft(null, receipt.fields, null))
+
+        assertTrue(ocr is ConfirmResult.Saved)
+        assertNull(g.receipts.receipt(receipt.receiptId).first())
+        assertTrue(manual is ConfirmResult.Saved)
+    }
+
+    @Test
     fun `잘못된 연결 코드는 이유와 함께 실패한다`() = runTest {
         val g = TestAppGraph(backgroundScope, AppClock { now })
 

@@ -25,6 +25,16 @@ class NavigatorTest {
     }
 
     @Test
+    fun `영수증이 오면 QR을 입력 화면으로 교체한다`() {
+        val nav = Navigator(Route.Home)
+        nav.push(Route.ReceiptQr)
+
+        nav.replaceTop(Route.FuelEntry("r-1"))
+
+        assertEquals(listOf(Route.Home, Route.FuelEntry("r-1")), nav.backStack.value)
+    }
+
+    @Test
     fun `주차에서 정차로 내려가면 백스택이 Home 하나로 줄어든다`() {
         val nav = Navigator(Route.Home)
         nav.push(Route.ProfilePicker)

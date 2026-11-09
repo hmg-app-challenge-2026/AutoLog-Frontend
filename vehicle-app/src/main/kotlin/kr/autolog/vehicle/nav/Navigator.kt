@@ -25,6 +25,13 @@ class Navigator(start: Route = Route.ProfilePicker) {
         return true
     }
 
+    /** QR에서 영수증 입력으로 바뀔 때 맨 위 화면만 교체한다. */
+    fun replaceTop(route: Route): Boolean {
+        if (tier != UsageTier.FULL) return false
+        _backStack.value = _backStack.value.dropLast(1) + route
+        return true
+    }
+
     fun replaceAll(route: Route): Boolean {
         if (tier != UsageTier.FULL) return false
         _backStack.value = listOf(route)
