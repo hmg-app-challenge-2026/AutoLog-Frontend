@@ -21,7 +21,7 @@ import kr.autolog.vehicle.ui.design.components.TripListRow
 
 /**
  * Home 가운데 두 섹션(D-25). 상태마다 "사용자가 지금 알고 싶은 것"을 왼쪽(값)·오른쪽(맥락)에 나눈다.
- * - 대기: 왼쪽 "이번 달 운행 정보"(누적 km + 보조 사실) · 오른쪽 "최근 운행 기록"(최신 3건 목록).
+ * - 대기: 왼쪽 "이번 달 운행 정보"(누적 km + 보조 사실) · 오른쪽 "최근 운행 기록"(최신 3건 목록, 누르면 운행 기록 조회).
  * - 기록 중: 왼쪽 "주행 거리" · 오른쪽 "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
  * 모든 섹션은 공용 [Section](같은 소제목 모양·문구 — Peek도 같다), 거리 숫자는 72 sp(TALL만 96) — 계기판처럼 계속 보는 앱이 아니므로.
  */
@@ -86,10 +86,16 @@ private fun MonthSummary(month: MonthUi?) {
 @Composable
 private fun TripDistance(tripKm: String?) {
     if (tripKm == null) {
-        // 이유는 알림 띠("계기판 거리를 읽지 못하고 있어요")가 말한다 — 여기선 조용히 미확정만, 추정값은 그리지 않는다
+        // 추정값은 그리지 않는다. 앱 안 알림이 없으므로(D-26) 이유는 이 칸 안에서 한 줄로
         Text(
             stringResource(R.string.trip_km_unknown),
             style = AutoLogTheme.type.label,
+            color = AutoLogTheme.colors.textSecondary,
+        )
+        Spacer(Modifier.height(Space.s2))
+        Text(
+            stringResource(R.string.trip_km_unknown_reason),
+            style = AutoLogTheme.type.caption,
             color = AutoLogTheme.colors.textSecondary,
         )
         return
@@ -103,7 +109,10 @@ private fun TripDistance(tripKm: String?) {
     )
 }
 
-/** 최근 운행 최대 3건, 위에서 아래로. 목적이 없는 운행은 아래 줄이 경고색 "목적 확인 필요" — 누르면 바로 목적 확인. */
+/**
+ * 최근 운행 최대 3건, 위에서 아래로. 목적이 없는 운행은 아래 줄 끝이 "목적 미입력"(재촉하지 않는 회색 — 사실만).
+ * 어느 줄을 눌러도 운행 기록 조회로 간다 — 목적을 고치는 곳은 거기 하나다(D-26).
+ */
 @Composable
 private fun RecentTrips(trips: List<RecentTripUi>, onAction: (HomeAction) -> Unit) {
     if (trips.isEmpty()) {
@@ -119,8 +128,7 @@ private fun RecentTrips(trips: List<RecentTripUi>, onAction: (HomeAction) -> Uni
             TripListRow(
                 title = routeText(trip.origin, trip.destination),
                 subtitle = tripMetaText(trip),
-                onClick = { onAction(HomeAction.OpenTrip(trip.tripId, trip.needsReview)) },
-                needsAttention = trip.needsReview,
+                onClick = { onAction(HomeAction.OpenRecords) },
             )
         }
     }
@@ -132,7 +140,7 @@ private fun routeText(origin: String?, destination: String?): String {
     return stringResource(R.string.trip_route, origin ?: unknown, destination ?: unknown)
 }
 
-/** "오늘 09:12 · 23.4 km · 거래처 방문" / 목적이 없으면 끝이 "목적 확인 필요". */
+/** "오늘 09:12 · 23.4 km · 거래처 방문" / 목적이 없으면 끝이 "목적 미입력". */
 @Composable
 private fun tripMetaText(trip: RecentTripUi): String {
     val whenText =
@@ -142,6 +150,6 @@ private fun tripMetaText(trip: RecentTripUi): String {
             TripDay.EARLIER -> stringResource(R.string.trip_day_date, trip.month, trip.dayOfMonth, trip.time)
         }
     val km = trip.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown)
-    val purpose = trip.purpose ?: stringResource(R.string.trip_needs_review)
+    val purpose = trip.purpose ?: stringResource(R.string.trip_no_purpose)
     return stringResource(R.string.trip_meta, whenText, km, purpose)
 }

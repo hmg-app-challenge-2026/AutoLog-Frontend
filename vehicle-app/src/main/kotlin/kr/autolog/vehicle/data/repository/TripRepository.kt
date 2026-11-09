@@ -10,11 +10,8 @@ import kr.autolog.vehicle.data.interim.TripRow
 import kr.autolog.vehicle.data.interim.UploadState
 import java.time.YearMonth
 
-/** 이력·월 요약·확인 필요 목록(스펙 7.2·7.7·7.8). */
+/** 이력·최근 운행·월 요약(스펙 7.2·7.7·7.8). */
 interface TripRepository {
-    /** 목적 확인이 필요한 운행 id, 최신 순. */
-    val pendingReviewIds: Flow<List<String>>
-
     fun history(month: YearMonth): Flow<List<HistoryItem>>
 
     /** 달과 상관없이 가장 최근 운행 [limit]건, 최신 순(Home "최근 운행 기록", 스펙 7.2). */
@@ -24,8 +21,6 @@ interface TripRepository {
 }
 
 class DefaultTripRepository(private val store: LocalStore, private val settings: SettingsApi) : TripRepository {
-    override val pendingReviewIds: Flow<List<String>> = store.pendingReviews.map { rows -> rows.map { it.tripId } }
-
     override fun history(month: YearMonth): Flow<List<HistoryItem>> = items(store.trips(month))
 
     override fun recent(limit: Int): Flow<List<HistoryItem>> = items(store.recent(limit))

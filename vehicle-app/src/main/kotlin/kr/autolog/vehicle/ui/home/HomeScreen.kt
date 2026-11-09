@@ -42,8 +42,6 @@ fun HomeRoute() {
                 graph.session,
                 graph.context,
                 graph.trips,
-                graph.receipts,
-                graph.settings,
                 graph.navigator,
                 graph.clock,
             )
@@ -53,21 +51,21 @@ fun HomeRoute() {
 }
 
 /**
- * 스펙 7.2 (D-23·D-24·D-25). 위에서 아래로:
- * 상태 줄(`● 기록 중 · 35분 경과`, 오른쪽은 운전자 배지) → 알림 띠(**있을 때만**) → 가운데 두 섹션(값 · 맥락) → 같은 모양 타일 4개.
- * 정상이면 알림 띠가 없다 — "문제가 있을 때만 말한다". 두 섹션 내용은 [HomePrimarySection]·[HomeSecondarySection].
+ * 스펙 7.2 (D-23·D-24·D-25·D-26). 위에서 아래로:
+ * 상태 줄(`● 기록 중 · 35분 경과`, 오른쪽은 운전자 배지) → 가운데 두 섹션(값 · 맥락) → 같은 모양 타일 4개.
+ * 앱 안 알림은 없다(D-26) — 알려야 할 일은 시스템 알림(앱 A)이 맡고, 고칠 일은 사용자가 운행 기록 조회에서 고친다.
+ * 예외는 결정이 꼭 필요한 팝업 둘뿐: 복구([RecoveryDialog])와 놓친 운행([MissedTripDialog]).
  */
 @Composable
 fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 섹션·알림을 그리지 않는다
+    // 복구 중에는 팝업이 모든 정보를 말한다 — 뒤에 섹션을 그리지 않는다
     val showBody = state.phase != HomePhase.NEEDS_RECOVERY
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
-            // 높이 640 dp 안에 상태 줄·알림 띠·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
+            // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
             Column(Modifier.fillMaxSize().padding(Space.s7), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
                 TopRow { HomeStatus(state) }
-                if (showBody && state.notices.isNotEmpty()) HomeNoticeStrip(state.notices, onAction)
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     if (showBody) {
                         // 좌우 반반. 섹션마다 넘치면 그 섹션만 스크롤
@@ -84,11 +82,7 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 타일은 늘 보인다
                 ScrollRegion(Modifier.weight(1f).fillMaxWidth()) {
                     if (showBody) {
-                        // 한 칸에 위아래로: 알림(있을 때만) → 값 → 맥락
-                        if (state.notices.isNotEmpty()) {
-                            HomeNoticeList(state.notices, onAction)
-                            Spacer(Modifier.height(Space.s6))
-                        }
+                        // 한 칸에 위아래로: 값 → 맥락
                         HomePrimarySection(state)
                         Spacer(Modifier.height(Space.s6))
                         HomeSecondarySection(state, onAction)
@@ -109,6 +103,14 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
         }
         if (state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
+        }
+        val missedKm = state.missedKm
+        if (state.phase == HomePhase.READY && missedKm != null) {
+            MissedTripDialog(
+                missedKm,
+                onAdd = { onAction(HomeAction.AcceptMissedTrip) },
+                onIgnore = { onAction(HomeAction.IgnoreMissedTrip) },
+            )
         }
     }
 }

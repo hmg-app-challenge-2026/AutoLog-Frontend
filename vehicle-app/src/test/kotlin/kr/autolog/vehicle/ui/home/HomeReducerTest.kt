@@ -7,9 +7,8 @@ import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.interim.StopReason
 import kr.autolog.vehicle.data.repository.HistoryItem
 import kr.autolog.vehicle.data.repository.MonthSummary
-import kr.autolog.vehicle.data.repository.UploadInfo
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class HomeReducerTest {
@@ -17,44 +16,19 @@ class HomeReducerTest {
     private val month = MonthSummary(tripCount = 23, totalKm = 412.6, businessKm = 388.1, reviewCount = 1)
 
     @Test
-    fun `대기면 이번 달 요약이 주인공이고 놓친 운행은 알림 목록에 든다`() {
+    fun `대기면 이번 달 요약이 주인공이고 놓친 운행 거리를 묻는다`() {
         val s = reduceHome(SessionState.Idle, MissedTrip(15.0, 0), destination = null, now = 0, month = month)
 
         assertEquals(HomePhase.READY, s.phase)
         assertEquals(MonthUi(23, "412.6", "388.1"), s.month)
-        assertEquals(listOf<HomeNotice>(HomeNotice.MissedTrip("15.0")), s.notices)
-    }
-
-    @Test
-    fun `알림은 목적 확인 → 영수증 → 놓친 운행 순서`() {
-        val s =
-            reduceHome(
-                SessionState.PendingReview(trip, 23.4, null),
-                MissedTrip(15.0, 0),
-                destination = null,
-                now = 0,
-                pendingReviewIds = listOf("t-1", "t-0"),
-                receiptIds = listOf("r-1"),
-            )
-
-        assertEquals(
-            listOf(HomeNotice.Review(2), HomeNotice.Receipt(1), HomeNotice.MissedTrip("15.0")),
-            s.notices,
-        )
+        assertEquals("15.0", s.missedKm)
     }
 
     @Test
     fun `기록 중에는 놓친 운행을 묻지 않는다 — 지금 운행이 먼저`() {
-        val s =
-            reduceHome(
-                SessionState.Recording(trip, 23.4, 0),
-                MissedTrip(15.0, 0),
-                "판교",
-                now = 0,
-                receiptIds = listOf("r-1"),
-            )
+        val s = reduceHome(SessionState.Recording(trip, 23.4, 0), MissedTrip(15.0, 0), "판교", now = 0)
 
-        assertEquals(listOf<HomeNotice>(HomeNotice.Receipt(1)), s.notices)
+        assertNull(s.missedKm)
     }
 
     @Test
@@ -89,38 +63,15 @@ class HomeReducerTest {
     }
 
     @Test
-    fun `처리할 일이 없으면 알림 목록이 비어 칸이 사라진다`() {
-        assertTrue(reduceHome(SessionState.Idle, null, null, now = 0).notices.isEmpty())
+    fun `계기판 거리를 못 읽으면 거리는 비우고 추정하지 않는다`() {
+        val s = reduceHome(SessionState.Recording(trip, liveKm = null, lastSavedAt = 0), null, "판교", now = 0)
+
+        assertEquals(HomePhase.RECORDING_PARKED, s.phase)
+        assertNull(s.tripKm)
     }
 
     @Test
-    fun `기록 자체의 문제(계기판·저장·전송)가 처리할 일보다 먼저`() {
-        val noOdo = SessionState.Recording(trip, liveKm = null, lastSavedAt = 0)
-        val upload = UploadInfo(enabled = true, pendingCount = 2, lastUploadAt = null, lastError = "timeout")
-
-        val s = reduceHome(noOdo, null, "판교", now = 40_000, pendingReviewIds = listOf("t-0"), upload = upload)
-
-        assertEquals(
-            listOf(
-                HomeNotice.OdometerUnavailable,
-                HomeNotice.SaveDelayed,
-                HomeNotice.UploadFailed(2),
-                HomeNotice.Review(1),
-            ),
-            s.notices,
-        )
-    }
-
-    @Test
-    fun `저장이 30초 안이고 전송이 꺼져 있으면 문제 알림이 없다`() {
-        val ok = SessionState.Recording(trip, 23.4, lastSavedAt = 20_000)
-        val off = UploadInfo(enabled = false, pendingCount = 5, lastUploadAt = null, lastError = "x")
-
-        assertTrue(reduceHome(ok, null, "판교", now = 40_000, upload = off).notices.isEmpty())
-    }
-
-    @Test
-    fun `최근 운행은 최대 3건, 오늘·어제·그 전으로 나누고 목적이 없으면 확인 필요`() {
+    fun `최근 운행은 최대 3건, 오늘·어제·그 전으로 나누고 목적이 없으면 비워 둔다`() {
         val now = java.time.ZonedDateTime.of(
             2026,
             11,
@@ -156,7 +107,7 @@ class HomeReducerTest {
         assertEquals(listOf("a", "b", "c"), s.recentTrips.map { it.tripId })
         assertEquals(listOf(TripDay.TODAY, TripDay.YESTERDAY, TripDay.EARLIER), s.recentTrips.map { it.day })
         assertEquals("09:12", s.recentTrips[0].time)
-        assertTrue(s.recentTrips[0].needsReview)
+        assertNull(s.recentTrips[0].purpose)
         assertEquals("거래처 방문", s.recentTrips[1].purpose)
         assertEquals(6, s.recentTrips[2].dayOfMonth)
     }

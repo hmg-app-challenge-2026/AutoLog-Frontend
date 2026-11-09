@@ -16,9 +16,7 @@ import kr.autolog.vehicle.common.currentMonth
 import kr.autolog.vehicle.common.tickerFlow
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.repository.ContextRepository
-import kr.autolog.vehicle.data.repository.ReceiptRepository
 import kr.autolog.vehicle.data.repository.SessionRepository
-import kr.autolog.vehicle.data.repository.SettingsRepository
 import kr.autolog.vehicle.data.repository.TripRepository
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
@@ -27,27 +25,18 @@ class HomeViewModel(
     private val session: SessionRepository,
     context: ContextRepository,
     trips: TripRepository,
-    receipts: ReceiptRepository,
-    settings: SettingsRepository,
     private val navigator: Navigator,
     clock: AppClock,
     ticker: Flow<Long> = tickerFlow(clock),
 ) : ViewModel() {
-    private val pendingIds = trips.pendingReviewIds.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    private val receiptIds =
-        receipts.inbox.map { list ->
-            list.map { it.receiptId }
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     val uiState: StateFlow<HomeUiState> =
         combine(
             combine(session.state, session.missedTrip, context.destinationLabel, ::Triple),
-            combine(pendingIds, receiptIds, settings.upload, ::Triple),
             // 대기 왼쪽 = 이번 달 요약, 오른쪽 = 최근 운행 기록(D-25). 화면이 열려 있는 동안 달이 바뀌는 경우는 다음 진입 때 맞춘다
             combine(trips.summary(clock.currentMonth()), trips.recent(RECENT_TRIPS), ::Pair),
             ticker,
-        ) { (s, missed, dest), (pending, receipts, upload), (month, recent), now ->
-            reduceHome(s, missed, dest, now, pending, receipts, month, recent, upload)
+        ) { (s, missed, dest), (month, recent), now ->
+            reduceHome(s, missed, dest, now, month, recent)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
@@ -71,14 +60,8 @@ class HomeViewModel(
                 HomeAction.AcceptMissedTrip -> session.acceptMissedTrip()
                 HomeAction.IgnoreMissedTrip -> session.ignoreMissedTrip()
                 is HomeAction.Recover -> session.resolveRecovery(action.choice)
-                HomeAction.OpenReview -> pendingIds.value.firstOrNull()?.let { navigator.push(Route.ReviewTrip(it)) }
-                HomeAction.OpenReceipt -> receiptIds.value.firstOrNull()?.let {
-                    navigator.push(Route.FuelEntry(receiptId = it))
-                }
                 HomeAction.AddFuelRecord -> navigator.push(Route.ReceiptQr)
                 HomeAction.OpenRecords -> navigator.push(Route.History)
-                is HomeAction.OpenTrip ->
-                    navigator.push(if (action.needsReview) Route.ReviewTrip(action.tripId) else Route.History)
                 HomeAction.OpenSettings -> navigator.push(Route.Settings)
             }
         }

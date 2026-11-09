@@ -32,16 +32,10 @@ import kr.autolog.vehicle.ui.design.confirmHaptic
 /**
  * 디자인 언어 11장 TripListRow — 운행 한 건 목록 줄(Home "최근 운행 기록", 이력). `surface1`, `radius.md`, 최소 높이 76 dp.
  * 위 [title](경로, `label`, 한 줄 말줄임) · 아래 [subtitle](날짜·거리·목적, `caption`, `textSecondary`).
- * [needsAttention]이면 아래 줄을 `warning`으로 — 목적 확인이 필요한 운행. 줄 전체가 터치 대상, 끝에 ›.
+ * 줄 전체가 터치 대상, 끝에 ›. 상태를 색으로 재촉하지 않는다 — 목적이 없으면 문장("목적 미입력")으로만 말한다(D-26).
  */
 @Composable
-fun TripListRow(
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    needsAttention: Boolean = false,
-) {
+fun TripListRow(title: String, subtitle: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val interaction = remember { MutableInteractionSource() }
@@ -64,7 +58,7 @@ fun TripListRow(
             Text(
                 subtitle,
                 style = t.caption,
-                color = if (needsAttention) c.warning else c.textSecondary,
+                color = c.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

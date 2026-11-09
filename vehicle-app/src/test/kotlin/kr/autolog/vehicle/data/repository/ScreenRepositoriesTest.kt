@@ -44,14 +44,14 @@ class ScreenRepositoriesTest {
     }
 
     @Test
-    fun `목적 확인은 추천을 함께 주고 확정하면 확인 필요에서 빠진다`() = runTest {
+    fun `목적 확인은 추천을 함께 주고 확정하면 운행 기록에 목적이 들어간다`() = runTest {
         val g = TestAppGraph(backgroundScope, AppClock { now })
 
         val review = g.review.review("t-s1").first()!!
         g.review.confirm("t-s1", PurposeDetail.CLIENT_VISIT, null, byVoice = false)
 
         assertEquals(PurposeDetail.CLIENT_VISIT, review.suggestion?.detail)
-        assertTrue("t-s1" !in g.trips.pendingReviewIds.first())
+        assertEquals(PurposeDetail.CLIENT_VISIT, g.trips.recent(10).first().single { it.tripId == "t-s1" }.purpose)
     }
 
     @Test

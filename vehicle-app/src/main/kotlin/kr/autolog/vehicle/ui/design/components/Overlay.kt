@@ -29,9 +29,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
@@ -53,7 +55,8 @@ private const val MODAL_ENTER_SCALE = 0.94f
  * - 키보드가 올라오면 카드가 그 위로 올라가고(imePadding), 내용이 넘치면 카드 안에서 스크롤한다(가장자리 흐림).
  * - [footer]는 스크롤 밖 카드 하단에 고정된다 — 결정 버튼은 여기에 둔다(주 버튼은 스크롤해야 보이면 안 된다, 디자인 언어 7장).
  * - **닫기·취소는 모두 [onClose] → 카드 오른쪽 위 X([CloseButton])**. 하단 [취소]·[닫기] 버튼은 두지 않는다.
- *   닫을 수 없는 팝업(반드시 골라야 하는 결정)은 onClose를 주지 않는다.
+ *   닫을 수 없는 팝업(반드시 골라야 하는 결정)은 onClose를 주지 않는다. X가 닫기 이상의 뜻이면(놓친 운행의 "무시")
+ *   [closeLabel]로 접근성 이름을 그 뜻으로 바꾼다.
  * - [title]을 주면 X와 같은 머리 줄 가운데에 놓인다(iOS 시트 배치). X가 없는 팝업은 내용 첫 줄에 [ModalTitle]을 둬도 된다.
  * - 바깥 탭은 뒤 화면으로 새지 않게 삼킨다(클릭 의미론 없음 — Peek 입력 0개 검사에 걸리지 않는다). 닫기는 카드 안 버튼으로만.
  * 단계가 FULL에서 내려가면 루트가 화면째 지운다.
@@ -65,6 +68,7 @@ fun ModalCard(
     title: String? = null,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
+    closeLabel: String = stringResource(R.string.action_close),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val c = AutoLogTheme.colors
@@ -106,7 +110,7 @@ fun ModalCard(
                         contentAlignment = Alignment.Center,
                     ) {
                         title?.let { ModalTitle(it, Modifier.padding(horizontal = Size.touchMin)) }
-                        onClose?.let { CloseButton(it, Modifier.align(Alignment.CenterEnd)) }
+                        onClose?.let { CloseButton(it, Modifier.align(Alignment.CenterEnd), label = closeLabel) }
                     }
                 }
                 val scroll = rememberScrollState()

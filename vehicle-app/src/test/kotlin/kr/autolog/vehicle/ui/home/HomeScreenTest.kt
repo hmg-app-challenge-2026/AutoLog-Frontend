@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.data.interim.RecoveryChoice
 import kr.autolog.vehicle.data.interim.StopReason
@@ -25,21 +24,15 @@ private val month = MonthUi(tripCount = 23, totalKm = "412.6", businessKm = "388
 
 private val recent =
     listOf(
-        RecentTripUi("t-1", "본사", "판교 테크노밸리 거래처", "23.4", TripDay.TODAY, 11, 9, "09:12", null, needsReview = true),
-        RecentTripUi("t-2", "판교 테크노밸리 거래처", "본사", "22.8", TripDay.YESTERDAY, 11, 8, "17:40", "거래처 방문", false),
-        RecentTripUi("t-3", "본사", "수원 물류센터", "41.2", TripDay.EARLIER, 11, 6, "13:05", "외근", false),
+        RecentTripUi("t-1", "본사", "판교 테크노밸리 거래처", "23.4", TripDay.TODAY, 11, 9, "09:12", null),
+        RecentTripUi("t-2", "판교 테크노밸리 거래처", "본사", "22.8", TripDay.YESTERDAY, 11, 8, "17:40", "거래처 방문"),
+        RecentTripUi("t-3", "본사", "수원 물류센터", "41.2", TripDay.EARLIER, 11, 6, "13:05", "외근"),
     )
 
-private val ready =
-    HomeUiState(
-        phase = HomePhase.READY,
-        month = month,
-        recentTrips = recent,
-        notices = listOf(HomeNotice.Review(1), HomeNotice.Receipt(1), HomeNotice.MissedTrip("15.0")),
-    )
+private val ready = HomeUiState(phase = HomePhase.READY, month = month, recentTrips = recent)
 
-/** 정상 대기 — 알림 띠가 없다. */
-private val readyQuiet = ready.copy(notices = emptyList())
+/** 앱이 꺼진 동안 15 km를 달린 뒤의 대기 — 놓친 운행 팝업(F-10, D-26). */
+private val readyMissed = ready.copy(missedKm = "15.0")
 
 private val recording =
     HomeUiState(
@@ -50,12 +43,11 @@ private val recording =
         elapsedMin = 35,
     )
 
-/** 기록 자체에 문제가 있을 때 — 계기판 미확정 + 영수증 도착, 긴 목적지 이름. */
+/** 계기판 거리를 못 읽을 때(이유는 거리 칸 안 한 줄) + 긴 목적지 이름. */
 private val recordingTrouble =
     recording.copy(
         tripKm = null,
         destination = "경기도 성남시 분당구 판교역로 테크노밸리 제2캠퍼스 거래처 본관",
-        notices = listOf(HomeNotice.OdometerUnavailable, HomeNotice.Receipt(1)),
     )
 private val autoEnding = recording.copy(phase = HomePhase.AUTO_ENDING, autoEnd = AutoEndUi(3, 0.6f, StopReason.GEAR_P))
 private val recovery = HomeUiState(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = "3.2")
@@ -92,42 +84,48 @@ class HomeScreenTest {
     }
 
     @Test
-    fun `알림 띠 — 알약 1탭으로 처리 화면, 넘치면 외 N건 목록에서 놓친 운행을 추가`() {
+    fun `앱 안 알림이 없고 최근 운행 기록이 보인다 — 목적이 없으면 목적 미입력`() {
+        show(ready)
+
+        compose.onNodeWithText("최근 운행 기록").assertIsDisplayed()
+        compose.onNodeWithText("본사 → 판교 테크노밸리 거래처").assertIsDisplayed()
+        compose.onNodeWithText("오늘 09:12 · 23.4 km · 목적 미입력").assertIsDisplayed()
+    }
+
+    @Test
+    fun `최근 운행 줄을 누르면 목적이 없어도 운행 기록 조회로 간다`() {
         val actions = mutableListOf<HomeAction>()
         show(ready, actions)
 
-        compose.onNodeWithText("운행 1건 목적 확인").performClick()
-        compose.onNodeWithText("영수증 1장 도착").performClick()
-        // 넓은 창 한 줄에 셋이 다 안 들어가 마지막은 "외 1건"으로 접힌다
-        compose.onNodeWithText("외 1건").performClick()
-        compose.onNodeWithText("추가").performScrollTo().performClick()
+        compose.onNodeWithText("오늘 09:12 · 23.4 km · 목적 미입력").performClick()
 
-        assertEquals(listOf(HomeAction.OpenReview, HomeAction.OpenReceipt, HomeAction.AcceptMissedTrip), actions)
+        assertEquals(listOf<HomeAction>(HomeAction.OpenRecords), actions)
     }
 
     @Test
-    fun `정상이면 알림 띠가 없고 최근 운행 기록이 보인다`() {
-        show(readyQuiet)
-
-        compose.onNodeWithText("운행 1건 목적 확인").assertDoesNotExist()
-        compose.onNodeWithText("최근 운행 기록").assertIsDisplayed()
-        compose.onNodeWithText("본사 → 판교 테크노밸리 거래처").assertIsDisplayed()
-    }
-
-    @Test
-    fun `최근 운행 — 목적이 없는 운행을 누르면 그 운행의 목적 확인`() {
+    fun `놓친 운행 팝업 — 추가하기 1탭, X는 무시`() {
         val actions = mutableListOf<HomeAction>()
-        show(readyQuiet, actions)
+        show(readyMissed, actions)
 
-        compose.onNodeWithText("오늘 09:12 · 23.4 km · 목적 확인 필요").performClick()
+        compose.onNodeWithText("앱이 꺼진 동안 15.0 km를 달렸어요").assertIsDisplayed()
+        compose.onNodeWithText("운행으로 추가하기").performClick()
+        compose.onNodeWithContentDescription("무시").performClick()
 
-        assertEquals(listOf<HomeAction>(HomeAction.OpenTrip("t-1", needsReview = true)), actions)
+        assertEquals(listOf(HomeAction.AcceptMissedTrip, HomeAction.IgnoreMissedTrip), actions)
+    }
+
+    @Test
+    fun `계기판 거리를 못 읽으면 거리 칸 안에서 이유를 말한다`() {
+        show(recordingTrouble)
+
+        compose.onNodeWithText("거리 미확정").assertIsDisplayed()
+        compose.onNodeWithText("계기판 거리를 읽지 못하고 있어요").assertIsDisplayed()
     }
 
     @Test
     fun `타일 4개 — 운행 기록 조회·설정·기록 시작`() {
         val actions = mutableListOf<HomeAction>()
-        show(readyQuiet, actions)
+        show(ready, actions)
 
         compose.onNodeWithText("운행 기록 조회").performClick()
         compose.onNodeWithText("설정").performClick()
@@ -171,7 +169,7 @@ class HomeScreenshotTest {
     fun ready() = captureAll("home_ready", driver = SampleDriver) { HomeScreen(ready, onAction = {}) }
 
     @Test
-    fun quiet() = captureAll("home_ready_quiet", driver = SampleDriver) { HomeScreen(readyQuiet, onAction = {}) }
+    fun missed() = captureAll("home_missed", driver = SampleDriver) { HomeScreen(readyMissed, onAction = {}) }
 
     @Test
     fun noDriver() = captureAll("home_nodriver", driver = ShotDriver(null, null)) { HomeScreen(ready, onAction = {}) }

@@ -7,11 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.History
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocalGasStation
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
@@ -49,8 +46,7 @@ class GalleryScreenshotTest {
             TertiaryButton("나중에 선택", onClick = {})
             StatusLine("기록 중", AutoLogTheme.colors.success, detail = "35분 경과")
             StatusLine("대기 중", AutoLogTheme.colors.textTertiary)
-            NoticePill(Icons.AutoMirrored.Rounded.ReceiptLong, AutoLogTheme.colors.accent, "영수증 1장 도착", onClick = {})
-            TripListRow("본사 → 판교 테크노밸리 거래처", "오늘 09:12 · 23.4 km · 목적 확인 필요", onClick = {}, needsAttention = true)
+            TripListRow("본사 → 판교 테크노밸리 거래처", "오늘 09:12 · 23.4 km · 목적 미입력", onClick = {})
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s6)) {
                 DriverBadge("u-1", "김영업", onClick = {})
                 DriverBadge(null, null, onClick = {})
@@ -58,11 +54,6 @@ class GalleryScreenshotTest {
             }
             HeroMetric("23.4", "km", "주행 거리", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             RouteFlow("본사", "판교 테크노밸리 거래처")
-            NoticeRow(Icons.Rounded.ErrorOutline, AutoLogTheme.colors.warning, "운행 1건 목적 확인", onClick = {})
-            NoticeRow(Icons.Rounded.Info, AutoLogTheme.colors.accent, "꺼진 동안 15.0 km 주행", actions = {
-                TertiaryButton("추가", onClick = {})
-                TertiaryButton("무시", onClick = {})
-            })
         }
     }
 

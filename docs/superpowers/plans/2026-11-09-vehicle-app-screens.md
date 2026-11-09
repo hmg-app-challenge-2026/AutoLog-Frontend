@@ -110,7 +110,7 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 - ReceiptQr(스펙 7.4): QR → 작은 글씨 안내 "스마트폰으로 QR 코드를 인식한 뒤 안내에 따라 영수증을 업로드해주세요"(`receipt_qr_hint`) → 남은 시간 → **[직접 입력하기]**(`receipt_manual_entry`, `SecondaryButton`) → `FuelEntry(null)`. inbox에 새 영수증이 오면 `navigator.replaceTop(FuelEntry(receiptId))`(QR을 백스택에서 대체 — `replaceTop`은 이 작업에서 Navigator에 추가, 맨 위 한 칸만 바꾸고 FULL이 아니면 무시). 만료 → [새 QR]. 실패 → 문구 + [다시 시도], 직접 입력은 그대로.
 - FuelEntry(스펙 7.5): 공통 필드(금액 필수·리터·단가·연결 운행) + 영수증이면 썸네일·상호·일시·유종·할인·카드 끝 4자리·`ConfidenceRow`·검산 배지. 맨 아래 **[추가하기]**(`fuel_add_confirm`). 영수증 자동 조건(전부 초록·검산 통과·후보 1개)이면 후보 선택 상태로 열린다. 숫자 칸 탭 → `NumericKeypad` 시트. 마이크 없음.
-- Home: [주유 기록 추가] → `ReceiptQr`, "영수증 도착" 칩 → `FuelEntry(receiptId)`(Task 2 정리 커밋에서 반영됨).
+- Home: [주유 기록 추가] → `ReceiptQr`. Home에는 영수증 알림이 없다(스펙 D-26). 대신 ReceiptQr이 열릴 때 inbox에 아직 확정하지 않은 영수증이 있으면 QR을 그리지 않고 곧바로 `replaceTop(FuelEntry(가장 최근 receiptId))` — 열려 있는 동안 새로 도착한 경우와 같은 경로 하나로 처리한다(스펙 7.4 진입).
 
 **Tests:** QR 화면 [직접 입력하기] 1탭 → 빈 입력 창 · 영수증 도착 시 입력 창이 OCR 값으로 채워져 QR을 대체 · 검산 실패 시 [추가하기] 비활성 · 전부 초록이면 [추가하기] 1탭 · 리터 수정 후 추가 시 edits 반영 · OCR 실패 시 금액만으로 추가 · 직접 입력은 `saveFuel`, 영수증은 `confirm`으로 간다(Repository 테스트) · QR 만료 → [새 QR] · 직접 입력 금액 없으면 비활성.
 
