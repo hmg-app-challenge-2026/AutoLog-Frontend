@@ -5,4 +5,18 @@ sealed interface Route {
     data object ProfilePicker : Route
 
     data object Home : Route
+
+    data class ReviewTrip(val tripId: String) : Route
+
+    data object ReceiptQr : Route
+
+    data class ReceiptReview(val receiptId: String) : Route
+
+    data class FuelEntry(val tripId: String?) : Route
+
+    data object Report : Route
+
+    data object History : Route
+
+    data object Settings : Route
 }

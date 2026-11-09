@@ -48,7 +48,17 @@ import kr.autolog.vehicle.ui.design.sharedAvatar
 @Composable
 fun HomeRoute() {
     val graph = LocalAppGraph.current
-    val vm = viewModel { HomeViewModel(graph.session, graph.profile, graph.context, graph.navigator, graph.clock) }
+    val vm = viewModel {
+        HomeViewModel(
+            graph.session,
+            graph.profile,
+            graph.context,
+            graph.trips,
+            graph.receipts,
+            graph.navigator,
+            graph.clock,
+        )
+    }
     val state by vm.uiState.collectAsStateWithLifecycle()
     HomeScreen(state, vm::onAction)
 }

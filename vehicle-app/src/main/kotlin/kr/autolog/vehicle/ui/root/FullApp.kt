@@ -18,8 +18,15 @@ import kr.autolog.vehicle.nav.Route
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalNavAnimatedScope
 import kr.autolog.vehicle.ui.design.LocalSharedTransitionScope
+import kr.autolog.vehicle.ui.history.HistoryRoute
 import kr.autolog.vehicle.ui.home.HomeRoute
 import kr.autolog.vehicle.ui.profile.ProfilePickerRoute
+import kr.autolog.vehicle.ui.receipt.FuelEntryRoute
+import kr.autolog.vehicle.ui.receipt.ReceiptQrRoute
+import kr.autolog.vehicle.ui.receipt.ReceiptReviewRoute
+import kr.autolog.vehicle.ui.report.ReportRoute
+import kr.autolog.vehicle.ui.review.ReviewRoute
+import kr.autolog.vehicle.ui.settings.SettingsRoute
 
 /** 주차(FULL) 층: 백스택 맨 위 화면. 전환은 motion.screen, 프로필→Home은 motion.hero. */
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -47,6 +54,13 @@ fun FullApp(graph: AppGraph) {
                 when (route) {
                     Route.ProfilePicker -> ProfilePickerRoute()
                     Route.Home -> HomeRoute()
+                    is Route.ReviewTrip -> ReviewRoute(route.tripId)
+                    Route.ReceiptQr -> ReceiptQrRoute()
+                    is Route.ReceiptReview -> ReceiptReviewRoute(route.receiptId)
+                    is Route.FuelEntry -> FuelEntryRoute(route.tripId)
+                    Route.Report -> ReportRoute()
+                    Route.History -> HistoryRoute()
+                    Route.Settings -> SettingsRoute()
                 }
             }
         }

@@ -45,10 +45,20 @@ class HomeReducerTest {
 
     @Test
     fun `운행이 끝나 목적 확인이 남으면 확인 필요 1건`() {
-        val s = reduceHome(SessionState.PendingReview(trip, 23.4, null), 18_443.9, null, driver, null, now = 0)
+        val s =
+            reduceHome(
+                SessionState.PendingReview(trip, 23.4, null),
+                18_443.9,
+                null,
+                driver,
+                null,
+                now = 0,
+                pendingReviewIds = listOf("t-1"),
+            )
 
         assertEquals(HomePhase.READY, s.phase)
         assertEquals(1, s.reviewCount)
+        assertEquals("t-1", s.latestReviewId)
     }
 
     @Test
