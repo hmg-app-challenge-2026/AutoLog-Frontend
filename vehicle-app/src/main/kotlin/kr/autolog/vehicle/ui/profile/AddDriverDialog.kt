@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PersonAdd
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.data.repository.AddDriverResult
 import kr.autolog.vehicle.ui.design.AutoLogTheme
@@ -27,6 +25,8 @@ import kr.autolog.vehicle.ui.design.components.AvatarFace
 import kr.autolog.vehicle.ui.design.components.IconAvatar
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalText
+import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 import kr.autolog.vehicle.ui.design.components.initialsOf
@@ -74,27 +74,15 @@ private const val HEADER_WEIGHT = 0.4f
 
 @Composable
 private fun AddDriverHeader(name: String, modifier: Modifier, compact: Boolean = false) {
-    val c = AutoLogTheme.colors
-    val t = AutoLogTheme.type
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         if (!compact) {
             NewDriverAvatar(name)
             Spacer(Modifier.height(Space.s5))
         }
-        Text(
-            stringResource(R.string.picker_add),
-            style = t.headline,
-            color = c.textPrimary,
-            textAlign = TextAlign.Center,
-        )
+        ModalTitle(stringResource(R.string.picker_add))
         if (!compact) {
             Spacer(Modifier.height(Space.s2))
-            Text(
-                stringResource(R.string.picker_add_subtitle),
-                style = t.body,
-                color = c.textSecondary,
-                textAlign = TextAlign.Center,
-            )
+            ModalText(stringResource(R.string.picker_add_subtitle))
         }
     }
 }
@@ -129,13 +117,7 @@ private fun AddDriverFields(form: AddDriverForm, onAction: (ProfilePickerAction)
 private fun AddDriverButtons(form: AddDriverForm, onAction: (ProfilePickerAction) -> Unit) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         form.error?.let {
-            Text(
-                errorText(it),
-                style = AutoLogTheme.type.body,
-                color = AutoLogTheme.colors.danger,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(bottom = Space.s4),
-            )
+            ModalText(errorText(it), Modifier.padding(bottom = Space.s4), color = AutoLogTheme.colors.danger)
         }
         PrimaryButton(
             stringResource(R.string.picker_add_confirm),

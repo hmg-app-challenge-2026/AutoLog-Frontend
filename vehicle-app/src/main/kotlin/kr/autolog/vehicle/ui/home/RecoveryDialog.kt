@@ -3,7 +3,6 @@ package kr.autolog.vehicle.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +16,8 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.DangerButton
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalText
+import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
@@ -30,9 +31,9 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
     ModalCard {
         Column(verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             if (!confirmingDelete) {
-                Text(stringResource(R.string.recovery_title), style = t.headline, color = c.textPrimary)
+                ModalTitle(stringResource(R.string.recovery_title))
                 extraKm?.let {
-                    Text(stringResource(R.string.recovery_body, it), style = t.title, color = c.textSecondary)
+                    ModalText(stringResource(R.string.recovery_body, it), style = t.title)
                 }
                 PrimaryButton(
                     text = stringResource(R.string.recovery_record),
@@ -50,7 +51,7 @@ fun RecoveryDialog(extraKm: String?, onChoice: (RecoveryChoice) -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
-                Text(stringResource(R.string.recovery_delete_confirm), style = t.title, color = c.textPrimary)
+                ModalText(stringResource(R.string.recovery_delete_confirm), style = t.title, color = c.textPrimary)
                 DangerButton(
                     text = stringResource(R.string.recovery_delete_yes),
                     onClick = { onChoice(RecoveryChoice.DELETE) },

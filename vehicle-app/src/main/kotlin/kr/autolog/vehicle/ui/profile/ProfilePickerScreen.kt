@@ -37,6 +37,7 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ActionTile
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.ProfileTile
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 
@@ -131,7 +132,6 @@ private fun PickerTileOf(tile: PickerTile, size: Dp, onAction: (ProfilePickerAct
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfilePickerAction) -> Unit) {
-    val c = AutoLogTheme.colors
     ModalCard(
         maxWidth = Size.sheetMaxWidth,
         footer = {
@@ -142,7 +142,7 @@ private fun AllProfilesDialog(profiles: List<DriverProfile>, onAction: (ProfileP
             )
         },
     ) {
-        Text(stringResource(R.string.picker_all_title), style = AutoLogTheme.type.headline, color = c.textPrimary)
+        ModalTitle(stringResource(R.string.picker_all_title))
         Spacer(Modifier.height(Space.s5))
         // 카드 하나의 스크롤로 흐른다 — 높이 고정 격자를 카드 안에 넣으면 스크롤이 두 겹이 되고 줄이 잘렸다
         FlowRow(

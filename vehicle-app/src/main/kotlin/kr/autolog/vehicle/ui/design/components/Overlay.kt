@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,8 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
@@ -101,4 +105,27 @@ fun ModalCard(
             }
         }
     }
+}
+
+/** 팝업 제목(`headline`). **모든 팝업의 제목·설명은 가운데 정렬**(D-21) — 정렬을 이 함수 한 곳에 묶는다. */
+@Composable
+fun ModalTitle(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text,
+        modifier.fillMaxWidth(),
+        style = AutoLogTheme.type.headline,
+        color = AutoLogTheme.colors.textPrimary,
+        textAlign = TextAlign.Center,
+    )
+}
+
+/** 팝업 설명·요약 문구. 기본은 `body` + `textSecondary`, 강조가 필요하면 [style]·[color]만 바꾼다. 가운데 정렬. */
+@Composable
+fun ModalText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = AutoLogTheme.type.body,
+    color: Color = AutoLogTheme.colors.textSecondary,
+) {
+    Text(text, modifier.fillMaxWidth(), style = style, color = color, textAlign = TextAlign.Center)
 }

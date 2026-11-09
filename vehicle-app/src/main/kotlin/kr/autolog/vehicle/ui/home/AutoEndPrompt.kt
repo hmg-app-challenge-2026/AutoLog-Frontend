@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -28,6 +27,8 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalText
+import kr.autolog.vehicle.ui.design.components.ModalTitle
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.durationText
@@ -71,17 +72,13 @@ fun AutoEndPrompt(state: AutoEndUi, tripKm: String?, destination: String?, onKee
             }
         }
     }) {
-        Text(stringResource(R.string.autoend_title), style = t.headline, color = c.textPrimary)
+        ModalTitle(stringResource(R.string.autoend_title))
         Spacer(Modifier.height(Space.s3))
         // 거리와 목적지를 나눈다 — 한 줄로 이으면 좁은 창에서 목적지가 단어 중간에서 끊긴다
-        tripKm?.let { Text("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
-        destination?.let { Text(it, style = t.body, color = c.textSecondary) }
+        tripKm?.let { ModalText("$it ${stringResource(R.string.unit_km)}", style = t.title, color = c.textPrimary) }
+        destination?.let { ModalText(it) }
         Spacer(Modifier.height(Space.s3))
-        Text(
-            stringResource(R.string.autoend_remaining, durationText(state.remainingSec)),
-            style = t.body,
-            color = c.textSecondary,
-        )
+        ModalText(stringResource(R.string.autoend_remaining, durationText(state.remainingSec)))
         Spacer(Modifier.height(Space.s4))
         Box(Modifier.fillMaxWidth().height(Size.progressBar).clip(CircleShape).background(c.surface3)) {
             Box(Modifier.fillMaxWidth(progress).height(Size.progressBar).clip(CircleShape).background(c.accent))
