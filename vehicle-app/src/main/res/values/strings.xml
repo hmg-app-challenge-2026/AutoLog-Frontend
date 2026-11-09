@@ -18,7 +18,9 @@
     <string name="picker_empty">아직 등록된 직원이 없어요</string>
     <string name="action_close">닫기</string>
     <string name="home_end">기록 종료</string>
+    <string name="home_end_compact">기록\n종료</string>
     <string name="home_start_manual">기록 시작</string>
+    <string name="home_start_compact">기록\n시작</string>
     <string name="status_ready">대기 중</string>
     <string name="status_recording">기록 중</string>
     <string name="home_status_elapsed">%1$d분 경과</string>
@@ -74,7 +76,9 @@
     <string name="recovery_delete_confirm">이 운행을 지울까요? 되돌릴 수 없어요</string>
     <string name="recovery_delete_yes">지우기</string>
     <string name="action_fuel_add">주유 기록 추가</string>
+    <string name="action_fuel_add_compact">주유\n추가</string>
     <string name="action_records">운행 기록 조회</string>
+    <string name="action_records_compact">운행\n조회</string>
     <string name="action_settings">설정</string>
     <string name="input_locked">지금은 입력할 수 없어요</string>
     <string name="keypad_delete">지우기</string>

@@ -38,10 +38,10 @@ data class AutoLogType(
     /** 영역 소제목("이번 달 운행 정보", "운행 경로"). 본문보다 작고 보조 글자보다 굵다. */
     val section: TextStyle,
     /**
-     * **글자 하한**(22 sp) — 좁은 창의 도크·dense 버튼과 긴 보조 문구처럼 공간이 모자란 곳에만 쓴다.
+     * **글자 하한**(22 sp) — 좁은 창의 dense 버튼과 긴 보조 문구처럼 공간이 모자란 곳에만 쓴다.
      */
     val fine: TextStyle,
-    /** [section]의 좁은 창판(26 sp 굵게) — 분할 화면처럼 세로 공간이 모자란 화면의 소제목. */
+    /** [section]의 좁은 창판(30 sp 굵게) — 분할 화면처럼 세로 공간이 모자란 화면의 소제목. */
     val sectionFine: TextStyle,
 )
 
@@ -68,9 +68,9 @@ fun autoLogType(): AutoLogType = AutoLogType(
     body = style(34, 400, 1.35f, 0f),
     label = style(34, 600, 1.2f, 0f),
     caption = style(28, 500, 1.3f, 0.005f),
-    section = style(30, 700, 1.3f, 0.01f),
+    section = style(38, 700, 1.25f, 0.01f),
     fine = style(22, 500, 1.3f, 0.005f),
-    sectionFine = style(26, 700, 1.3f, 0.01f),
+    sectionFine = style(30, 700, 1.3f, 0.01f),
 )
 
 /**

@@ -232,9 +232,9 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `body` | 34 sp | 400 | 1.35 | 0 | **본문 하한**: 설명, 리스트 내용 |
 | `label` | 34 sp | 600 | 1.2 | 0 | 버튼, 칩 |
 | `caption` | 28 sp | 500 | 1.3 | +0.5% | **보조 글자**: 메타 정보. **Peek에 쓰지 않는다** |
-| `section` | 30 sp | 700 | 1.3 | +1% | 영역 소제목(`SectionHeader`) |
-| `fine` | 22 sp | 500 | 1.3 | +0.5% | 좁은 창의 도크 이름·선택형 행과 긴 보조 문구. 이보다 작은 글자는 만들지 않는다 |
-| `sectionFine` | 26 sp | 700 | 1.3 | +1% | 좁은 창 소제목(`SectionHeader(dense)`) |
+| `section` | 38 sp | 700 | 1.25 | +1% | 영역 소제목(`SectionHeader`) |
+| `fine` | 22 sp | 500 | 1.3 | +0.5% | 좁은 창의 dense 버튼과 긴 보조 문구. 이보다 작은 글자는 만들지 않는다 |
+| `sectionFine` | 30 sp | 700 | 1.3 | +1% | 좁은 창 소제목(`SectionHeader(dense)`) |
 
 - 숫자와 단위는 **줄바꿈하지 않는다**("k / m" 방지). 넘치면 크기 단계를 `hero` → `heroSmall` → `heroCompact`로 낮춘다(`HeroMetric`의 `MetricSize`).
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
@@ -424,11 +424,11 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusLine` | 화면 맨 위 상태 한 줄. **배경 없는 점(12 dp) + 글자**: `● 기록 중 · 35분 경과`. 점 색이 상태(기록 중 `success`, 대기 `textTertiary`), 글자 `label` 본문색, 보조(`detail`)는 `body` 회색. 알약 배경이 없어 주인공 숫자와 경쟁하지 않는다. 누를 수 없다(Home·Peek 공용) |
-| `DockTile` | 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식). 모든 타일이 같은 모양: 네모 80 dp(`surface1`, `radius.lg`) 안에 아이콘 36 dp(`accent`), 아래 이름(`caption`, `textSecondary`, 가운데, 두 줄까지). 이름은 버튼 밖 설명 글씨라 버튼 글자 하한(28 sp) 대신 `caption`. 터치 영역은 네모 + 이름 칸 전체. 4칸 등분(`weight`) 한 줄 — 네모가 같은 간격. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(네모 `accentFill`, 이름 `accent`) |
+| `DockTile` | 화면 맨 아래 동작. 아이콘 네모 + 그 아래 이름. 네모는 WIDE 112 dp, TALL 96 dp, NARROW 88 dp이고 아이콘은 48 dp. 이름은 WIDE·TALL `label` 34 sp, NARROW `caption` 28 sp. 좁은 창의 긴 동작 이름은 어절 사이에 줄바꿈을 둔다. 터치 영역은 네모 + 이름 칸 전체. 4칸 등분(`weight`) 한 줄. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(네모 `accentFill`, 이름 `accent`) |
 | `DriverBadge` | 화면 오른쪽 위 고정(넷플릭스식, 스펙 7.1.1·D-19). 네모 아바타(`avatarChip` 48 dp) + "○○님"(`label`). 미선택이면 `IconAvatar`(사람) + "운전자 선택"(`accent`). FULL은 누르면 운전자 선택, Peek은 표시만. 모달이 뜨면 숨는다. 운전자 이름은 앱 전체에서 **이 자리에만** 보인다 운전자 선택 · 운행 결과 화면에는 두지 않는다(`FullApp.showsDriverBadge` 한곳) |
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
-| `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). 모든 섹션이 같은 모양: `section`(22 sp 굵게), `textSecondary`, 아래 `space.3`. `dense`(좁은 창 운행 결과)만 `sectionFine` 20 sp. **섹션 안에는 소제목보다 큰 회색 설명 글씨를 두지 않는다** — 위계는 소제목 → 데이터 값(숫자·목적지, 커도 됨) → 보조 사실(`caption`, `textSecondary`) → 안내(`caption`, `textTertiary`). 카드 안 목록 항목(`TripListRow` 위 줄)은 예외 |
+| `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). 보통 `section` 38 sp, `dense`(좁은 창 운행 결과)는 `sectionFine` 30 sp. `textSecondary`, 아래 `space.3`. 데이터 값과 카드 안 목록 항목은 소제목보다 클 수 있다 |
 | `Section` | `SectionHeader` + 내용 한 묶음. **같은 정보는 어느 화면·창 크기에서나 같은 소제목**(정보 종류마다 문구 하나): 주행 거리 · 운행 경로 · 누적 거리 · 이번 달 운행 정보 · 최근 운행 기록. Home(WIDE·NARROW·TALL)과 Peek이 함께 쓴다 |
 | `TripListRow` | 운행 한 건 목록 줄(Home 최근 운행 기록, 이력). `surface1`, `radius.md`, 위 경로(`label`, 한 줄) · 아래 날짜·거리·목적(`caption`, `textSecondary`). 목적이 없으면 끝이 "목적 미입력" — **색으로 재촉하지 않는다**(D-26). 줄 전체가 터치 대상, 끝에 › |
 | `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |

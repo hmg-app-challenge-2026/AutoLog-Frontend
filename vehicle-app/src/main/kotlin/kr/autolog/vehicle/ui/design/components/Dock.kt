@@ -24,8 +24,7 @@ import kr.autolog.vehicle.ui.design.WindowLayout
 
 /**
  * 디자인 언어 11장 DockTile — 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식).
- * 모든 타일이 같은 모양: 네모 80 dp(`surface1`, `radius.lg`) 안에 아이콘 36 dp(`accent`), 아래 이름(`caption`, `textSecondary`, 가운데, 두 줄까지).
- * 이름이 버튼 밖 설명 글씨라 버튼 글자 하한(28 sp) 대신 `caption`을 쓴다. 터치 영역은 네모 + 이름 칸 전체(76 dp 이상).
+ * 화면 폭에 따라 112/96/88 dp 네모 안에 아이콘, 아래 이름을 놓는다. 터치 영역은 네모 + 이름 칸 전체(76 dp 이상).
  * [emphasized]면 네모가 파란 채움(`accentFill` + `onAccent` 아이콘), 이름은 `accent` — 같은 자리에서 상태가 바뀐 주 동작(기록 중의 [기록 종료]).
  * 폭은 부모가 정한다(보통 `weight(1f)`로 등분 — 네모가 같은 간격으로 놓인다).
  */
@@ -38,6 +37,12 @@ fun DockTile(
     emphasized: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
+    val layout = LocalWindowLayout.current
+    val iconSize = when (layout) {
+        WindowLayout.WIDE -> Size.dockIcon
+        WindowLayout.TALL -> Size.dockIconTall
+        WindowLayout.NARROW -> Size.dockIconNarrow
+    }
     Column(
         modifier
             .widthIn(min = Size.touchMin)
@@ -48,7 +53,7 @@ fun DockTile(
     ) {
         Box(
             Modifier
-                .size(Size.dockIcon)
+                .size(iconSize)
                 .clip(RoundedCornerShape(Radius.lg))
                 .background(if (emphasized) c.accentFill else c.surface1),
             contentAlignment = Alignment.Center,
@@ -57,18 +62,12 @@ fun DockTile(
                 icon,
                 contentDescription = null,
                 tint = if (emphasized) c.onAccent else c.accent,
-                modifier = Modifier.size(Size.icon),
+                modifier = Modifier.size(Size.iconLg),
             )
         }
         Text(
             label,
-            style = if (LocalWindowLayout.current ==
-                WindowLayout.NARROW
-            ) {
-                AutoLogTheme.type.fine
-            } else {
-                AutoLogTheme.type.caption
-            },
+            style = if (layout == WindowLayout.NARROW) AutoLogTheme.type.caption else AutoLogTheme.type.label,
             color = if (emphasized) c.accent else c.textSecondary,
             textAlign = TextAlign.Center,
             maxLines = 2,

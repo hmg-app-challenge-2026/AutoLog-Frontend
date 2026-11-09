@@ -12,7 +12,7 @@ import kr.autolog.vehicle.ui.design.Space
 
 /**
  * 디자인 언어 11장 SectionHeader — 한 화면 안 영역의 소제목("이번 달 운행 정보", "운행 경로"). 모든 섹션이 같은 모양:
- * `section`(22 sp 굵게), `textSecondary`, 아래 `space.3`. 크기 대신 굵기로 제목임을 드러낸다 —
+ * `section`(38 sp 굵게), `textSecondary`, 아래 `space.3`. 크기와 굵기로 제목임을 드러낸다 —
  * 섹션 안에는 이보다 큰 회색 설명 글씨를 두지 않는다(데이터 값과 카드 안 목록 항목은 예외).
  */
 @Composable
@@ -20,7 +20,7 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier, dense: Boolean =
     Text(
         title,
         modifier.fillMaxWidth().padding(bottom = Space.s3),
-        // dense(좁은 창): sectionFine 20 sp — 글자 하한
+        // dense(좁은 창): sectionFine 30 sp
         style = if (dense) AutoLogTheme.type.sectionFine else AutoLogTheme.type.section,
         color = AutoLogTheme.colors.textSecondary,
     )
