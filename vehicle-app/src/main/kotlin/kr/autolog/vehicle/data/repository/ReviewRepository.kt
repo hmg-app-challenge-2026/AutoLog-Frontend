@@ -65,6 +65,7 @@ class DefaultReviewRepository(
                 row.originLabel,
                 row.destinationLabel,
                 suggestion,
+                purpose = row.purpose,
             ),
         )
     }

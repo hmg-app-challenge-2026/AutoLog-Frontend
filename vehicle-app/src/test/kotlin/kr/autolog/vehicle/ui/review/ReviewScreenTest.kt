@@ -45,6 +45,9 @@ private val noDestination =
         destinationCandidates = listOf("판교 테크노밸리 거래처", "본사", "수원 지점"),
     )
 
+/** 운행 기록 조회에서 이미 확정한 운행을 고치러 옴 — 지금 목적(외근)이 체크. */
+private val editing = unsure.copy(currentPurpose = PurposeDetail.FIELD_WORK)
+
 private val placeProposal = confident.copy(place = PlaceProposalUi("판교 테크노밸리 거래처"))
 
 @RunWith(AndroidJUnit4::class)
@@ -136,6 +139,9 @@ class ReviewScreenshotTest {
     fun noDestination() = captureAll("review_no_destination", driver = SampleDriver) {
         ReviewScreen(noDestination, onAction = {})
     }
+
+    @Test
+    fun editing() = captureAll("review_editing", driver = SampleDriver) { ReviewScreen(editing, onAction = {}) }
 
     @Test
     fun place() = captureAll("review_place", driver = SampleDriver) { ReviewScreen(placeProposal, onAction = {}) }

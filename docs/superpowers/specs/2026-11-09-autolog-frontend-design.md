@@ -540,6 +540,7 @@ interface DeviceApi  { val connection: StateFlow<ConnectionState>; suspend fun r
 interface UploadApi  { val status: StateFlow<UploadStatus>; suspend fun uploadNow(): UploadResult }   // 8장
 ```
 
+- `startSession`은 Idle **또는 PendingReview**에서 시작할 수 있다. 목적 확인을 미룬("나중에") 운행은 저장소에 "목적 확인 필요"로 남고 새 운행이 시작된다 — 목적을 안 골랐다고 다음 운행이 기록되지 않으면 안 된다(가짜 세션이 Idle에서만 시작해 미룬 뒤 다음 운행이 기록되지 않던 버그를 고치며 명시, 2026-11-09).
 - 타입(`SessionState`, `TripRow`, `MissedTrip` …)도 같은 파일에 둔다. 값 타입은 `core/ContractTypes.kt`에 있는 것(`PurposeDetail`, `DriverSource`, `ReportFile`, `Suggestion`)을 재사용한다.
 - `StopCandidate.reason` = `GEAR_P` / `NO_MOVEMENT` / `NAVI_ARRIVED` / `USER_REQUEST`. `deadlineAt`(epoch millis)은 **자동 종료 시각**이고 앱 A의 세션이 유일한 시계다. 화면은 `deadlineAt − now`를 보여 줄 뿐 타이머를 따로 돌리지 않는다. 대기 시간은 이유별로 다르다: **`GEAR_P` = 5초**(`T_GEAR_P_SEC`, 사용자 결정 2026-11-09), `NO_MOVEMENT`·`NAVI_ARRIVED` = 180초(Backend `T_STOP_SEC`). 상수는 앱 A 소유.
 - Fake: `FakeTripSession`(시작하면 1초마다 0.1 km 증가, 23.4 km에서 기어 P → StopCandidate, 데모 패널로 `motion` 전환), `FakeLocalStore`, `FakeReportApi`, `FakeDeviceApi`, `FakeUploadApi`.
@@ -623,7 +624,7 @@ sealed interface Route {
 - **화면마다 ViewModel 저장소 하나**(`ui/root/RouteViewModelStores`, Navigation 라이브러리의 NavBackStackEntry 역할): 화면의 `viewModel {}`은 그 화면이 백스택에 있는 동안만 살고, 스택에서 빠지면 지워진다. 같은 운행의 목적 확인을 다시 열면 새 상태로 시작한다. 저장소 묶음은 Activity 범위 ViewModel 안에 있어 창 크기 변경(분할 화면 전환)에도 화면 상태가 유지된다.
 - 백스택의 모든 화면은 **주차(FULL) 전용**이다. `tier != FULL`이면 `push`가 무시된다. (PEEK은 Route가 아니라 루트가 그리는 별도 층이다.)
 - 앱 시작 경로(FULL일 때): `ProfilePicker`(운전자 미선택 또는 앱 새로 시작) → `Home`. 이미 운행 중이면 바로 `Home`. PEEK·BACKGROUND로 시작하면 6.9 2번을 따른다.
-- 알림 탭 딥링크: 앱 A의 `TripRecordingService` 알림이 `MainActivity`를 열 때 extra `autolog.route=review`, `autolog.tripId=<id>`를 넣는다(키 상수는 R-3 요청). `onNewIntent`에서 `Navigator.handleDeepLink`.
+- 알림 탭 딥링크: 앱 A의 `TripRecordingService` 알림이 `MainActivity`를 열 때 extra `autolog.route=review`, `autolog.tripId=<id>`를 넣는다(키 상수는 R-3 요청, 그 전까지 `nav/DeepLink.kt`의 `DeepLinkKeys`). `onCreate`(새로 시작할 때만)·`onNewIntent`에서 `Navigator.handleDeepLink`. 주차(FULL)면 백스택을 `[Home, 목적 확인]`으로 바로 연다(뒤로 가면 Home). **주행·정차 중이거나 앱 시작 직후 단계를 모르면 기억해 두었다가 다음 주차 때 연다** — 운전 중에 화면을 띄우지 않으면서 사용자가 누른 알림을 잃지 않는다. 모르는 경로·빈 운행 id는 무시.
 
 ### 6.11 스레딩
 
@@ -717,7 +718,8 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 
 | 항목 | 내용 |
 |---|---|
-| 진입 | 운행 종료(PendingReview) 자동 진입, 시스템 알림 탭 딥링크, History 미확정 행(목적을 나중에 고치는 곳은 여기 하나 — D-26). 확정·나중에·등록 뒤에는 **들어온 화면으로 돌아간다**(Home 또는 History, 뒤가 없으면 Home) |
+| 진입 | 운행 종료(PendingReview) 자동 진입, 시스템 알림 탭 딥링크(6.10), History 행(목적을 나중에 고치는 곳은 여기 하나 — D-26). 확정·나중에·등록 뒤에는 **들어온 화면으로 돌아간다**(Home 또는 History, 뒤가 없으면 Home). "나중에"로 미뤄도 다음 운행은 시작된다(6.6) |
+| 고치기 | 이미 목적이 있는 운행(History에서 고치러 옴)은 추천 버튼 없이 선택지를 바로 펴고 **지금 목적에 체크**. 다른 목적 1탭이면 바뀐다 |
 | 제목 | 맨 위 줄 "목적 확인"(`type.title`) — 좁은 창에서도 운전자 배지 옆 한 줄 |
 | 상단 요약 | 섹션 "운행 요약": `09:00 → 09:35 · 23.4 km`(`label`) + 경로선(`RouteFlow(live = false)` — 끝난 운행이라 흐름 모션 없음). 도착지가 없으면 경로선 끝이 회색 "도착지를 골라 주세요" + **최근 목적지 칩(최대 3)**, 고른 칩은 경로선에 바로 보이고 목적과 함께 저장된다(R-10). 등록 장소·직접 입력은 이번 범위에서 뺐다 |
 | 추천 | `Suggestion.isConfident`(≥ 0.8)이고 "확인 필요"가 아니면 섹션 "추천 목적" + **큰 추천 버튼 1개** "거래처 방문으로 기록"(`PrimaryButton` 120 dp, 조사 "(으)로"는 `withRo`), 아래 [다른 목적] · [나중에]가 한 줄. 아니면 추천 없이 선택지를 먼저 보여 준다(기획: 확신이 낮으면 반드시 묻는다) |
@@ -1035,3 +1037,4 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 1.1 | 2026-11-09 | D-26 앱 안 알림 없음(시스템 알림만): Home 알림 띠·목록 삭제, 놓친 운행은 대기 Home 팝업, 목적 없는 운행은 운행 기록 조회에서 직접, 미확정 영수증은 [주유 기록 추가] 진입 때 바로 입력 창 |
 | 1.2 | 2026-11-09 | 구조 점검: `SessionRepository`가 화면용 세션 타입을 내보내 `ui/`의 interim 의존 제거(6.5·6.6), Home·Peek 상태 계산을 `XxxReducer.kt`로 분리 |
 | 1.3 | 2026-11-09 | 7.3 목적 확인 구현 반영(제목·요약·추천·선택지·음성·거래처 등록·레이아웃), R-10(확정 때 도착지 저장), 6.10 화면별 ViewModel 저장소 |
+| 1.4 | 2026-11-09 | 6.6 PendingReview에서도 새 운행 시작, 6.10 알림 딥링크(주행 중이면 다음 주차 때), 7.3 이미 목적이 있는 운행 고치기 |

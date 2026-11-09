@@ -140,7 +140,7 @@ private fun Decision(state: ReviewUiState, onAction: (ReviewAction) -> Unit) {
         }
         if (state.voiceAvailable) VoiceInput(state, onAction)
         val optionsOpen = state.showOptions || heard != null
-        if (optionsOpen) PurposeOptions(state, selected = heard?.detail, onAction)
+        if (optionsOpen) PurposeOptions(state, selected = heard?.detail ?: state.currentPurpose, onAction)
         // 보조 동작은 한 줄에 — 640 dp 창에서 [나중에]가 스크롤 아래로 숨지 않게
         Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
             if (!optionsOpen) {
@@ -210,7 +210,7 @@ private fun VoiceInput(state: ReviewUiState, onAction: (ReviewAction) -> Unit) {
 }
 
 /**
- * 선택지 3묶음. 1탭 = 바로 확정. [selected]는 말로 고른 목적(링 + 체크).
+ * 선택지 3묶음. 1탭 = 바로 확정. [selected]는 말로 고른 목적, 없으면 이미 확정된 목적(링 + 체크).
  * 묶음 이름(일반 업무용 · 출퇴근용 · 비업무용)이 곧 소제목이라 그 위에 소제목을 하나 더 두지 않는다.
  */
 @Composable

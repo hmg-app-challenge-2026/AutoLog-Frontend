@@ -82,4 +82,13 @@ class ReviewReducerTest {
         assertEquals(VoiceUi.NotUnderstood("음"), vague.toVoiceUi())
         assertEquals(VoiceUi.Failed(null), null.toVoiceUi())
     }
+
+    @Test
+    fun `이미 목적이 있는 운행(고치러 옴)은 추천 없이 지금 목적이 체크된 선택지`() {
+        val s = reduce(trip.copy(purpose = PurposeDetail.FIELD_WORK))
+
+        assertNull(s.suggestion)
+        assertEquals(PurposeDetail.FIELD_WORK, s.currentPurpose)
+        assertTrue(s.showOptions)
+    }
 }

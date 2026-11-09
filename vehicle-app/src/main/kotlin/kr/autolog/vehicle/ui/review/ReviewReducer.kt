@@ -22,8 +22,12 @@ internal fun reduceReview(
 ): ReviewUiState {
     if (!loaded) return ReviewUiState(loading = true)
     if (review == null) return ReviewUiState(loading = false, notFound = true)
+    // 이미 목적이 있으면(고치러 온 경우) 추천 대신 지금 목적을 체크한 선택지를 바로 보여 준다
+    val current = review.purpose?.takeIf { it.category != PurposeCategory.UNDETERMINED }
     val suggestion =
-        review.suggestion?.takeIf { it.isConfident && it.category != PurposeCategory.UNDETERMINED }?.detail
+        review.suggestion?.takeIf {
+            current == null && it.isConfident && it.category != PurposeCategory.UNDETERMINED
+        }?.detail
     val voice = interaction.voice
     // 말로 고르다 실패하면 바로 탭할 수 있게 선택지를 편다
     val voiceFellBack = voice is VoiceUi.NotUnderstood || voice is VoiceUi.Failed
@@ -31,6 +35,7 @@ internal fun reduceReview(
         loading = false,
         summary = review.toSummaryUi(),
         suggestion = suggestion,
+        currentPurpose = current,
         showOptions = suggestion == null || interaction.showOptions || voiceFellBack,
         destinationCandidates = if (review.destination == null) candidates else emptyList(),
         chosenDestination = interaction.chosenDestination,

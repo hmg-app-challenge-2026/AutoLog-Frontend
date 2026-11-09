@@ -51,6 +51,8 @@ data class ReviewUiState(
     val summary: ReviewSummaryUi? = null,
     /** 확신(≥ 0.8) 추천만. null이면 추천 없이 선택지를 먼저 보여 준다(확신이 낮으면 반드시 묻는다). */
     val suggestion: PurposeDetail? = null,
+    /** 이미 확정된 목적 — 운행 기록 조회에서 고치러 들어왔을 때. 선택지에 체크로 보이고 추천 버튼은 없다. */
+    val currentPurpose: PurposeDetail? = null,
     val showOptions: Boolean = true,
     val groups: List<PurposeGroupUi> = PURPOSE_GROUPS,
     /** 도착지를 모를 때만: 최근 목적지(최대 3). */

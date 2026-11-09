@@ -13,7 +13,7 @@ sealed interface Outcome {
     data class Failed(val reason: String) : Outcome
 }
 
-/** 목적 확인 화면에 필요한 운행 요약 + 추천. */
+/** 목적 확인 화면에 필요한 운행 요약 + 추천. [purpose] = 이미 확정된 목적(운행 기록 조회에서 고치러 들어온 경우), 없으면 null. */
 data class TripReview(
     val tripId: String,
     val startTime: Long,
@@ -22,6 +22,7 @@ data class TripReview(
     val origin: String?,
     val destination: String?,
     val suggestion: Suggestion?,
+    val purpose: PurposeDetail? = null,
 )
 
 enum class UploadMark { PENDING, DONE, FAILED }
