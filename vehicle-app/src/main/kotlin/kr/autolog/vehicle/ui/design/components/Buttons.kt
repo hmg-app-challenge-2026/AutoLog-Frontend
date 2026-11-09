@@ -42,6 +42,7 @@ private fun ButtonBody(
     enabled: Boolean,
     loading: Boolean = false,
     dense: Boolean = false,
+    labelStyle: TextStyle = AutoLogTheme.type.label,
 ) {
     val colors = AutoLogTheme.colors
     // 잠금이면 눌리지 않을 뿐 아니라 비활성 색으로 보인다(누를 수 없음을 미리 알림)
@@ -95,7 +96,7 @@ private fun ButtonBody(
             .background(face)
             .padding(horizontal = Space.s6),
         contentAlignment = Alignment.Center,
-    ) { ButtonLabel(text, textColor, content, loading) }
+    ) { ButtonLabel(text, textColor, content, loading, style = labelStyle) }
 }
 
 @Composable
@@ -124,9 +125,12 @@ fun PrimaryButton(
     loading: Boolean = false,
     enabled: Boolean = true,
     dense: Boolean = false,
+    labelStyle: TextStyle = AutoLogTheme.type.label,
 ) {
     val c = AutoLogTheme.colors
-    ButtonBody(text, onClick, modifier, height, c.accentFill, c.onAccent, c.surface3, enabled, loading, dense)
+    ButtonBody(
+        text, onClick, modifier, height, c.accentFill, c.onAccent, c.surface3, enabled, loading, dense, labelStyle,
+    )
 }
 
 @Composable

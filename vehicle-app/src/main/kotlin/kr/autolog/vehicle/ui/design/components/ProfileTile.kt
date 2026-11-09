@@ -23,9 +23,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.sharedAvatar
 
 /** 디자인 언어 11장 ProfileTile. 1탭 = 선택 + 진입(조작 최소화 2.6). */
@@ -43,7 +45,16 @@ fun ProfileTile(
     sharedKey: String? = userId,
 ) {
     val c = AutoLogTheme.colors
-    TileFrame(name, AutoLogTheme.type.title, c.textPrimary, dept, tileSize, onClick, modifier) {
+    val narrow = LocalWindowLayout.current == WindowLayout.NARROW
+    TileFrame(
+        name,
+        if (narrow) AutoLogTheme.type.label else AutoLogTheme.type.title,
+        c.textPrimary,
+        dept,
+        tileSize,
+        onClick,
+        modifier,
+    ) {
         // 배지는 아바타 아래 가장자리에 걸친다 — 이니셜을 가리지 않는다
         Box(contentAlignment = Alignment.BottomCenter) {
             val ring =
@@ -80,7 +91,7 @@ fun ActionTile(
     // 동작 이름은 사람 이름보다 길다("새 운전자 추가") — 한 단계 작은 글자, 두 줄까지
     TileFrame(
         label,
-        AutoLogTheme.type.label,
+        if (LocalWindowLayout.current == WindowLayout.NARROW) AutoLogTheme.type.caption else AutoLogTheme.type.label,
         AutoLogTheme.colors.textSecondary,
         null,
         tileSize,
@@ -128,7 +139,13 @@ private fun TileFrame(
         if (caption != null) {
             Text(
                 caption,
-                style = AutoLogTheme.type.caption,
+                style = if (LocalWindowLayout.current ==
+                    WindowLayout.NARROW
+                ) {
+                    AutoLogTheme.type.fine
+                } else {
+                    AutoLogTheme.type.caption
+                },
                 color = AutoLogTheme.colors.textSecondary,
                 maxLines = 1,
             )

@@ -35,9 +35,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.verticalScrollFade
 
 /** 지금 떠 있는 모달 수. 운전자 배지 등 화면 위 요소는 0이 아니면 숨는다(모달이 화면 전체를 덮어야 하므로). */
@@ -144,7 +146,13 @@ fun ModalTitle(text: String, modifier: Modifier = Modifier) {
     Text(
         text,
         modifier.fillMaxWidth(),
-        style = AutoLogTheme.type.headline,
+        style = if (LocalWindowLayout.current ==
+            WindowLayout.NARROW
+        ) {
+            AutoLogTheme.type.label
+        } else {
+            AutoLogTheme.type.headline
+        },
         color = AutoLogTheme.colors.textPrimary,
         textAlign = TextAlign.Center,
     )

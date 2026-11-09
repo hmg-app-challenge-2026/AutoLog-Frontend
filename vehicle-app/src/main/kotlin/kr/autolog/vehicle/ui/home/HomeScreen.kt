@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,7 +25,6 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
-import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.components.TopLine
@@ -57,6 +57,8 @@ fun HomeRoute() {
 fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
     val sections = homeSections(state, onAction)
+    // 상태 줄 아래 소제목만 내려 배치하고, 값·목록·하단 동작의 레이아웃 높이는 유지한다.
+    val sectionTitleOffset = Modifier.offset(y = Space.s3)
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
             // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
@@ -70,7 +72,7 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     sections.forEach { section ->
                         Column(Modifier.weight(1f).fillMaxHeight()) {
-                            SectionHeader(section.title)
+                            SectionHeader(section.title, sectionTitleOffset)
                             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                                 ScrollColumn(Modifier.fillMaxWidth(), content = section.content)
                             }
@@ -90,7 +92,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                     // 한 칸에 위아래로: 값 → 맥락
                     sections.forEachIndexed { i, section ->
                         if (i > 0) Spacer(Modifier.height(Space.s6))
-                        Section(section.title, content = section.content)
+                        Column {
+                            SectionHeader(section.title, sectionTitleOffset)
+                            section.content(this)
+                        }
                     }
                 }
                 HomeDock(state, onAction)

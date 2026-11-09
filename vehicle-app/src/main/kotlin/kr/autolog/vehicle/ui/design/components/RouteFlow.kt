@@ -52,15 +52,14 @@ private const val GLOW_SPREAD = 1.2f
 /**
  * 디자인 언어 11장 RouteFlow — **경로선**: 왼쪽 표시 칸(출발 ○ · 흐르는 화살표 · 도착 ●)과 오른쪽 글자 칸(장소 이름) 두 칸.
  * 출발지와 목적지가 같은 세로선에서 시작해 두 지점이 짝지어 읽힌다(지도 앱 경로 요약 방식).
- * 위계: 섹션 소제목(22 굵게) → **목적지**(`label` 28 세미볼드, 값, 두 줄까지) → 출발지(`caption` 22 보통, 회색, 보조).
- * 출발지를 소제목보다 약하게 둔다 — 같은 회색에 더 크면 또 하나의 소제목처럼 읽혔다(2026-11-09 좁은 창 점검).
+ * 위계: 섹션 소제목 → **목적지**(`title`, 두 줄까지) → 출발지(`title`, 회색).
+ * 출발지는 보통 굵기와 보조색, 목적지는 굵은 기본색으로 구분한다.
  * 화살표는 하이브리드 회생 제동 표시처럼 갈매기(⌄) 3개에 빛이 위에서 아래로 주기적으로 흐른다([MotionTokens.flowPeriodMs]).
  * 반복 모션은 [kr.autolog.vehicle.ui.design.MotionTokens.ambient]일 때만 — 꺼지면 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
  * [live] = 지금 달리는 운행(흐르는 화살표). 끝난 운행(운행 결과·이력)은 false — 화살표 대신 ○와 ●를 잇는 가는 선(지도 앱 경로 요약처럼),
  * 흐름이 "진행 중"으로 잘못 읽히지 않게.
- * [dense](좁은 창 반쪽 칸): 출발지·목적지를 **같은 크기**(`fine` 20 sp — 글자 하한, 같은 글자색)로 맞추고 **굵기로만** 구분 — 목적지 굵게,
- * 출발지 보통. 표시 칸과 글자 사이도 8 dp로 좁힌다(반쪽 칸 글자 폭 152 dp에 "서울 강남구 역삼동"이 한 줄로).
+ * [dense](좁은 창 반쪽 칸): 출발지 `caption`, 목적지 `label`. 표시 칸과 글자 사이를 8 dp로 좁힌다.
  */
 @Composable
 fun RouteFlow(
@@ -74,8 +73,8 @@ fun RouteFlow(
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val density = LocalDensity.current
-    val originStyle = if (dense) t.fine else t.caption
-    val destinationStyle = if (dense) t.fine.copy(fontWeight = FontWeight.Bold) else t.label
+    val originStyle = if (dense) t.caption else t.title.copy(fontWeight = FontWeight.Normal)
+    val destinationStyle = if (dense) t.label else t.title
     val gap = if (dense) Space.s2 else Space.s3
     val originColor = if (dense) destinationColor else c.textSecondary
     // 점을 그 줄 글자의 첫 줄 가운데에 맞추려고, 점 칸 높이를 글자 한 줄 높이로 둔다
@@ -84,7 +83,13 @@ fun RouteFlow(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s1)) {
         if (origin != null) {
             RouteRow(gap, markerHeight = originLine, marker = { OriginMarker() }) {
-                Text(origin, style = originStyle, color = originColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    origin,
+                    style = originStyle,
+                    color = originColor,
+                    maxLines = if (dense) 2 else 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
             RouteRow(gap, markerHeight = null, marker = { if (live) FlowChevrons() else StaticConnector() }) {}
         }
@@ -113,12 +118,12 @@ private fun RouteRow(gap: Dp, markerHeight: Dp?, marker: @Composable () -> Unit,
     }
 }
 
-/** 끝난 운행의 출발 → 도착 연결선: 굵기 `ring`(3 dp), `textTertiary`, 둥근 끝. 화살표 칸과 같은 높이라 경로선 전체 높이가 같다. */
+/** 끝난 운행의 출발 → 도착 연결선: 굵기 `ring`(3 dp), `textTertiary`, 둥근 끝. */
 @Composable
 private fun StaticConnector() {
     Box(
         Modifier
-            .size(width = Size.ring, height = Space.s3 * CHEVRONS)
+            .size(width = Size.ring, height = Space.s4)
             .clip(CircleShape)
             .background(AutoLogTheme.colors.textTertiary),
     )
