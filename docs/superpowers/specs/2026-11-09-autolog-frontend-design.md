@@ -389,7 +389,8 @@ Pleos 에뮬레이터는 외장 GPU가 필요하고, 맥용 시스템 이미지�
   with: { submodules: recursive }
 - uses: actions/setup-java@v4  # temurin 17
 - uses: gradle/actions/setup-gradle@v4
-- run: ./gradlew ktlintCheck :vehicle-app:testDemoDebugUnitTest :vehicle-app:verifyRoborazziDemoDebug :vehicle-app:assembleDemoDebug
+- run: ./gradlew ktlintCheck :vehicle-app:testDemoDebugUnitTest :vehicle-app:recordRoborazziDemoDebug :vehicle-app:assembleDemoDebug
+- uses: actions/upload-artifact@v4  # 찍은 스크린샷을 결과물 screenshots로(기준 이미지를 커밋하지 않으므로 verify 대신 record — CONVENTIONS 4장)
 - uses: actions/setup-node@v4  # node 20
 - run: cd web/admin && npm ci && npm run lint && npm test -- --run && npm run build
 ```
@@ -898,7 +899,7 @@ Compose는 같은 컨테이너 경로의 볼륨을 override 쪽으로 바꾼다.
 
 ```bash
 ./gradlew ktlintFormat
-./gradlew ktlintCheck :vehicle-app:testDemoDebugUnitTest :vehicle-app:verifyRoborazziDemoDebug :vehicle-app:assembleDemoDebug
+./gradlew ktlintCheck :vehicle-app:testDemoDebugUnitTest :vehicle-app:recordRoborazziDemoDebug :vehicle-app:assembleDemoDebug
 cd web/admin && npm run lint && npm test -- --run && npm run build
 ```
 

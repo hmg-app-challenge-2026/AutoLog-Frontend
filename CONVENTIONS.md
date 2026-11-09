@@ -45,7 +45,7 @@
 |---|---|
 | ViewModel | 화면마다 1개 이상. 정상·오류·잠금 상태 각 1개 이상 |
 | 디자인 토큰 | 토큰을 바꾸면 `ContrastTest` 통과 필수 |
-| 스크린샷 | 화면을 추가·변경하면 `./gradlew :vehicle-app:recordRoborazziDemoDebug`로 로컬에 기록해 검토한다. 파일은 창 크기별 폴더 `src/test/screenshots/{wide,narrow,tall}/<이름>_<dark|light>.png`(`captureAll`이 정한다). **현재는 리포에 커밋하지 않는다**(`.gitignore`, 2026-11-09 사용자 결정 — 로컬 검토용). 그래서 CI의 `verifyRoborazzi`는 비교할 기준이 없어 회귀를 잡지 못한다. 기준 이미지를 커밋하기로 바꾸면 `.gitignore`에서 빼고 이 행을 고친다 |
+| 스크린샷 | 화면을 추가·변경하면 `./gradlew :vehicle-app:recordRoborazziDemoDebug`로 로컬에 기록해 검토한다. 파일은 창 크기별 폴더 `src/test/screenshots/{wide,narrow,tall}/<이름>_<dark|light>.png`(`captureAll`이 정한다). **현재는 리포에 커밋하지 않는다**(`.gitignore`, 2026-11-09 사용자 결정 — 로컬 검토용). 그래서 CI는 `verifyRoborazzi`(기준 이미지와 비교 — 기준이 없으면 모든 스크린샷 테스트가 "original file was not found"로 실패)가 아니라 `recordRoborazzi`로 찍기만 하고, 캡처는 Actions 결과물 `screenshots`로 올린다(리뷰어가 내려받아 본다). 화면이 그려지다 죽는 문제는 잡지만 픽셀 회귀는 잡지 못한다. 기준 이미지를 커밋하기로 바꾸면 `.gitignore`에서 빼고 CI를 `verifyRoborazzi`로 되돌린 뒤 이 행을 고친다 |
 | 컴포넌트 갤러리 | `ui/design/components/` 컴포넌트를 추가·변경하면 `GalleryScreenshotTest`(components·components_tiles·components_forms·components_modal)도 같이 고친다. 갤러리는 지금 컴포넌트 목록과 같아야 한다. UI를 바꾸면 `src/test/screenshots/`를 지우고 전부 다시 기록한다(옛 캡처를 남기지 않는다) |
 | 웹 | 폼·API 오류 문구 테스트 |
 
@@ -55,7 +55,7 @@
 
 ```bash
 ./gradlew ktlintFormat
-./gradlew ktlintCheck :vehicle-app:testDemoDebugUnitTest :vehicle-app:verifyRoborazziDemoDebug :vehicle-app:assembleDemoDebug
+./gradlew ktlintCheck :vehicle-app:testDemoDebugUnitTest :vehicle-app:recordRoborazziDemoDebug :vehicle-app:assembleDemoDebug
 (cd web/admin && npm run lint && npm test -- --run && npm run build)   # web을 바꿨을 때
 ```
 

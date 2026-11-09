@@ -17,7 +17,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: ktlint
         run: ./gradlew ktlintCheck
-      - name: Unit tests + screenshot verify
-        run: ./gradlew :vehicle-app:testDemoDebugUnitTest :vehicle-app:verifyRoborazziDemoDebug
+      # 스크린샷은 리포에 커밋하지 않는다(CONVENTIONS 4장) — 비교할 기준 이미지가 없으므로 verify가 아니라 record로 찍어
+      # 화면이 그려지는지만 확인하고, 찍은 캡처는 결과물로 올려 리뷰에 쓴다
+      - name: Unit tests + screenshot record
+        run: ./gradlew :vehicle-app:testDemoDebugUnitTest :vehicle-app:recordRoborazziDemoDebug
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: vehicle-app/src/test/screenshots/
+          if-no-files-found: ignore
       - name: Build
         run: ./gradlew :vehicle-app:assembleDemoDebug :vehicle-app:assembleVehicleDebug
