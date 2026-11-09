@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 첫 프레임 배경을 토큰 bg와 맞춰 깜빡임을 없앤다 -->
+<resources>
+    <style name="Theme.AutoLog" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
