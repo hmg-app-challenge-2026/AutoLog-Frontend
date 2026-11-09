@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -40,14 +39,16 @@ class HomeViewModel(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
-        // 운행이 끝나 목적 확인 대기가 되면 바로 ReviewTrip을 연다(스펙 7.3 진입 1번). 같은 운행은 한 번만.
+        // 종료 조건이 되면(종료 대기) 또는 운행이 끝나면 바로 운행 결과 카드를 연다(스펙 7.3, D-28).
+        // 같은 운행의 "종료 대기 → 끝남"은 한 번만 연다. [계속 기록하기]로 되돌렸다가 다시 종료 대기가 되면 다시 연다.
         viewModelScope.launch {
-            var opened: String? = null
             session.state
-                .filterIsInstance<TripSession.PendingReview>()
-                .map { it.tripId }
+                .map { it.resultTripId() }
                 .distinctUntilChanged()
-                .collect { id -> if (id != opened && navigator.push(Route.ReviewTrip(id))) opened = id }
+                .collect { id ->
+                    val route = id?.let { Route.TripResult(it) } ?: return@collect
+                    if (navigator.current != route) navigator.push(route)
+                }
         }
     }
 
@@ -56,7 +57,6 @@ class HomeViewModel(
             when (action) {
                 HomeAction.StartTrip -> session.startTrip()
                 HomeAction.EndNow -> session.endNow()
-                HomeAction.KeepRecording -> session.keepRecording()
                 HomeAction.AcceptMissedTrip -> session.acceptMissedTrip()
                 HomeAction.IgnoreMissedTrip -> session.ignoreMissedTrip()
                 is HomeAction.Recover -> session.resolveRecovery(action.action)
@@ -66,4 +66,11 @@ class HomeViewModel(
             }
         }
     }
+}
+
+/** 운행 결과 카드를 열 운행: 종료 대기 중이거나 방금 끝나 목적을 기다리는 운행. */
+private fun TripSession.resultTripId(): String? = when (this) {
+    is TripSession.AutoEnding -> trip.tripId
+    is TripSession.PendingReview -> tripId
+    else -> null
 }

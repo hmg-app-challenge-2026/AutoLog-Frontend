@@ -16,7 +16,7 @@ class SessionRepositoryTest {
         assertEquals(TripSession.Idle, SessionState.Idle.toTripSession())
         assertEquals(TripSession.Recording(active, null), SessionState.Recording(live, null, 0).toTripSession())
         assertEquals(
-            TripSession.AutoEnding(active, 23.4, AutoEndReason.NAVI_ARRIVED, since = 1, deadlineAt = 2),
+            TripSession.AutoEnding(active, 23.4, AutoEndReason.NAVI_ARRIVED, deadlineAt = 2),
             SessionState.StopCandidate(live, 23.4, StopReason.NAVI_ARRIVED, since = 1, deadlineAt = 2).toTripSession(),
         )
         assertEquals(TripSession.PendingReview("t-1"), SessionState.PendingReview(live, 23.4, null).toTripSession())

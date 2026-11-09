@@ -3,18 +3,13 @@ package kr.autolog.vehicle.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,16 +20,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.LocalTopEndReserved
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
-import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusLine
+import kr.autolog.vehicle.ui.design.components.TopLine
 import kr.autolog.vehicle.ui.design.screenMargin
-import kr.autolog.vehicle.ui.design.verticalScrollFade
 
 @Composable
 fun HomeRoute() {
@@ -70,7 +64,7 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 Modifier.fillMaxSize().padding(screenMargin()),
                 verticalArrangement = Arrangement.spacedBy(Space.s4),
             ) {
-                TopRow { HomeStatus(state) }
+                TopLine { HomeStatus(state) }
                 // 좌우 반반. 소제목은 위에 나란히 고정하고, 내용은 그 아래 남는 높이의 세로 가운데에 —
                 // 짧은 내용(기록 중 거리·경로)이 소제목 바로 밑에 붙어 위로 쏠리지 않게. 길면(최근 운행 3건) 칸을 다 쓰고 그 칸만 스크롤
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
@@ -78,7 +72,7 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                         Column(Modifier.weight(1f).fillMaxHeight()) {
                             SectionHeader(section.title)
                             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                                ScrollRegion(Modifier.fillMaxWidth(), content = section.content)
+                                ScrollColumn(Modifier.fillMaxWidth(), content = section.content)
                             }
                         }
                     }
@@ -90,9 +84,9 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 Modifier.fillMaxSize().padding(screenMargin()),
                 verticalArrangement = Arrangement.spacedBy(Space.s5),
             ) {
-                TopRow { HomeStatus(state) }
+                TopLine { HomeStatus(state) }
                 // 가운데만 남는 높이를 쓴다 — 넘치면 이 영역이 스크롤되고 타일은 늘 보인다
-                ScrollRegion(Modifier.weight(1f).fillMaxWidth()) {
+                ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {
                     // 한 칸에 위아래로: 값 → 맥락
                     sections.forEachIndexed { i, section ->
                         if (i > 0) Spacer(Modifier.height(Space.s6))
@@ -101,16 +95,6 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 }
                 HomeDock(state, onAction)
             }
-        }
-        val autoEnd = state.autoEnd
-        if (state.phase == HomePhase.AUTO_ENDING && autoEnd != null) {
-            AutoEndPrompt(
-                autoEnd,
-                state.tripKm,
-                state.destination,
-                onKeep = { onAction(HomeAction.KeepRecording) },
-                onEnd = { onAction(HomeAction.EndNow) },
-            )
         }
         if (state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
@@ -130,7 +114,7 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
 @Composable
 private fun HomeStatus(state: HomeUiState) {
     val c = AutoLogTheme.colors
-    val recording = state.phase == HomePhase.RECORDING_PARKED || state.phase == HomePhase.AUTO_ENDING
+    val recording = state.phase == HomePhase.RECORDING_PARKED
     if (recording) {
         StatusLine(
             text = stringResource(R.string.status_recording),
@@ -140,21 +124,4 @@ private fun HomeStatus(state: HomeUiState) {
     } else {
         StatusLine(text = stringResource(R.string.status_ready), dot = c.textTertiary)
     }
-}
-
-/** 화면 맨 위 줄(높이 76 dp). 오른쪽은 운전자 배지 자리로 비운다([LocalTopEndReserved]). */
-@Composable
-private fun TopRow(content: @Composable RowScope.() -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = Size.touchMin).padding(end = LocalTopEndReserved.current),
-        verticalAlignment = Alignment.CenterVertically,
-        content = content,
-    )
-}
-
-/** 위쪽 정렬로 쌓고, 넘치면 스크롤 + 더 있는 쪽 가장자리를 흐린다. */
-@Composable
-private fun ScrollRegion(modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
-    val scroll = rememberScrollState()
-    Column(modifier.verticalScrollFade(scroll, Space.s7).verticalScroll(scroll), content = content)
 }

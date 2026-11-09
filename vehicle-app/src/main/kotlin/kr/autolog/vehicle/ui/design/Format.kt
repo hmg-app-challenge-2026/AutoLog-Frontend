@@ -7,8 +7,3 @@ import kotlin.math.ceil
 fun formatKm(km: Double?): String? = km?.let { String.format(Locale.US, "%,.1f", it) }
 
 fun remainingSeconds(deadlineAt: Long, now: Long): Int = ceil((deadlineAt - now) / 1000.0).toInt().coerceAtLeast(0)
-
-fun progressOf(since: Long, deadlineAt: Long, now: Long): Float {
-    val total = (deadlineAt - since).coerceAtLeast(1)
-    return ((deadlineAt - now).toFloat() / total).coerceIn(0f, 1f)
-}

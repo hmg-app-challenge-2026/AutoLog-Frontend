@@ -19,6 +19,7 @@ object Space {
 /** 디자인 언어 6.5. */
 object Size {
     val touchMin = 76.dp
+    val denseFace = 56.dp // dense 버튼·선택 행의 보이는 높이(좁은 창). 터치 영역은 touchMin 그대로 — CloseButton과 같은 방식
     val buttonMd = 76.dp
     val buttonLg = 96.dp
     val buttonXl = 120.dp
@@ -41,6 +42,7 @@ object Size {
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
     val hairline = 1.dp
     val progressBar = 8.dp
+    val edgeBar = 4.dp // EdgeCountdownBar — 화면 맨 위 가는 남은 시간 막대
     val ring = 3.dp
 }
 

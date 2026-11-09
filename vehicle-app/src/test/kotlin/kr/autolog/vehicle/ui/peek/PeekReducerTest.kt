@@ -24,7 +24,7 @@ class PeekReducerTest {
 
     @Test
     fun `움직임 없음 자동 종료 대기면 남은 시간을 보여 준다`() {
-        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.NO_MOVEMENT, since = 0, deadlineAt = 180_000)
+        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.NO_MOVEMENT, deadlineAt = 180_000)
 
         val r = reducePeek(candidate, null, null, now = 19_000) as PeekUiState.Recording
 

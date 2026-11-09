@@ -2,7 +2,6 @@ package kr.autolog.vehicle.data.repository
 
 import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.core.ReportFile
-import kr.autolog.vehicle.core.Suggestion
 
 // 화면(ui/)이 쓰는 Repository 값 타입. interim·core 서비스 계약이 바뀌어도 이 타입은 유지한다(스펙 6.6).
 
@@ -12,17 +11,6 @@ sealed interface Outcome {
 
     data class Failed(val reason: String) : Outcome
 }
-
-/** 목적 확인 화면에 필요한 운행 요약 + 추천. */
-data class TripReview(
-    val tripId: String,
-    val startTime: Long,
-    val endTime: Long?,
-    val distanceKm: Double?,
-    val origin: String?,
-    val destination: String?,
-    val suggestion: Suggestion?,
-)
 
 enum class UploadMark { PENDING, DONE, FAILED }
 

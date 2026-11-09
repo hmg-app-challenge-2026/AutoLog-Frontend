@@ -19,11 +19,4 @@ class FormatTest {
         assertEquals(5, remainingSeconds(deadlineAt = 10_000, now = 5_001))
         assertEquals(0, remainingSeconds(deadlineAt = 10_000, now = 12_000))
     }
-
-    @Test
-    fun `진행률은 남은 비율이고 0에서 1 사이`() {
-        assertEquals(1f, progressOf(since = 0, deadlineAt = 5_000, now = 0), 0.001f)
-        assertEquals(0.4f, progressOf(since = 0, deadlineAt = 5_000, now = 3_000), 0.001f)
-        assertEquals(0f, progressOf(since = 0, deadlineAt = 5_000, now = 9_000), 0.001f)
-    }
 }

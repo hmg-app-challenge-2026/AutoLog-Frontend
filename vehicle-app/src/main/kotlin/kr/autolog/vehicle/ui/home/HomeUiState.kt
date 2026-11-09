@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import kr.autolog.vehicle.data.repository.RecoveryAction
 
-/** 스펙 7.2 상태 4가지. 상태 계산은 [reduceHome](HomeReducer.kt). */
-enum class HomePhase { READY, RECORDING_PARKED, AUTO_ENDING, NEEDS_RECOVERY }
-
-data class AutoEndUi(val remainingSec: Int, val progress: Float)
+/** 스펙 7.2 상태 3가지(종료 대기는 Home이 아니라 운행 결과 카드가 맡는다 — D-28). 상태 계산은 [reduceHome](HomeReducer.kt). */
+enum class HomePhase { READY, RECORDING_PARKED, NEEDS_RECOVERY }
 
 /** 대기 상태의 주인공 — 이번 달 요약(스펙 7.2, D-23). */
 data class MonthUi(val tripCount: Int, val totalKm: String, val businessKm: String)
@@ -39,7 +37,6 @@ data class HomeUiState(
     val origin: String? = null,
     val destination: String? = null,
     val elapsedMin: Int? = null,
-    val autoEnd: AutoEndUi? = null,
     /** 대기 오른쪽 "최근 운행 기록", 최신 순 최대 [RECENT_TRIPS]건. */
     val recentTrips: List<RecentTripUi> = emptyList(),
     val recoveryExtraKm: String? = null,
@@ -52,8 +49,6 @@ sealed interface HomeAction {
     data object StartTrip : HomeAction
 
     data object EndNow : HomeAction
-
-    data object KeepRecording : HomeAction
 
     data object AcceptMissedTrip : HomeAction
 

@@ -8,7 +8,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-09-autolog-frontend-design.md` 7.3~7.9, 8장 · `docs/design-language.md`
 
-**선행 상태:** 브랜치 `fe/vehicle-app-foundation`(디자인 게이트 리뷰는 사용자가 나중에). 이 계획은 그 위에 `fe/vehicle-app-screens`로 쌓는다.
+**선행 상태:** 브랜치 `feat/foundation`(옛 이름 `fe/vehicle-app-foundation`)(디자인 게이트 리뷰는 사용자가 나중에). 이 계획은 그 위에 `fe/vehicle-app-screens`로 쌓는다.
 
 ## Global Constraints
 
@@ -91,6 +91,8 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 ---
 
 ## Task 4: ReviewTrip — 목적 확인 (F-06, F-08, F-09, F-17)
+
+> 2026-11-09 구현 후 **운행 결과 카드로 바뀌었다**(스펙 D-27, 브랜치 `feat/review-trip`). 아래 원래 계획(확신 추천 · 선택지 · 음성 · 거래처 등록)은 기록으로 남긴다. 지금: `Route.TripResult`, `ui/result/*`, `TripResultRepository`(`classify` + `detailFor`), `DefaultPurposePolicy`(기본 일반 업무), 5초 자동 저장 · [수정하기]/[저장] · [메인 화면으로]. History(Task 7) 행 탭은 `Route.TripResult`로 연다 — 그때 History에서 연 카드는 카운트다운 없이 열지 정한다.
 
 **Files:** Create `ui/review/ReviewUiState.kt`, `ReviewViewModel.kt`, `ReviewScreen.kt` · Test `ReviewReducerTest`, `ReviewViewModelTest`, `ReviewScreenTest`(조작 예산), `ReviewScreenshotTest`
 

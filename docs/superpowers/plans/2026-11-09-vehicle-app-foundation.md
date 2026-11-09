@@ -120,7 +120,7 @@ Expected: 마지막 줄 출력에 `android.car.jar`가 있다(없으면 `docs/ve
 
 ```bash
 cd ~/code/AutoLog-Frontend
-git checkout -b fe/vehicle-app-foundation
+git checkout -b feat/foundation   # 옛 이름 fe/vehicle-app-foundation (2026-11-09 변경)
 git submodule add https://github.com/hmg-app-challenge-2026/AutoLog-Backend backend
 git -C backend log --oneline -1
 ```

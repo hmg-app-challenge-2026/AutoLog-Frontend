@@ -44,7 +44,7 @@ class FakeTripSession(
     }
 
     override suspend fun startSession(): StartResult {
-        if (_state.value !is SessionState.Idle) return StartResult.Failed("이미 기록 중입니다")
+        if (!_state.value.canStart()) return StartResult.Failed("이미 기록 중입니다")
         val now = clock.nowMs()
         val trip = LiveTrip("trip-$now", now, _totalOdometerKm.value, "판교 테크노밸리 거래처", _currentDriver.value, "본사")
         _state.value =
@@ -106,7 +106,7 @@ class FakeTripSession(
                 autoEndJob?.cancel()
                 _state.value = SessionState.Recording(s.trip, s.liveKm, clock.nowMs())
             }
-            motion == VehicleMotion.MOVING && s is SessionState.Idle -> scope.launch { startSession() }
+            motion == VehicleMotion.MOVING && s.canStart() -> scope.launch { startSession() }
             else -> Unit
         }
     }
@@ -139,6 +139,9 @@ class FakeTripSession(
                 if (_state.value is SessionState.StopCandidate) finalizeNow()
             }
     }
+
+    /** 새 운행을 시작할 수 있는 상태: 운행 없음, 또는 끝난 운행이 목적 확인을 기다림(미룬 확인은 저장소에 남는다). */
+    private fun SessionState.canStart() = this is SessionState.Idle || this is SessionState.PendingReview
 
     private fun finalizeNow() {
         val (trip, km) =

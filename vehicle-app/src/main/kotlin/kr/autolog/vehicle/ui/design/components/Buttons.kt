@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.R
@@ -40,36 +41,76 @@ private fun ButtonBody(
     disabledContainer: Color,
     enabled: Boolean,
     loading: Boolean = false,
+    dense: Boolean = false,
 ) {
     val colors = AutoLogTheme.colors
     // 잠금이면 눌리지 않을 뿐 아니라 비활성 색으로 보인다(누를 수 없음을 미리 알림)
     val active = enabled && !LocalInputLocked.current && !loading
+    // 모서리는 높이에 맞춰 같은 비율로: 76 dp 면 = radius.lg(28), 56 dp dense 면 = radius.md(20) — 알약이 아니라 둥근 직사각형
+    val shape = RoundedCornerShape(if (dense) Radius.md else Radius.lg)
+    val face = if (active || loading) container else disabledContainer
+    // 로딩 중에도 글자를 투명하게 남겨 버튼 폭이 흔들리지 않게 한다
+    val textColor = if (loading) {
+        Color.Transparent
+    } else if (active) {
+        content
+    } else {
+        colors.textTertiary
+    }
+    if (dense) {
+        // dense(좁은 창에서 여러 개를 한 줄에): 보이는 면 56 dp·좌우 여백 12 dp·글자 fine 20 sp(글자 하한)로 작게,
+        // 터치 영역은 76 dp 그대로(면 위아래 투명). 버튼 글자 28 sp 규칙의 예외(2026-11-09 사용자 결정, 디자인 언어 1.20·1.22)
+        Box(
+            modifier
+                .heightIn(min = Size.touchMin)
+                .defaultMinSize(minWidth = Size.touchMin)
+                .tappable(onClick, enabled = enabled && !loading),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .padding(vertical = (Size.touchMin - Size.denseFace) / 2)
+                    .clip(shape)
+                    .background(face),
+            )
+            ButtonLabel(
+                text,
+                textColor,
+                content,
+                loading,
+                Modifier.padding(horizontal = Space.s3),
+                AutoLogTheme.type.fine,
+            )
+        }
+        return
+    }
     Box(
         modifier =
         modifier
             .heightIn(min = height)
             .defaultMinSize(minWidth = Size.touchMin)
             .tappable(onClick, enabled = enabled && !loading)
-            .clip(RoundedCornerShape(Radius.lg))
-            .background(if (active || loading) container else disabledContainer)
+            .clip(shape)
+            .background(face)
             .padding(horizontal = Space.s6),
         contentAlignment = Alignment.Center,
-    ) {
-        // 로딩 중에도 글자를 투명하게 남겨 버튼 폭이 흔들리지 않게 한다
-        Text(
-            text = text,
-            style = AutoLogTheme.type.label,
-            color = if (loading) {
-                Color.Transparent
-            } else if (active) {
-                content
-            } else {
-                colors.textTertiary
-            },
-            textAlign = TextAlign.Center,
-        )
+    ) { ButtonLabel(text, textColor, content, loading) }
+}
+
+@Composable
+private fun ButtonLabel(
+    text: String,
+    color: Color,
+    spinner: Color,
+    loading: Boolean,
+    modifier: Modifier = Modifier,
+    style: TextStyle = AutoLogTheme.type.label,
+) {
+    Box(modifier, contentAlignment = Alignment.Center) {
+        Text(text = text, style = style, color = color, textAlign = TextAlign.Center)
         if (loading) {
-            CircularProgressIndicator(color = content, strokeWidth = Space.s1, modifier = Modifier.size(Size.icon))
+            CircularProgressIndicator(color = spinner, strokeWidth = Space.s1, modifier = Modifier.size(Size.icon))
         }
     }
 }
@@ -82,9 +123,10 @@ fun PrimaryButton(
     height: Dp = Size.buttonLg,
     loading: Boolean = false,
     enabled: Boolean = true,
+    dense: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
-    ButtonBody(text, onClick, modifier, height, c.accentFill, c.onAccent, c.surface3, enabled, loading)
+    ButtonBody(text, onClick, modifier, height, c.accentFill, c.onAccent, c.surface3, enabled, loading, dense)
 }
 
 @Composable
@@ -94,10 +136,11 @@ fun SecondaryButton(
     modifier: Modifier = Modifier,
     height: Dp = Size.buttonMd,
     enabled: Boolean = true,
+    dense: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
     // surface3: 시트(surface2) 위에서도 버튼 면이 보이게 한 단계 위 서피스
-    ButtonBody(text, onClick, modifier, height, c.surface3, c.textPrimary, c.surface3, enabled)
+    ButtonBody(text, onClick, modifier, height, c.surface3, c.textPrimary, c.surface3, enabled, dense = dense)
 }
 
 @Composable

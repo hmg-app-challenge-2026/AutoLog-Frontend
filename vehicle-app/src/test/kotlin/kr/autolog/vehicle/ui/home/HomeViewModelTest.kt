@@ -37,15 +37,36 @@ class HomeViewModelTest {
     )
 
     @Test
-    fun `계속 기록을 누르면 자동 종료가 취소된다`() = runTest {
+    fun `기어 P(종료 대기)가 되면 운행 결과 카드가 바로 열리고, 끝나도 다시 열지 않는다`() = runTest {
         val g = graph()
-        val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
+        HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
+        g.trip.startSession()
+        advanceTimeBy(1_100)
+
+        g.trip.setMotion(VehicleMotion.PARKED)
+        advanceTimeBy(1_100)
+        val tripId = (g.trip.state.value as SessionState.StopCandidate).trip.tripId
+        assertEquals(listOf(Route.Home, Route.TripResult(tripId)), g.navigator.backStack.value)
+
+        advanceTimeBy(6_000) // 종료 시각이 지나 끝남(PendingReview) — 같은 운행이라 카드를 또 쌓지 않는다
+        assertEquals(listOf(Route.Home, Route.TripResult(tripId)), g.navigator.backStack.value)
+    }
+
+    @Test
+    fun `계속 기록으로 되돌렸다가 다시 기어 P면 카드를 다시 연다`() = runTest {
+        val g = graph()
+        HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
         g.trip.startSession()
         g.trip.setMotion(VehicleMotion.PARKED)
+        advanceTimeBy(1_100)
+        g.navigator.pop()
+        g.trip.resume()
+        advanceTimeBy(1_100)
 
-        vm.onAction(HomeAction.KeepRecording)
+        g.trip.setMotion(VehicleMotion.PARKED)
+        advanceTimeBy(1_100)
 
-        assertTrue(g.trip.state.value is SessionState.Recording)
+        assertTrue(g.navigator.current is Route.TripResult)
     }
 
     @Test
@@ -71,10 +92,10 @@ class HomeViewModelTest {
         advanceTimeBy(1_100)
 
         val current = g.navigator.current
-        assertTrue(current is Route.ReviewTrip)
+        assertTrue(current is Route.TripResult)
         assertEquals(
             (g.trip.state.value as SessionState.PendingReview).trip.tripId,
-            (current as Route.ReviewTrip).tripId,
+            (current as Route.TripResult).tripId,
         )
     }
 

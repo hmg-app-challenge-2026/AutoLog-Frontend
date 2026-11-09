@@ -6,7 +6,8 @@ sealed interface Route {
 
     data object Home : Route
 
-    data class ReviewTrip(val tripId: String) : Route
+    /** 운행 결과 카드(스펙 7.3, D-27) — 운행이 끝나면 자동으로, 알림 탭으로, 운행 기록 조회에서 연다. */
+    data class TripResult(val tripId: String) : Route
 
     /** 주유 기록 추가의 기본 경로: 폰으로 영수증을 올릴 QR(스펙 7.4, D-20). */
     data object ReceiptQr : Route

@@ -48,7 +48,6 @@ private val recordingTrouble =
         tripKm = null,
         destination = "경기도 성남시 분당구 판교역로 테크노밸리 제2캠퍼스 거래처 본관",
     )
-private val autoEnding = recording.copy(phase = HomePhase.AUTO_ENDING, autoEnd = AutoEndUi(3, 0.6f))
 private val recovery = HomeUiState(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = "3.2")
 
 @RunWith(AndroidJUnit4::class)
@@ -59,16 +58,6 @@ class HomeScreenTest {
 
     private fun show(state: HomeUiState, actions: MutableList<HomeAction> = mutableListOf()) = compose.setContent {
         AutoLogTheme { WindowLayoutHost { HomeScreen(state, onAction = { actions += it }) } }
-    }
-
-    @Test
-    fun `자동 종료 안내에서 계속 기록은 1탭`() {
-        val actions = mutableListOf<HomeAction>()
-        show(autoEnding, actions)
-
-        compose.onNodeWithText("계속 기록").performClick()
-
-        assertEquals(listOf<HomeAction>(HomeAction.KeepRecording), actions)
     }
 
     @Test
@@ -180,9 +169,6 @@ class HomeScreenshotTest {
     fun recordingTrouble() = captureAll("home_recording_trouble", driver = SampleDriver) {
         HomeScreen(recordingTrouble, onAction = {})
     }
-
-    @Test
-    fun autoEnding() = captureAll("home_autoend", driver = SampleDriver) { HomeScreen(autoEnding, onAction = {}) }
 
     @Test
     fun recovery() = captureAll("home_recovery", driver = SampleDriver) { HomeScreen(recovery, onAction = {}) }

@@ -5,10 +5,12 @@ import kotlinx.coroutines.test.runTest
 import kr.autolog.vehicle.TestAppGraph
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.ConfirmResult
+import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.data.interim.containsEpoch
 import kr.autolog.vehicle.fake.FakeReceiptApi
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -44,14 +46,26 @@ class ScreenRepositoriesTest {
     }
 
     @Test
-    fun `목적 확인은 추천을 함께 주고 확정하면 운행 기록에 목적이 들어간다`() = runTest {
+    fun `운행 결과 — 목적 없는 운행은 일반 업무가 기본, 분류하면 엔진 추천 세부 목적으로 저장`() = runTest {
         val g = TestAppGraph(backgroundScope, AppClock { now })
 
-        val review = g.review.review("t-s1").first()!!
-        g.review.confirm("t-s1", PurposeDetail.CLIENT_VISIT, null, byVoice = false)
+        val result = g.tripResults.result("t-s1").first()!!
+        g.tripResults.classify("t-s1", PurposeCategory.BUSINESS)
 
-        assertEquals(PurposeDetail.CLIENT_VISIT, review.suggestion?.detail)
+        assertEquals(PurposeCategory.BUSINESS, result.category)
+        assertFalse(result.classified)
+        // 가짜 엔진 추천 = 거래처 방문(일반 업무용) → 그 세부 목적으로
         assertEquals(PurposeDetail.CLIENT_VISIT, g.trips.recent(10).first().single { it.tripId == "t-s1" }.purpose)
+    }
+
+    @Test
+    fun `운행 결과 — 이미 분류된 운행은 저장된 분류를 보여 준다`() = runTest {
+        val g = TestAppGraph(backgroundScope, AppClock { now })
+
+        val result = g.tripResults.result("t-s3").first()!! // 출근으로 확정된 운행
+
+        assertEquals(PurposeCategory.COMMUTE, result.category)
+        assertTrue(result.classified)
     }
 
     @Test

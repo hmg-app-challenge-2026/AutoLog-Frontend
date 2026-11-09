@@ -32,7 +32,7 @@ internal fun homeSections(state: HomeUiState, onAction: (HomeAction) -> Unit): L
             HomeSection(stringResource(R.string.section_month_trip)) { MonthSummary(state.month) },
             HomeSection(stringResource(R.string.section_recent_trips)) { RecentTrips(state.recentTrips, onAction) },
         )
-    HomePhase.RECORDING_PARKED, HomePhase.AUTO_ENDING ->
+    HomePhase.RECORDING_PARKED ->
         listOf(
             HomeSection(stringResource(R.string.section_distance)) { TripDistance(state.tripKm) },
             HomeSection(stringResource(R.string.section_route)) { TripRoute(state) },
