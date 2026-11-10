@@ -53,8 +53,23 @@ private fun TripRoute(state: HomeUiState) {
         destination = state.destination ?: stringResource(R.string.peek_no_destination),
         destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
         textStyle = AutoLogTheme.windowType.homeRoute,
+        markerScale = routeMarkerScale(),
     )
 }
+
+/**
+ * 출발지·목적지를 키운 Home에서 ○ · 흐르는 갈매기 · ●도 함께 키운다(2026-11-10 사용자 지시 — 글자보다 한 단계 더, 방향이 한눈에).
+ * 넓은 화면 2배(갈매기 48×72 dp) · 분할 화면 1.6배 · 세로 창 그대로.
+ */
+@Composable
+private fun routeMarkerScale(): Float = when (LocalWindowLayout.current) {
+    WindowLayout.WIDE -> ROUTE_MARKER_SCALE_WIDE
+    WindowLayout.NARROW -> ROUTE_MARKER_SCALE_NARROW
+    WindowLayout.TALL -> 1f
+}
+
+private const val ROUTE_MARKER_SCALE_WIDE = 2f
+private const val ROUTE_MARKER_SCALE_NARROW = 1.6f
 
 /** 큰 숫자 크기 — 넓은 화면 140 sp, 세로 화면 112 sp, 좁은 분할 화면 80 sp. */
 @Composable

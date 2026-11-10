@@ -27,7 +27,7 @@ class AutoLogRootTest {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     @Test
-    fun `정차면 누를 수 있는 것이 하나도 없다 — 운전자 배지도 표시 전용`() {
+    fun `정차면 누를 수 있는 것이 하나도 없다 — 운전자 배지도 없다`() {
         val graph = TestAppGraph(scope, start = Route.Home)
         runBlocking { graph.session.selectDriver("u-1") }
         graph.trip.setMotion(VehicleMotion.STOPPED)
@@ -35,8 +35,24 @@ class AutoLogRootTest {
         compose.setContent { AutoLogRoot(graph, onRequestBackground = {}) }
         compose.waitForIdle()
 
-        compose.onNodeWithText("김영업님").assertIsDisplayed()
+        compose.onNodeWithText("김영업님").assertDoesNotExist() // 배지는 Home "대기 중"에만(D-30)
         assertEquals(0, compose.onAllNodes(hasClickAction()).fetchSemanticsNodes().size)
+    }
+
+    @Test
+    @Config(qualifiers = "w1024dp-h640dp")
+    fun `기록 중 Home엔 운전자 배지가 없다 — 대기 중에만`() {
+        val graph = TestAppGraph(scope, start = Route.Home)
+        runBlocking {
+            graph.session.selectDriver("u-1")
+            graph.trip.startSession()
+        }
+
+        compose.setContent { AutoLogRoot(graph, onRequestBackground = {}) }
+        compose.mainClock.advanceTimeBy(FULL_ENTRY_GUARD_MS + 1_100) // 세션 값은 1초 스로틀
+
+        compose.onNodeWithText("기록 중").assertIsDisplayed()
+        compose.onNodeWithText("김영업님").assertDoesNotExist()
     }
 
     @Test

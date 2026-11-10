@@ -24,8 +24,8 @@ enum class ShotSize(val qualifier: String) {
     NARROW("w1280dp-h1268dp"),
 }
 
-/** 실제 앱처럼 오른쪽 위 운전자 배지를 얹을 때. [clickable]=false는 Peek(표시 전용). */
-data class ShotDriver(val userId: String?, val name: String?, val clickable: Boolean = true)
+/** 실제 앱처럼 오른쪽 위 운전자 배지를 얹을 때 — Home "대기 중"뿐(D-30). */
+data class ShotDriver(val userId: String?, val name: String?)
 
 /** 스크린샷 기록 위치(로컬 검토용, 커밋하지 않음 — CONVENTIONS 4장). */
 const val SCREENSHOT_DIR = "src/test/screenshots"
@@ -55,7 +55,7 @@ fun captureAll(
                             if (driver == null) {
                                 content()
                             } else {
-                                BadgeScaffold(driver.userId, driver.name, if (driver.clickable) ({}) else null, content)
+                                BadgeScaffold(driver.userId, driver.name, onClick = {}, content = content)
                             }
                         }
                     }
