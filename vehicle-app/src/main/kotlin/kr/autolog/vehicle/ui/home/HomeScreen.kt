@@ -58,8 +58,8 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
     val layout = LocalWindowLayout.current
     val sections = homeSections(state, onAction)
     // 상태 줄 아래 소제목만 내려 배치하고, 값·목록·하단 동작의 레이아웃 높이는 유지한다.
-    // 넓은 화면은 내용이 세로 가운데라 소제목만 32 dp 내려 상태 줄과 떼어 둔다(2026-11-10 사용자 지시)
-    val sectionTitleOffset = Modifier.offset(y = if (layout == WindowLayout.WIDE) Space.s6 else Space.s3)
+    // 넓은 화면은 내용이 세로 가운데라 소제목만 64 dp 내려 상태 줄과 떼어 둔다(2026-11-10 사용자 지시)
+    val sectionTitleOffset = Modifier.offset(y = if (layout == WindowLayout.WIDE) Space.s8 else Space.s3)
     Box(modifier.fillMaxSize()) {
         if (layout == WindowLayout.WIDE) {
             // 높이 640 dp 안에 상태 줄·두 섹션·타일이 다 들어가게 단 사이 간격은 16 dp
