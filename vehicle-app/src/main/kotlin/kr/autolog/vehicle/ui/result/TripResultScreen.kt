@@ -131,7 +131,8 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                         }
                     }
                 }
-                ClassificationSummary(state)
+                // 분류 문구는 버튼에서 40 dp(줄 간격 8 + 32) 띄워 위로 — 버튼 글자와 붙어 한 덩어리로 읽히지 않게(2026-11-10 사용자 지시)
+                ClassificationSummary(state, Modifier.padding(bottom = CLASSIFICATION_GAP))
                 // 행동 줄: 같은 폭 버튼을 가운데에 모은다(분류 문구와 같은 가운데 축). 남은 시간은 주 버튼 안에
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { WideActions(state, onAction) }
             }
@@ -161,6 +162,9 @@ private fun TwoColumns(modifier: Modifier = Modifier, content: @Composable RowSc
 
 /** 칸 높이가 넉넉한 차량 화면에서 거리·시간과 경로 사이 간격(112 dp). 작은 창은 48 dp. */
 private val SUMMARY_GAP_SPACIOUS = Space.s7 * 2 + Space.s4
+
+/** 두 칸 배치에서 분류 문구 아래에 더하는 간격 — 버튼과 40 dp(열 간격 8 + 32). */
+private val CLASSIFICATION_GAP = Space.s6
 
 /** 칸 높이가 넉넉한 차량 화면에서 두 칸을 세로 가운데보다 이만큼 위에 둔다. */
 private val COLUMNS_LIFT_SPACIOUS = Space.s6
@@ -235,14 +239,14 @@ private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Un
 
 /** 선택한 운행 목적의 분류 결과를 하단 행동 버튼 바로 위, 화면 가운데에 표시한다. */
 @Composable
-private fun ClassificationSummary(state: TripResultUiState) {
+private fun ClassificationSummary(state: TripResultUiState, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val kind = stringResource(classLabel(state.selected))
     Text(
         state.km?.let { stringResource(R.string.result_classified, kind, stringResource(R.string.trip_km, it)) }
             ?: stringResource(R.string.result_classified_no_km, kind),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
         style = AutoLogTheme.windowType.resultClassification,
         color = c.textPrimary,
