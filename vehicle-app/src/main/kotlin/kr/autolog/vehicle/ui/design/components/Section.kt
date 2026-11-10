@@ -16,12 +16,11 @@ import kr.autolog.vehicle.ui.design.Space
  * 섹션 안에는 이보다 큰 회색 설명 글씨를 두지 않는다(데이터 값과 카드 안 목록 항목은 예외).
  */
 @Composable
-fun SectionHeader(title: String, modifier: Modifier = Modifier, dense: Boolean = false) {
+fun SectionHeader(title: String, modifier: Modifier = Modifier) {
     Text(
         title,
         modifier.fillMaxWidth().padding(bottom = Space.s3),
-        // dense(좁은 창): sectionFine 30 sp
-        style = if (dense) AutoLogTheme.type.sectionFine else AutoLogTheme.type.section,
+        style = AutoLogTheme.type.section,
         color = AutoLogTheme.colors.textSecondary,
     )
 }
@@ -31,14 +30,9 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier, dense: Boolean =
  * — 소제목 문구는 정보 종류마다 하나(`section_*` 문자열): 주행 거리 · 운행 경로 · 누적 거리 · 이번 달 운행 정보 · 최근 운행 기록.
  */
 @Composable
-fun Section(
-    title: String,
-    modifier: Modifier = Modifier,
-    dense: Boolean = false,
-    content: @Composable ColumnScope.() -> Unit,
-) {
+fun Section(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(modifier.fillMaxWidth()) {
-        SectionHeader(title, dense = dense)
+        SectionHeader(title)
         content()
     }
 }

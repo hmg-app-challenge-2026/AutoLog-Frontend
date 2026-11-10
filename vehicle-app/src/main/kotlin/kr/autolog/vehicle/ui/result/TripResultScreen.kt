@@ -46,6 +46,7 @@ import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.TopLine
 import kr.autolog.vehicle.ui.design.durationText
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.trips.tripWhenText
 
 @Composable
@@ -67,7 +68,7 @@ fun TripResultRoute(tripId: String, mode: TripResultMode = TripResultMode.AFTER_
  * - 두 칸 아래 가운데 = "일반 업무용 거리 48.2 km로 분류돼요"(선택의 결과), 행동 버튼 바로 위.
  * - 아래 행동 줄: [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · 3초]를
  *   콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 자동으로 눌릴 주 버튼 글자 + 맨 위 가장자리 막대.
- * NARROW·TALL: 넓은 창 순서를 세로 한 칸에(넘치면 그 칸만 스크롤) + 분류 문구 + 하단 고정 행동 — NARROW는 한 줄(dense), TALL은 두 줄.
+ * 넓은 창과 Pleos 1:1 분할 한 칸(≈1280×1268)은 같은 두 칸 배치·같은 글자. 세로로 긴 창(TALL)만 세로 한 칸(넘치면 그 칸만 스크롤) + 분류 문구 + 버튼 두 줄.
  */
 @Composable
 fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> Unit, modifier: Modifier = Modifier) {
@@ -82,21 +83,12 @@ fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> U
 @Composable
 private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) -> Unit, layout: WindowLayout) {
     val c = AutoLogTheme.colors
-    // 좁은 창(분할 화면)은 한 단계 작은 글자·얇은 면(dense)으로 — 같은 내용을 덜 꽉 차게.
-    // 버튼은 화면 바닥 가까이(아래 여백 8 dp — 버튼 면 아래 투명 터치 영역 10 dp와 합쳐 바닥에서 18 dp), 그만큼 위 내용이 더 보인다
-    val dense = layout == WindowLayout.NARROW
+    val twoColumns = layout.twoColumns
     val margin = screenMargin()
+    // 두 칸 배치(넓은 창·분할 화면)는 위아래 여백을 16 dp로 줄여 두 칸에 높이를 준다(에뮬레이터에서 맞춤, PR #4)
+    val vertical = if (twoColumns) Space.s4 else margin
     Column(
-        Modifier.fillMaxSize().padding(
-            start = margin,
-            top = if (layout == WindowLayout.WIDE) Space.s4 else margin,
-            end = margin,
-            bottom = when (layout) {
-                WindowLayout.NARROW -> Space.s2
-                WindowLayout.WIDE -> Space.s4
-                WindowLayout.TALL -> margin
-            },
-        ),
+        Modifier.fillMaxSize().padding(start = margin, top = vertical, end = margin, bottom = vertical),
         verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {
         TopLine {
@@ -120,7 +112,7 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                     height = Size.buttonMd,
                 )
             }
-            layout == WindowLayout.WIDE -> {
+            twoColumns -> {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                     val availableHeight = maxHeight
                     val spacious = availableHeight >= Size.spaciousHeight
@@ -143,18 +135,18 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                 WideActions(state, onAction)
             }
             else -> {
-                // 한 칸: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행).
+                // 세로로 긴 창: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행).
                 // 다 들어가지 않으면 이 칸만 스크롤되고 분류 문구·버튼은 늘 보인다
                 val scroll = rememberScrollState()
-                // [수정]을 누르면 아래에 있는 운행 목적이 보이게 끝까지 내린다(좁은 창에선 첫 화면 밖)
+                // [수정]을 누르면 아래에 있는 운행 목적이 보이게 끝까지 내린다
                 LaunchedEffect(state.editing) { if (state.editing) scroll.animateScrollTo(scroll.maxValue) }
                 ScrollColumn(Modifier.weight(1f).fillMaxWidth(), scroll) {
-                    TripSummary(state, dense)
-                    Spacer(Modifier.height(if (dense) Space.s4 else Space.s6))
-                    Purpose(state, onAction, dense)
+                    TripSummary(state)
+                    Spacer(Modifier.height(Space.s6))
+                    Purpose(state, onAction)
                 }
                 ClassificationSummary(state)
-                if (layout == WindowLayout.NARROW) NarrowActions(state, onAction) else CompactActions(state, onAction)
+                CompactActions(state, onAction)
             }
         }
     }
@@ -173,28 +165,25 @@ private val SUMMARY_GAP_SPACIOUS = Space.s7 * 2 + Space.s4
 private val COLUMNS_LIFT_SPACIOUS = Space.s6
 
 /**
- * 운행 결과의 섹션 하나. 넓은 창은 소제목 아래를 16 dp 더 띄운다(Pleos 에뮬레이터 2560×1440에서 맞춤, PR #4) —
+ * 운행 결과의 섹션 하나. 두 칸 배치는 소제목 아래를 16 dp 더 띄운다(Pleos 에뮬레이터 2560×1440에서 맞춤, PR #4) —
  * 운행 요약과 운행 목적이 같은 규칙을 쓰도록 여기 한 곳에서.
  */
 @Composable
-private fun ResultSection(@StringRes title: Int, dense: Boolean, content: @Composable ColumnScope.() -> Unit) {
-    val wide = LocalWindowLayout.current == WindowLayout.WIDE
-    Section(stringResource(title), dense = dense) {
-        if (wide) Spacer(Modifier.height(Space.s4))
+private fun ResultSection(@StringRes title: Int, content: @Composable ColumnScope.() -> Unit) {
+    val twoColumns = LocalWindowLayout.current.twoColumns
+    Section(stringResource(title)) {
+        if (twoColumns) Spacer(Modifier.height(Space.s4))
         content()
     }
 }
 
-/**
- * 운행 요약: "운행 거리 · 시간" → [gap] → "운행 경로". 모든 창에서 위아래로 쌓는다 —
- * 좁은 창도 전폭이라 커진 값(`resultDistance`)이 잘리지 않는다. 운행 목적은 같은 칸 아래에서 스크롤한다.
- */
+/** 운행 요약: "운행 거리 · 시간" → [gap] → "운행 경로", 위아래로. */
 @Composable
-private fun TripSummary(state: TripResultUiState, dense: Boolean = false, gap: Dp = Space.s7) {
+private fun TripSummary(state: TripResultUiState, gap: Dp = Space.s7) {
     Column {
-        ResultSection(R.string.section_distance_time, dense) { DistanceTime(state) }
+        ResultSection(R.string.section_distance_time) { DistanceTime(state) }
         Spacer(Modifier.height(gap))
-        ResultSection(R.string.section_route, dense) { Route(state) }
+        ResultSection(R.string.section_route) { Route(state) }
     }
 }
 
@@ -229,16 +218,14 @@ private fun Route(state: TripResultUiState) {
 
 /** 운행 목적 — 같은 폭 선택형 행 3개(8 dp 간격, 보기 모드에선 누를 수 없음). */
 @Composable
-private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit, dense: Boolean = false) {
-    ResultSection(R.string.section_purpose, dense) {
-        // dense 행은 면 위아래가 이미 비어 있어 간격 없이 쌓는다(면 사이 틈 20 dp)
-        Column(verticalArrangement = if (dense) Arrangement.Top else Arrangement.spacedBy(Space.s2)) {
+private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
+    ResultSection(R.string.section_purpose) {
+        Column(verticalArrangement = Arrangement.spacedBy(Space.s2)) {
             PURPOSE_CHOICES.forEach { category ->
                 ChoiceRow(
                     stringResource(choiceLabel(category)),
                     selected = category == state.selected,
                     onClick = if (state.editing) ({ onAction(TripResultAction.Select(category)) }) else null,
-                    dense = dense,
                 )
             }
         }
@@ -262,7 +249,7 @@ private fun ClassificationSummary(state: TripResultUiState) {
 }
 
 /**
- * 넓은 창 행동 버튼(같은 폭, 이 순서): [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · n초].
+ * 두 칸 배치(넓은 창·분할 화면) 행동 버튼(같은 폭, 이 순서): [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · n초].
  * 보기: [메인 화면으로]가 주 버튼(시간이 다 되면 저절로 눌릴 버튼, 남은 시간을 글자에). 수정: [저장]이 주 버튼 — 자리는 그대로, 강조만 옮긴다(D-28).
  */
 @Composable
@@ -300,55 +287,6 @@ private fun CompactActions(state: TripResultUiState, onAction: (TripResultAction
             }
         }
         Home(state, onAction, Modifier.fillMaxWidth(), countdownInLabel = true)
-    }
-}
-
-/**
- * 좁은 창(분할 화면) 행동 버튼 — 한 줄, 같은 순서·같은 이름: [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · 3초].
- * 셋을 한 줄에 두려고 dense 버튼(글자 `fine` 22 sp — 글자 하한, 좌우 여백 12 dp). 앞 둘은 글자 폭, [메인 화면으로]가 남는 폭을 쓴다.
- */
-@Composable
-private fun NarrowActions(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s3)) {
-        if (state.canContinue) {
-            SecondaryButton(
-                stringResource(R.string.result_continue),
-                onClick = { onAction(TripResultAction.Continue) },
-                dense = true,
-            )
-        }
-        if (state.editing) {
-            PrimaryButton(
-                stringResource(R.string.result_save),
-                onClick = { onAction(TripResultAction.Save) },
-                height = Size.buttonMd,
-                loading = state.saving,
-                dense = true,
-            )
-            SecondaryButton(
-                stringResource(R.string.result_home),
-                onClick = { onAction(TripResultAction.GoHome) },
-                modifier = Modifier.weight(1f),
-                dense = true,
-            )
-        } else {
-            SecondaryButton(stringResource(R.string.result_edit), onClick = {
-                onAction(TripResultAction.Edit)
-            }, dense = true)
-            val sec = state.autoCloseSec
-            PrimaryButton(
-                if (sec != null) {
-                    stringResource(R.string.result_home_in, durationText(sec))
-                } else {
-                    stringResource(R.string.result_home)
-                },
-                onClick = { onAction(TripResultAction.GoHome) },
-                modifier = Modifier.weight(1f),
-                height = Size.buttonMd,
-                loading = state.saving,
-                dense = true,
-            )
-        }
     }
 }
 

@@ -39,9 +39,8 @@ fun DockTile(
     val c = AutoLogTheme.colors
     val layout = LocalWindowLayout.current
     val iconSize = when (layout) {
-        WindowLayout.WIDE -> Size.dockIcon
+        WindowLayout.WIDE, WindowLayout.NARROW -> Size.dockIcon
         WindowLayout.TALL -> Size.dockIconTall
-        WindowLayout.NARROW -> Size.dockIconNarrow
     }
     Column(
         modifier

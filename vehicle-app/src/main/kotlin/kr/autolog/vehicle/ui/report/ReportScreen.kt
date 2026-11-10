@@ -27,7 +27,6 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.CheckRow
 import kr.autolog.vehicle.ui.design.components.PeriodSwitcher
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
@@ -35,6 +34,7 @@ import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.mail.mailErrorText
 
 @Composable
@@ -64,11 +64,13 @@ fun ReportScreen(state: ReportUiState, onAction: (ReportAction) -> Unit, modifie
             verticalArrangement = Arrangement.spacedBy(Space.s4),
         ) {
             ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {
+                // 이 화면은 달 이동이 한 줄에 혼자라 가운데(제목·요약 카드와 같은 세로축)
                 PeriodSwitcher(
                     state.month,
                     state.canGoNext,
                     onPrev = { onAction(ReportAction.PrevMonth) },
                     onNext = { onAction(ReportAction.NextMonth) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
                 state.summary?.let { SummaryCard(it) }
                 Recipients(state, onAction)
@@ -86,7 +88,7 @@ fun ReportScreen(state: ReportUiState, onAction: (ReportAction) -> Unit, modifie
     }
 }
 
-/** 요약: 운행 · 총 거리 · 업무 비율 · 검토 필요. 넓은 창은 네 칸 한 줄, 좁은·세로 창은 두 칸씩 두 줄(한 줄이면 "127.0 km"가 꺾인다). */
+/** 요약: 운행 · 총 거리 · 업무 비율 · 검토 필요. 넓은 창·분할 화면은 네 칸 한 줄, 세로로 긴 창은 두 칸씩 두 줄. */
 @Composable
 private fun SummaryCard(summary: ReportSummaryUi) {
     val facts = listOf(
@@ -99,7 +101,7 @@ private fun SummaryCard(summary: ReportSummaryUi) {
             stringResource(R.string.report_business_label),
         stringResource(R.string.report_trips, summary.reviewCount) to stringResource(R.string.report_review_label),
     )
-    val rows = if (LocalWindowLayout.current == WindowLayout.WIDE) listOf(facts) else facts.chunked(2)
+    val rows = if (LocalWindowLayout.current.twoColumns) listOf(facts) else facts.chunked(2)
     Column(
         Modifier
             .padding(top = Space.s4)
@@ -159,12 +161,13 @@ private fun StepMessage(state: ReportUiState) {
         ReportStep.Ready ->
             if (state.summary?.tripCount == 0) stringResource(R.string.report_no_trips) to c.textTertiary else return
         is ReportStep.BuildFailed -> step.reason to c.danger
-        ReportStep.Built ->
-            if (state.smtpConfigured) {
-                stringResource(R.string.report_built) to c.textSecondary
-            } else {
-                stringResource(R.string.mail_not_configured) to c.warning
-            }
+        // 만든 뒤엔 버튼([보내기 · N명])이 다음 할 일을 말한다 — 메일 계정이 없을 때만 이유 한 줄
+        ReportStep.Built -> if (state.smtpConfigured) {
+            return
+        } else {
+            stringResource(R.string.mail_not_configured) to
+                c.warning
+        }
         is ReportStep.Sent -> stringResource(R.string.report_sent, step.count) to c.success
         is ReportStep.SendFailed -> stringResource(mailErrorText(step.error)) to c.danger
         ReportStep.Building, ReportStep.Sending -> return

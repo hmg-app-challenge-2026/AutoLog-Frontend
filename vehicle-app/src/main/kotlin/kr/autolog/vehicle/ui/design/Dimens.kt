@@ -19,14 +19,12 @@ object Space {
 /** 디자인 언어 6.5. */
 object Size {
     val touchMin = 76.dp
-    val denseFace = 56.dp // dense 버튼·선택 행의 보이는 높이(좁은 창). 터치 영역은 touchMin 그대로 — CloseButton과 같은 방식
     val buttonMd = 76.dp
     val buttonLg = 96.dp
     val buttonXl = 120.dp
     val iconButton = 96.dp
-    val dockIcon = 112.dp // 넓은 화면 DockTile 아이콘 네모
+    val dockIcon = 112.dp // DockTile 아이콘 네모(넓은 창·분할 화면 한 칸)
     val dockIconTall = 96.dp
-    val dockIconNarrow = 88.dp
     val iconSm = 28.dp // 닫기(X)처럼 작은 원 안의 아이콘
     val statusDot = 12.dp // StatusLine 상태 점
     val routeDot = 12.dp // RouteFlow 출발 ○ · 도착 ● 표시
@@ -38,7 +36,6 @@ object Size {
     val avatarPreviewTall = 160.dp // 같은 미리보기, 세로가 넉넉한 TALL
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp
-    val profileTileCompact = 128.dp
     val peekMaxWidth = 960.dp // Peek 내용 최대 폭 — 2560 dp 차량 화면 가운데에서 목적지·상황 줄이 꺾이지 않게(560이면 "물어볼/게요")
     val sheetMaxWidth = 960.dp
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭

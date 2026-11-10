@@ -3,7 +3,7 @@ package kr.autolog.vehicle.ui.design
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** 창 크기별 글자 역할 표를 고정한다 — 좁은 창에서 한 단계 작아지는 것만 다르다(디자인 언어 6.2). */
+/** 창 크기별 글자 역할 표를 고정한다 — 넓은 창과 Pleos 1:1 분할 한 칸은 같고, 세로로 긴 창만 일부가 다르다(디자인 언어 6.2). */
 class WindowTypeTest {
     private val t = autoLogType()
 
@@ -17,15 +17,8 @@ class WindowTypeTest {
     }
 
     @Test
-    fun `좁은 창 — 한 단계씩 작고 타일 부서는 글자 하한 fine`() {
-        val n = windowTypeOf(WindowLayout.NARROW, t)
-        assertEquals(t.headline, n.screenTitle)
-        assertEquals(t.label, n.modalTitle)
-        assertEquals(t.label, n.tileName)
-        assertEquals(t.caption, n.tileAction)
-        assertEquals(t.fine, n.tileCaption)
-        assertEquals(t.caption, n.dockLabel)
-        assertEquals(t.label, n.resultTitle)
+    fun `분할 화면 한 칸은 넓은 창과 같은 글자 — 실제 크기 1280×1268이라 줄일 이유가 없다`() {
+        assertEquals(windowTypeOf(WindowLayout.WIDE, t), windowTypeOf(WindowLayout.NARROW, t))
     }
 
     @Test

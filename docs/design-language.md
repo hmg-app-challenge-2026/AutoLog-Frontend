@@ -231,10 +231,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `title` | 44 sp | 600 | 1.25 | 0 | **주요 정보 하한**: 목적지, 추천 목적, 카드 제목 |
 | `body` | 34 sp | 400 | 1.35 | 0 | **본문 하한**: 설명, 리스트 내용 |
 | `label` | 34 sp | 600 | 1.2 | 0 | 버튼, 칩 |
-| `caption` | 28 sp | 500 | 1.3 | +0.5% | **보조 글자**: 메타 정보. **Peek에 쓰지 않는다** |
+| `caption` | 28 sp | 500 | 1.3 | +0.5% | **보조 글자 · 글자 하한**: 메타 정보. 이보다 작은 글자는 만들지 않는다. **Peek에 쓰지 않는다** |
 | `section` | 38 sp | 700 | 1.25 | +1% | 영역 소제목(`SectionHeader`) |
-| `fine` | 22 sp | 500 | 1.3 | +0.5% | 좁은 창의 dense 버튼과 긴 보조 문구. 이보다 작은 글자는 만들지 않는다 |
-| `sectionFine` | 30 sp | 700 | 1.3 | +1% | 좁은 창 소제목(`SectionHeader(dense)`) |
 | `resultDistance` | 64 sp | 600 | 1.1 | −1.5% | 운행 완료 거리 값 |
 | `resultTime` | 56 sp | 500 | 1.15 | −0.5% | 운행 완료 시간 값 |
 
@@ -242,23 +240,23 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
-- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 좁은 창에서 무엇이 한 단계 작아지는지가 이 표 한 곳에 있다.
+- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 창 크기마다 무엇이 달라지는지가 이 표 한 곳에 있다. Pleos 1:1 분할 한 칸(NARROW, 1280×1268 dp)은 넓은 화면과 **같은 글자**다(1.33) — 실제 크기에서 줄일 이유가 없었다.
 
-  | 역할 | WIDE | TALL | NARROW |
-  |---|---|---|---|
-  | `screenTitle` 전체 화면 제목 | `display` | `display` | `headline` |
-  | `modalTitle` 팝업 제목 | `headline` | `headline` | `label` |
-  | `tileName` 운전자 타일 이름 | `title` | `title` | `label` |
-  | `tileAction` 동작 타일 이름 | `label` | `label` | `caption` |
-  | `tileCaption` 타일 부서 | `caption` | `caption` | `fine` |
-  | `dockLabel` 하단 타일 이름 | `label` | `label` | `caption` |
-  | `resultTitle` 운행 결과 제목 | `title` | `title` | `label` |
-  | `resultClassification` 분류 문구 | `title` | `label` | `label` |
-  | `resultHomeButton` [메인 화면으로 · n초] | `caption` | `label` | `label` |
-  | `periodTitle` 달 이동 "2026년 11월" | `title` | `title` | `label` |
-  | `headerTitle` 보조 화면 머리 줄 제목 | `title` | `title` | `label` |
+  | 역할 | WIDE · NARROW | TALL |
+  |---|---|---|
+  | `screenTitle` 전체 화면 제목 | `display` | `display` |
+  | `modalTitle` 팝업 제목 | `headline` | `headline` |
+  | `tileName` 운전자 타일 이름 | `title` | `title` |
+  | `tileAction` 동작 타일 이름 | `label` | `label` |
+  | `tileCaption` 타일 부서 | `caption` | `caption` |
+  | `dockLabel` 하단 타일 이름 | `label` | `label` |
+  | `resultTitle` 운행 결과 제목 | `title` | `title` |
+  | `resultClassification` 분류 문구 | `title` | `label` |
+  | `resultHomeButton` [메인 화면으로 · n초] | `caption` | `label` |
+  | `periodTitle` 달 이동 "2026년 11월" | `title` | `title` |
+  | `headerTitle` 보조 화면 머리 줄 제목 | `title` | `title` |
 
-- `fine`(22 sp)보다 작은 글자를 만들지 않는다. `fine`은 좁은 창의 dense 버튼처럼 공간이 정말 모자란 곳에만.
+- `caption`(28 sp)보다 작은 글자를 만들지 않는다. 예전 `fine` 22 sp · `sectionFine` 30 sp는 근거 없던 504 dp 폭 좁은 창용이라 1.33에서 삭제했다.
 - **기준 화면**: Pleos Connect v2.1.0 에뮬레이터(API 34) 기본 디스플레이는 **2560×1440 px, 밀도 1.0(160 dpi)** — 캡처에서 넓은 화면 여백 48 dp가 48 px, 하단 타일 네모 112 dp가 112 px로 찍힌다. 위 상태 표시줄 76 px·아래 하단 바 96 px를 빼면 **앱 영역 ≈ 2560×1268 dp**(WIDE). 2026-11-10 사용자가 이 에뮬레이터에서 지금 글자 크기·위치(PR #4)를 보고 괜찮다고 확인 — 글자·간격을 바꿀 때 기준은 이 화면이다. Roborazzi 스크린샷(1024×640 등)은 이 화면보다 훨씬 작아서 글자가 더 커 보이고 넘칠 수 있다 — 넘침 판단은 에뮬레이터 캡처로 한다.
 - 모든 글자 스타일은 한국어를 어절 중간에서 자르지 않는 줄바꿈(`LineBreak.WordBreak.Phrase`, Android 13+)을 쓴다. 단, Robolectric 스크린샷에서는 적용되지 않아(2026-11-09 확인) 끊김 위험이 있는 곳은 문장을 나눠 설계한다(예: 자동 종료 시트의 거리·목적지 두 줄).
 
@@ -285,7 +283,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 레이아웃 | 바깥 여백 | 거터 |
 |---|---|---|
 | WIDE | `space.7` 48 | `space.5` 24 |
-| NARROW | `space.6` 32 | `space.5` 24 |
+| NARROW | `space.7` 48 | `space.5` 24 |
 | TALL | 40 | `space.5` 24 |
 
 ### 6.5 크기
@@ -295,11 +293,11 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `size.touchMin` | 76 | 모든 터치 대상의 최소 높이·너비 |
 | `size.buttonMd` | 76 | 보조 버튼, 리스트 행 |
 | `size.buttonLg` | 96 | 주 버튼 |
-| `size.buttonXl` | 120 | Home의 [운행 시작]·[기록 종료] (NARROW에서는 높이가 모자라 `buttonLg` 96) |
+| `size.buttonXl` | 120 | 큰 주 버튼(지금 Home은 하단 타일을 써서 쓰는 곳 없음 — 쓰게 되면 이 행을 고친다) |
 | `size.iconButton` | 96 | 마이크, 키패드 키 |
 | `size.icon` | 36 | 버튼 안 아이콘 |
 | `size.iconLg` | 48 | 상태 아이콘 |
-| `size.profileTileWide` / `Narrow` | 200 / 160 | 프로필 타일 |
+| `size.profileTileWide` / `Narrow` | 200 / 160 | 프로필 타일(WIDE·NARROW / TALL) |
 
 ### 6.6 모양과 깊이
 
@@ -318,12 +316,12 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | **Status · Sections · Tiles** (Home, 스펙 D-23~D-26) | 위 상태 줄(점 + 글자) · 배지 / 가운데 좌우 반반: 기록 중 "주행 거리"(72 sp) · "운행 경로", 대기 "이번 달 운행 정보" · "최근 운행 기록"(3건) / 아래 타일 4개. 단 사이 16 dp | 상태 줄 / 값 → 맥락 / 타일 4개 한 줄 | NARROW와 같음(거리 96 sp) |
 | **Peek** (정차) | 가운데 카드(최대 폭 560 dp), 정보 늘리지 않음 | 세로 스택 가운데 정렬 — 기본 형태(사이드 창) | NARROW와 같음 |
 | **Form Dialog** (새 운전자 추가) | 머리 줄(제목 가운데 · X 오른쪽) → 아바타(120 dp) → 이름·부서 한 줄에 나란히 → 주 버튼(전폭) | WIDE와 같음 | 머리 줄 → 아바타(160 dp) → 이름 → 부서 → 주 버튼 |
-| **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
-| **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
-| **List** (운행 기록 조회, 스펙 7.8) | 머리 줄 → 툴바 한 줄(◀ 달 ▶ · 오른쪽 끝 [운행기록부 내보내기]) → 합계 → 목록. 내용은 `sheetMaxWidth`(960 dp) 폭으로 가운데 | 머리 줄(배지 아래) → 달 이동 / 합계 / 버튼(전폭) → 목록 | NARROW와 같음 |
-| **Form + Action** (운행기록부 내보내기, 스펙 7.7) | 머리 줄 → ◀ 달 ▶ → 요약 카드(네 칸 한 줄) → 받는 사람 체크 → 사내 서버 한 줄, 맨 아래 단계 한 줄 + 주 버튼 하나(고정). 내용은 `sheetMaxWidth` 폭으로 가운데 | 머리 줄(배지 아래) → 같은 순서, 요약 카드 2×2 | NARROW와 같음 |
-| **Master–Detail** (설정, 스펙 7.9) | 좌 섹션 목록(콘텐츠 폭 40%, `NavRow` — 열린 섹션은 accent 테두리) / 우 상세(처음엔 첫 섹션, 넘치면 스크롤) | 목록 → 상세(머리 줄 제목 = 섹션 이름, 뒤로 = 목록) — 경로 하나, 안쪽 상태로 전환. 상세는 `sheetMaxWidth` 폭 가운데 | NARROW와 같음 |
-| **Result** (운행 결과, D-27·D-28) | 콘텐츠 폭 반반: 운행 거리·시간과 운행 목적 소제목을 같은 높이에서 시작하고, 두 칸 전체를 세로 가운데보다 32 dp 위에 둔다. 각 소제목 아래 내용 여백은 공통 12 dp에 16 dp를 더한다. 거리·시간과 경로 사이 간격은 높이가 넉넉한 차량 화면에서 112 dp, 작은 창에서 48 dp. 분류 결과는 두 칸 아래 가운데에 큰 글씨로 표시하고, 그 아래 버튼 3개([계속 기록하기] · [수정하기] · [메인 화면으로 · n초])가 콘텐츠 폭 전체를 쓴다. 맨 위 가장자리 남은 시간 막대 | 운행 거리·시간과 경로를 48 dp 간격으로 전폭에 쌓고, 운행 목적은 스크롤 영역에 표시. 분류 결과는 아래 가운데, 버튼은 한 줄 고정 | 넓은 창 순서를 세로 한 칸에 표시하고(두 섹션 사이 48 dp) 분류 결과 아래 버튼 두 줄 |
+| **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | WIDE와 같음(1:1 분할 한 칸 1280 dp에도 200 dp 타일 4개가 한 줄) | 3열(160 dp) |
+| **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | WIDE와 같음 | 이미지 상단 1/3 + 필드 |
+| **List** (운행 기록 조회, 스펙 7.8) | 머리 줄 → 툴바 한 줄(◀ 달 ▶ · 오른쪽 끝 [운행기록부 내보내기]) → 합계 → 목록. 내용은 `sheetMaxWidth`(960 dp) 폭으로 가운데 | WIDE와 같음 | 머리 줄 → 달 이동 / 합계 / 버튼(전폭) → 목록 |
+| **Form + Action** (운행기록부 내보내기, 스펙 7.7) | 머리 줄 → ◀ 달 ▶(가운데) → 요약 카드(네 칸 한 줄) → 받는 사람 체크 → 사내 서버 한 줄, 맨 아래 단계 한 줄(필요할 때만) + 주 버튼 하나(고정). 내용은 `sheetMaxWidth` 폭으로 가운데 | WIDE와 같음 | 같은 순서, 요약 카드 2×2 |
+| **Master–Detail** (설정, 스펙 7.9) | 좌 섹션 목록(콘텐츠 폭 40%, `NavRow` — 열린 섹션은 accent 테두리) / 우 상세(처음엔 첫 섹션, 넘치면 스크롤) | WIDE와 같음 | 목록 → 상세(머리 줄 제목 = 섹션 이름, 뒤로 = 목록) — 경로 하나, 안쪽 상태로 전환. 상세는 `sheetMaxWidth` 폭 가운데 |
+| **Result** (운행 결과, D-27·D-28) | 콘텐츠 폭 반반: 운행 거리·시간과 운행 목적 소제목을 같은 높이에서 시작하고, 두 칸 전체를 세로 가운데보다 32 dp 위에 둔다. 각 소제목 아래 내용 여백은 공통 12 dp에 16 dp를 더한다. 거리·시간과 경로 사이 간격은 높이가 넉넉한 차량 화면에서 112 dp, 작은 창에서 48 dp. 분류 결과는 두 칸 아래 가운데에 큰 글씨로 표시하고, 그 아래 버튼 3개([계속 기록하기] · [수정하기] · [메인 화면으로 · n초])가 콘텐츠 폭 전체를 쓴다. 맨 위 가장자리 남은 시간 막대 | WIDE와 같음(반반 두 칸) | 넓은 창 순서를 세로 한 칸에 표시하고(두 섹션 사이 48 dp) 분류 결과 아래 버튼 두 줄 |
 
 - 주 버튼은 스크롤 영역 밖 **하단 고정**. 스크롤해야 보이는 주 버튼을 만들지 않는다.
 - **오른쪽 위 운전자 배지는 Home에만**(D-30). Home의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 배지 자리를 비운다 — 배지가 실제로 잰 폭이 들어온다(배지가 없는 화면은 0). 보조 화면은 그 자리까지 내용에 쓴다.
@@ -438,18 +436,18 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 | 컴포넌트 | 사양 |
 |---|---|
-| `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. `dense`(좁은 창에서 버튼 여러 개를 한 줄에 — `SecondaryButton`도 같다): 보이는 면 56 dp(`size.denseFace`) · `radius.md` · 글자 `fine` 20 sp · 좌우 여백 12 dp, 터치 76 dp 그대로. 상태: 기본 / 눌림(0.97배) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자를 투명하게 남겨 폭 유지 + 진행 표시, 탭 무시). 로딩 회전은 무한 애니메이션이라 스크린샷 테스트에 넣지 않는다 |
+| `PrimaryButton` | 높이 `buttonLg`(Home은 `buttonXl`), `radius.lg`, `accentFill` 바탕, `label` `onAccent`. 화면당 1개. 상태: 기본 / 눌림(0.97배) / 비활성(바탕 `surface3`, 글자 `textTertiary`) / 로딩(글자를 투명하게 남겨 폭 유지 + 진행 표시, 탭 무시). 로딩 회전은 무한 애니메이션이라 스크린샷 테스트에 넣지 않는다 |
 | `SecondaryButton` | 높이 `buttonMd`, `surface3` 바탕(팝업 `surface2` 위에서도 면이 보이게), `textPrimary` 글자 |
 | `TertiaryButton` | 바탕 없음, `accent` 글자, 최소 터치 76 dp 유지("나중에 선택" 등) |
 | `DangerButton` | `dangerFill` 바탕. 확인 다이얼로그 안에서만 |
-| `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE 200 / TALL 160 / NARROW 128 dp. 누르면 `press` |
+| `ProfileTile` | 정사각, `radius.xl`, 그라데이션 바탕 + 이니셜(흰색, 아바타 크기의 40%) + 아래 이름(`title`)·부서(`caption`). 배차면 3 dp `accent` 링 + 아바타 아래 가장자리에 걸친 "배차" 배지(`accentFill`, `caption`), 최근이면 "최근" 배지(`surface3`). 배지는 이니셜을 가리지 않는다. 크기: WIDE·NARROW 200 / TALL 160 dp. 누르면 `press` |
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusLine` | 화면 맨 위 상태 한 줄. **배경 없는 점(12 dp) + 글자**: `● 기록 중 · 35분 경과`. 점 색이 상태(기록 중 `success`, 대기 `textTertiary`), 글자 `label` 본문색, 보조(`detail`)는 `body` 회색. 알약 배경이 없어 주인공 숫자와 경쟁하지 않는다. 누를 수 없다(Home·Peek 공용) |
-| `DockTile` | 화면 맨 아래 동작. 아이콘 네모 + 그 아래 이름. 네모는 WIDE 112 dp, TALL 96 dp, NARROW 88 dp이고 아이콘은 48 dp. 이름은 WIDE·TALL `label` 34 sp, NARROW `caption` 28 sp. 좁은 창의 긴 동작 이름은 어절 사이에 줄바꿈을 둔다. 터치 영역은 네모 + 이름 칸 전체. 4칸 등분(`weight`) 한 줄. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(네모 `accentFill`, 이름 `accent`) |
+| `DockTile` | 화면 맨 아래 동작. 아이콘 네모 + 그 아래 이름. 네모는 WIDE·NARROW 112 dp, TALL 96 dp이고 아이콘은 48 dp. 이름은 `label` 34 sp 한 줄(분할 한 칸 1280 dp에도 "운행 기록 조회"가 한 줄에 들어간다). 터치 영역은 네모 + 이름 칸 전체. 4칸 등분(`weight`) 한 줄. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(네모 `accentFill`, 이름 `accent`) |
 | `DriverBadge` | 화면 오른쪽 위 고정(넷플릭스식, 스펙 7.1.1·D-19). 네모 아바타(`avatarChip` 48 dp) + "○○님"(`label`). 미선택이면 `IconAvatar`(사람) + "운전자 선택"(`accent`). FULL은 누르면 운전자 선택, Peek은 표시만. 모달이 뜨면 숨는다. 운전자 이름은 앱 전체에서 **이 자리에만** 보인다 **Home에만 둔다**(D-30, 2026-11-10 사용자 결정) — 운행 결과·주유·운행 기록·운행기록부·설정·운전자 선택에는 없다(`FullApp.showsDriverBadge` 한곳). 정차 중 Peek은 표시만 하는 배지를 따로 얹는다 |
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
-| `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). 보통 `section` 38 sp, `dense`(좁은 창 운행 결과)는 `sectionFine` 30 sp. `textSecondary`, 아래 `space.3`. 데이터 값과 카드 안 목록 항목은 소제목보다 클 수 있다 |
+| `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). `section` 38 sp(크기 모드는 하나 — 예전 `dense`는 1.33에서 삭제). `textSecondary`, 아래 `space.3`. 데이터 값과 카드 안 목록 항목은 소제목보다 클 수 있다 |
 | `Section` | `SectionHeader` + 내용 한 묶음. **같은 정보는 어느 화면·창 크기에서나 같은 소제목**(정보 종류마다 문구 하나): 주행 거리 · 운행 경로 · 누적 거리 · 이번 달 운행 정보 · 최근 운행 기록. Home(WIDE·NARROW·TALL)과 Peek이 함께 쓴다 |
 | `TripListRow` | 운행 한 건 목록 줄(Home 최근 운행 기록, 이력). `surface1`, `radius.md`, 위 경로(`label`, 한 줄) · 아래 날짜·거리·목적(`caption`, `textSecondary`). 목적이 없으면 끝이 "목적 미입력" — **색으로 재촉하지 않는다**(D-26). 줄 전체가 터치 대상, 끝에 ›  `extra` = 아래 줄 밑에 붙는 내용(운행 기록 조회의 "운전자 지정" 후보처럼 그 줄에서 바로 끝낼 일), 그 안의 버튼은 줄 탭과 따로 눌린다 |
 | `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
@@ -462,7 +460,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
-| `ChoiceRow` | 여러 개 중 하나를 고르는 **선택형 행**(운행 결과의 운행 목적). 같은 폭 행을 8 dp 간격으로 쌓아 한 묶음으로 읽히게: `surface1` 면 · `radius.md` · 76 dp, 왼쪽 원 28 dp + 글자 `body`, 행 전체 터치. 선택 = `accent` 테두리 3 dp + 원 가운데 점, 고르지 않은 행 = `outline` 1 dp 테두리(바탕에 묻히지 않게). `onClick = null`이면 보기 전용(누를 수 없을 뿐 글자는 같은 색) `dense`(좁은 창): 보이는 면 56 dp · 글자 `caption` 22 sp, 터치 76 dp 그대로 — 간격 없이 쌓아도 면 사이 20 dp 틈 |
+| `ChoiceRow` | 여러 개 중 하나를 고르는 **선택형 행**(운행 결과의 운행 목적). 같은 폭 행을 8 dp 간격으로 쌓아 한 묶음으로 읽히게: `surface1` 면 · `radius.md` · 76 dp, 왼쪽 원 28 dp + 글자 `body`, 행 전체 터치. 선택 = `accent` 테두리 3 dp + 원 가운데 점, 고르지 않은 행 = `outline` 1 dp 테두리(바탕에 묻히지 않게). `onClick = null`이면 보기 전용(누를 수 없을 뿐 글자는 같은 색) |
 | `CheckRow` | 여러 개를 함께 고르는 체크 행(운행기록부 받는 사람). `ChoiceRow`와 같은 틀(면·테두리·76 dp) — 표시만 네모: 고름 = `accentFill` 네모 + 흰 ✓, 안 고름 = `textTertiary` 테두리. `detail` = 이름 아래 보조 줄(`caption`, `textSecondary`) |
 | `NavRow` | 다른 화면·상세로 들어가는 목록 줄(설정 섹션 목록): 왼쪽 아이콘(36 dp, `accent`) · 이름(`label`) + 지금 상태 한 줄(`caption`, `textSecondary`) · 오른쪽 ›. `surface1`, `radius.md`, 76 dp. `selected`(넓은 창에서 오른쪽에 열린 것) = `accent` 3 dp 테두리, › 숨김 |
 | `EdgeCountdownBar` | 화면 맨 위 가장자리에 붙는 가는 남은 시간 막대(4 dp, `accent`, 바탕 줄 없음). 남은 비율만큼 왼쪽부터 채워 있고 오른쪽 끝이 왼쪽으로 줄어든다. 1초마다 바뀌는 값을 1초 동안 선형으로(정지형이면 바로). 운행 결과에서 주 버튼 글자 "메인 화면으로 · 3초"와 함께 쓴다 |
@@ -497,7 +495,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - [ ] 1초에 알아야 할 것이 가장 크다
 - [ ] 주 버튼이 하나이고 운전자 쪽 하단에 있다
 - [ ] 모든 색이 토큰이고, `ContrastTest`가 통과한다
-- [ ] 글자가 `fine`(22 sp, 글자 하한) 이상이고, 주요 정보는 `title` 이상이다
+- [ ] 글자가 `caption`(28 sp, 글자 하한) 이상이고, 주요 정보는 `title` 이상이다
 - [ ] 모든 터치 대상이 76 dp 이상, 서로 16 dp 이상 떨어져 있다
 - [ ] **실제 Pleos 두 크기**(넓은 화면 2560×1268 dp · 1:1 분할 1280×1268 dp) × 다크·라이트 스크린샷이 있고 잘림·겹침이 없다. 넓은 화면에서 한 칸 내용이 읽기 쉬운 폭(`sheetMaxWidth`)으로 모였다
 - [ ] 주차(FULL) 전용 화면이다 — 정차면 Peek, 주행이면 화면 없음으로 바뀐다
@@ -571,3 +569,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.30 | 2026-11-10 | 설정(스펙 7.9) **Master–Detail** 구현: `NavRow` 추가, 상태 카드 · 이름–값 카드 · 사람 줄(회사 지정 = 자물쇠 + 아래 줄 앞 "회사 지정") · 결과 한 줄. 플랫폼 키보드 규제(`LocalKeyboardLocked`)가 켜지면 `InputField`만 비활성 + "지금은 입력할 수 없어요"(버튼은 그대로) |
 | 1.31 | 2026-11-10 | **공식 Pleos 에뮬레이터 크기(2560×1268 dp, 밀도 1.0)를 스크린샷 기준으로**(`pleos/`, 사용자 지시). 최종 점검: 한 칸 화면의 최대 폭 순서 버그 수정(가운데 960 dp), 주유 직접 입력 버튼 폭, `peekMaxWidth` 560 → 960 dp, Peek 생략 규칙(`FitOrDrop`)·상태 줄 위치, `StatusLine` 한 줄 고정, 설정 팝업 간격. 13장 체크리스트를 지금 규칙(글자 하한 `fine`, D-28 주 버튼)으로 |
 | 1.32 | 2026-11-10 | 스크린샷을 **실제 Pleos 화면 두 크기만**으로(사용자 지시): 넓은 화면 2560×1268 dp · 1:1 분할 한 칸 1280×1268 dp, 밀도 1.0. 근거 없던 1024×640 · 504×640 · 720×1100 삭제 |
+| 1.33 | 2026-11-10 | **분할 화면 한 칸(NARROW)을 실제 크기 1280×1268 dp에 맞게 다시 맞춤**(사용자 지시 "글자를 키워도 되니 보기 편한 상용 수준으로"). 1.16~1.24의 좁은 창 축소는 근거 없던 504×640에 맞춘 것이라 걷어냈다: 글자 역할 표 NARROW = WIDE, 바깥 여백 48 dp, 하단 타일 네모 112 dp · 이름 한 줄(짧은 이름 문자열 삭제), 운전자 타일 200 dp 한 줄. 두 칸 배치(운행 결과 요약|목적, 주유 영수증|필드, 설정 목록|상세, 운행 기록 툴바 한 줄, 내보내기 요약 네 칸 한 줄)는 세로 창(TALL)만 빼고 쓴다(`WindowLayout.twoColumns`). 삭제: `fine`·`sectionFine` 글자, 버튼·`ChoiceRow`·`SectionHeader`의 `dense` 모드, `size.denseFace`·`dockIconNarrow`·`profileTileCompact` — 글자 하한은 `caption` 28 sp. 설정 연결 코드 칸 56 → 76 dp. 운행기록부 내보내기: 달 이동을 가운데 정렬, "운행기록부를 만들었어요…" 단계 문구 삭제(메일 미설정 경고만 남김) |

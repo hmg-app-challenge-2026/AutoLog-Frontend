@@ -16,7 +16,7 @@ class FontCoverageTest {
     fun `우리 글자 토큰은 모두 Asta Sans다`() {
         listOf(
             type.hero, type.heroSmall, type.heroCompact, type.display, type.headline,
-            type.title, type.body, type.label, type.caption, type.section, type.fine, type.sectionFine,
+            type.title, type.body, type.label, type.caption, type.section,
         ).forEach { assertEquals(AstaSans, it.fontFamily) }
     }
 

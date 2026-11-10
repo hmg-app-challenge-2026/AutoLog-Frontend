@@ -57,8 +57,8 @@ private fun TripRoute(state: HomeUiState) {
 @Composable
 private fun metricSize(): MetricSize = when (LocalWindowLayout.current) {
     WindowLayout.WIDE -> MetricSize.HERO
-    WindowLayout.TALL -> MetricSize.MEDIUM
-    WindowLayout.NARROW -> MetricSize.COMPACT
+    // 분할 화면 한 칸·세로 창은 세로 한 칸에 두 섹션을 쌓으므로 한 단계 작게(112 sp)
+    WindowLayout.NARROW, WindowLayout.TALL -> MetricSize.MEDIUM
 }
 
 @Composable

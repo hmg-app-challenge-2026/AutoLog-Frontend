@@ -17,9 +17,7 @@ import androidx.compose.ui.res.stringResource
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.DriverSide
 import kr.autolog.vehicle.ui.design.LocalDriverSide
-import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.DockTile
 
 /** 타일 하나. [emphasized] = 같은 자리에서 상태가 바뀐 주 동작(파란 채움). */
@@ -28,35 +26,13 @@ private data class DockItem(
     @StringRes val label: Int,
     val action: HomeAction,
     val emphasized: Boolean = false,
-    @StringRes val compactLabel: Int = label,
 )
 
-private val FUEL = DockItem(
-    Icons.Rounded.LocalGasStation,
-    R.string.action_fuel_add,
-    HomeAction.AddFuelRecord,
-    compactLabel = R.string.action_fuel_add_compact,
-)
-private val RECORDS = DockItem(
-    Icons.Rounded.Description,
-    R.string.action_records,
-    HomeAction.OpenRecords,
-    compactLabel = R.string.action_records_compact,
-)
+private val FUEL = DockItem(Icons.Rounded.LocalGasStation, R.string.action_fuel_add, HomeAction.AddFuelRecord)
+private val RECORDS = DockItem(Icons.Rounded.Description, R.string.action_records, HomeAction.OpenRecords)
 private val SETTINGS = DockItem(Icons.Rounded.Settings, R.string.action_settings, HomeAction.OpenSettings)
-private val START = DockItem(
-    Icons.Rounded.PlayArrow,
-    R.string.home_start_manual,
-    HomeAction.StartTrip,
-    compactLabel = R.string.home_start_compact,
-)
-private val END = DockItem(
-    Icons.Rounded.Stop,
-    R.string.home_end,
-    HomeAction.EndNow,
-    emphasized = true,
-    compactLabel = R.string.home_end_compact,
-)
+private val START = DockItem(Icons.Rounded.PlayArrow, R.string.home_start_manual, HomeAction.StartTrip)
+private val END = DockItem(Icons.Rounded.Stop, R.string.home_end, HomeAction.EndNow, emphasized = true)
 
 /**
  * 맨 아래 타일 4개(D-24): [기록 시작] · [주유 기록 추가] · [운행 기록 조회] · [설정].
@@ -69,13 +45,12 @@ internal fun HomeDock(state: HomeUiState, onAction: (HomeAction) -> Unit) {
     val record = if (state.phase == HomePhase.READY) START else END
     val ordered = listOf(record, FUEL, RECORDS, SETTINGS)
     val items = if (LocalDriverSide.current == DriverSide.START) ordered else ordered.reversed()
-    val compact = LocalWindowLayout.current == WindowLayout.NARROW
     // 4칸 등분 — 네모가 같은 간격으로 놓인다. 좁은 창에서도 한 줄(이름은 필요하면 두 줄)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
         items.forEach { item ->
             DockTile(
                 item.icon,
-                stringResource(if (compact) item.compactLabel else item.label),
+                stringResource(item.label),
                 onClick = { onAction(item.action) },
                 modifier = Modifier.weight(1f),
                 emphasized = item.emphasized,

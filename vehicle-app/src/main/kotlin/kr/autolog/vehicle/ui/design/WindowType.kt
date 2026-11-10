@@ -5,6 +5,7 @@ import androidx.compose.ui.text.TextStyle
 
 /**
  * 창 크기([WindowLayout])에 따라 글자 크기가 달라지는 **역할** 모음(디자인 언어 6.2).
+ * 넓은 창·분할 화면 한 칸은 같은 글자, 세로로 긴 창(TALL)만 일부가 다르다.
  * 화면·컴포넌트는 `LocalWindowLayout`으로 글자를 직접 고르지 않고 `AutoLogTheme.windowType.<역할>`을 쓴다 —
  * 창 크기별 글자 결정이 이 파일 한 곳에 모여, 표 하나만 보면 좁은 창에서 무엇이 한 단계 작아지는지 알 수 있다.
  * 값은 Pleos Connect v2.1.0 에뮬레이터(2560×1440 px, 160 dpi)에서 맞춘 것(PR #4, 2026-11-10 사용자 확인).
@@ -37,7 +38,8 @@ data class WindowType(
 
 /** [layout]에 맞는 역할별 글자. 순수 함수 — `WindowTypeTest`가 표를 고정한다. */
 fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layout) {
-    WindowLayout.WIDE -> WindowType(
+    // 넓은 창과 Pleos 1:1 분할 한 칸(≈1280×1268)은 높이가 같고 폭이 넉넉해 같은 글자
+    WindowLayout.WIDE, WindowLayout.NARROW -> WindowType(
         screenTitle = t.display,
         modalTitle = t.headline,
         tileName = t.title,
@@ -62,19 +64,5 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultHomeButton = t.label,
         periodTitle = t.title,
         headerTitle = t.title,
-    )
-    // 분할 화면 한 칸: 한 단계씩 작게
-    WindowLayout.NARROW -> WindowType(
-        screenTitle = t.headline,
-        modalTitle = t.label,
-        tileName = t.label,
-        tileAction = t.caption,
-        tileCaption = t.fine,
-        dockLabel = t.caption,
-        resultTitle = t.label,
-        resultClassification = t.label,
-        resultHomeButton = t.label,
-        periodTitle = t.label,
-        headerTitle = t.label,
     )
 }

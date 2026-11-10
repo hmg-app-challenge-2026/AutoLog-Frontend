@@ -12,20 +12,16 @@
     <string name="peek_no_trip">기록 중인 운행이 없어요</string>
     <string name="peek_no_trip_hint">출발하면 자동으로 기록해요</string>
     <string name="picker_title">운전자를 선택해주세요</string>
-    <string name="picker_title_two_lines">운전자를\n선택해주세요</string>
     <string name="picker_later">나중에 선택</string>
     <string name="picker_more">다른 사람</string>
     <string name="picker_empty">아직 등록된 직원이 없어요</string>
     <string name="action_close">닫기</string>
     <string name="action_back">뒤로</string>
     <string name="home_end">기록 종료</string>
-    <string name="home_end_compact">기록\n종료</string>
     <string name="home_start_manual">기록 시작</string>
-    <string name="home_start_compact">기록\n시작</string>
     <string name="status_ready">대기 중</string>
     <string name="status_recording">기록 중</string>
     <string name="home_status_elapsed">%1$d분 경과</string>
-    <string name="home_status_elapsed_short">%1$d분</string>
     <string name="home_month_meta">%1$d회 운행 · 업무 %2$s km</string>
     <string name="home_month_loading">이번 달 기록을 불러오는 중</string>
     <string name="section_month_trip">이번 달 운행 정보</string>
@@ -76,7 +72,6 @@
     <string name="report_no_trips">이 달에는 운행 기록이 없어요</string>
     <string name="report_build">운행기록부 만들기</string>
     <string name="report_build_again">다시 만들기</string>
-    <string name="report_built">운행기록부를 만들었어요. 받는 사람을 확인하고 보내 주세요</string>
     <string name="report_send">보내기 · %1$d명</string>
     <string name="report_send_again">다시 보내기</string>
     <string name="report_connect_mail">설정에서 메일 계정 연결</string>
@@ -117,9 +112,7 @@
     <string name="recovery_delete_confirm">이 운행을 지울까요? 되돌릴 수 없어요</string>
     <string name="recovery_delete_yes">지우기</string>
     <string name="action_fuel_add">주유 기록 추가</string>
-    <string name="action_fuel_add_compact">주유\n추가</string>
     <string name="action_records">운행 기록 조회</string>
-    <string name="action_records_compact">운행\n조회</string>
     <string name="action_settings">설정</string>
     <string name="input_locked">지금은 입력할 수 없어요</string>
     <string name="keypad_delete">지우기</string>
@@ -175,7 +168,6 @@
     <string name="picker_add_duplicate">이미 등록된 사용자에요</string>
     <string name="picker_add_name_hint">예: 홍길동</string>
     <string name="picker_add_dept_hint">예: 영업1팀</string>
-    <string name="picker_add_dept_short_hint">부서명</string>
     <string name="action_add">추가</string>
     <string name="action_remove">지우기</string>
     <string name="settings_title">설정</string>

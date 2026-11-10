@@ -34,11 +34,11 @@ import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.NavRow
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.trips.tripWhenText
 
 /** 넓은 창 왼쪽 섹션 목록이 차지하는 폭(콘텐츠 폭 대비). */
@@ -66,7 +66,8 @@ fun SettingsRoute() {
  */
 @Composable
 fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, modifier: Modifier = Modifier) {
-    val wide = LocalWindowLayout.current == WindowLayout.WIDE
+    // 넓은 창·분할 화면 한 칸은 목록|상세 두 칸, 세로로 긴 창만 목록 → 상세
+    val wide = LocalWindowLayout.current.twoColumns
     val inDetail = !wide && state.section != null
     // 좁은 창에서 상세를 보고 있으면 시스템 뒤로도 목록으로(화면을 나가지 않게)
     BackHandler(enabled = inDetail) { onAction(SettingsAction.CloseSection) }

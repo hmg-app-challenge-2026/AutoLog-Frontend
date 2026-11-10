@@ -168,7 +168,7 @@ private fun DialogBody(content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s4), content = content)
 }
 
-/** 연결 코드 6칸 — 입력한 숫자는 칸에, 다음 칸은 accent 테두리 없이 비어 있다. */
+/** 연결 코드 6칸(76 dp — 숫자판 키와 같은 무게로 읽히게) — 입력한 숫자는 칸에, 남은 칸은 비어 있다. */
 @Composable
 private fun CodeBoxes(code: String) {
     val c = AutoLogTheme.colors
@@ -178,7 +178,7 @@ private fun CodeBoxes(code: String) {
     ) {
         repeat(REGISTER_CODE_LENGTH) { i ->
             Box(
-                Modifier.size(Size.denseFace).clip(RoundedCornerShape(Radius.sm)).background(c.surface3),
+                Modifier.size(Size.touchMin).clip(RoundedCornerShape(Radius.sm)).background(c.surface3),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(code.getOrNull(i)?.toString().orEmpty(), style = AutoLogTheme.type.title, color = c.textPrimary)

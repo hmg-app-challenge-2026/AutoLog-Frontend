@@ -33,18 +33,11 @@ import kr.autolog.vehicle.ui.design.Space
  * 같은 폭의 행을 쌓아 한 묶음으로 읽히게 한다. 행 = `surface1` 면(`radius.md`) + 왼쪽 원 28 dp + 글자, 행 전체가 터치 대상(76 dp).
  * 선택: `accent` 테두리(3 dp) + 원 가운데 `accent` 점. 고르지 않은 행: `outline` 1 dp 테두리 — 면이 바탕에 묻히지 않게.
  * [onClick]이 null이면 **보기 전용**(누를 수 없을 뿐, 글자는 같은 색 — 목록이 또렷이 읽히게).
- * [dense](좁은 창): 보이는 면 56 dp · 글자 `caption`으로 작게, 터치 영역(76 dp)은 그대로 — 행 사이 간격 없이 쌓아도 면 사이에 20 dp 틈이 보인다.
  */
 @Composable
-fun ChoiceRow(
-    text: String,
-    selected: Boolean,
-    onClick: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-    dense: Boolean = false,
-) {
+fun ChoiceRow(text: String, selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
-    OptionRow(text, null, selected, onClick, Role.RadioButton, modifier, dense) {
+    OptionRow(text, null, selected, onClick, Role.RadioButton, modifier) {
         Box(
             Modifier.size(Size.iconSm).border(Size.ring, if (selected) c.accent else c.textTertiary, CircleShape),
             contentAlignment = Alignment.Center,
@@ -68,7 +61,7 @@ fun CheckRow(
 ) {
     val c = AutoLogTheme.colors
     val box = RoundedCornerShape(Radius.sm)
-    OptionRow(text, detail, checked, onClick, Role.Checkbox, modifier, dense = false) {
+    OptionRow(text, detail, checked, onClick, Role.Checkbox, modifier) {
         Box(
             Modifier
                 .size(Size.iconSm)
@@ -92,7 +85,6 @@ private fun OptionRow(
     onClick: (() -> Unit)?,
     role: Role,
     modifier: Modifier,
-    dense: Boolean,
     mark: @Composable () -> Unit,
 ) {
     val c = AutoLogTheme.colors
@@ -106,11 +98,9 @@ private fun OptionRow(
             .tappable(onClick, role = role),
         contentAlignment = Alignment.CenterStart,
     ) {
-        // 면: 보통은 행 전체, dense면 위아래를 비워 56 dp
         Box(
             Modifier
                 .matchParentSize()
-                .then(if (dense) Modifier.padding(vertical = (Size.touchMin - Size.denseFace) / 2) else Modifier)
                 .clip(shape)
                 .background(c.surface1)
                 .border(if (selected) Size.ring else Size.hairline, if (selected) c.accent else c.outline, shape),
@@ -122,8 +112,7 @@ private fun OptionRow(
         ) {
             mark()
             if (detail == null) {
-                // dense(좁은 창): 글자도 한 단계 작게(`caption`)
-                Text(text, style = if (dense) t.caption else t.body, color = c.textPrimary)
+                Text(text, style = t.body, color = c.textPrimary)
             } else {
                 Column(Modifier.padding(vertical = Space.s3)) {
                     Text(text, style = t.body, color = c.textPrimary)
