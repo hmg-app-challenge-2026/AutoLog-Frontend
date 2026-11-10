@@ -26,9 +26,9 @@ class WindowTypeTest {
     }
 
     @Test
-    fun `세로 창 — 글자는 넓은 창과 같고 결과 제목은 title, 분류 문구는 label`() {
+    fun `세로 창 — 글자는 넓은 창과 같고 결과 제목·Home 운행 경로는 title, 분류 문구는 label`() {
         val w = windowTypeOf(WindowLayout.WIDE, t)
         val tall = windowTypeOf(WindowLayout.TALL, t)
-        assertEquals(w.copy(resultTitle = t.title, resultClassification = t.label), tall)
+        assertEquals(w.copy(resultTitle = t.title, resultClassification = t.label, homeRoute = t.title), tall)
     }
 }

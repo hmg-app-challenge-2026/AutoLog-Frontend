@@ -240,7 +240,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
-- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 창 크기마다 무엇이 달라지는지가 이 표 한 곳에 있다. Pleos 1:1 분할 한 칸(NARROW, 1280×1268 dp)은 넓은 화면과 **같은 글자**다(1.33) — 실제 크기에서 줄일 이유가 없었다. 예외는 Home 기록 중 운행 경로(`homeRoute`) 하나 — 두 섹션을 위아래로 쌓아 폭이 남으므로 한 단계 크게(1.40).
+- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 창 크기마다 무엇이 달라지는지가 이 표 한 곳에 있다. Pleos 1:1 분할 한 칸(NARROW, 1280×1268 dp)은 넓은 화면과 **같은 글자**다(1.33) — 실제 크기에서 줄일 이유가 없었다. 예외는 Home 기록 중 운행 경로(`homeRoute`) 하나 — 넓은 화면 64 sp, 분할 화면 52 sp(1.40·1.43).
 
   | 역할 | WIDE · NARROW | TALL |
   |---|---|---|
@@ -252,7 +252,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
   | `dockLabel` 하단 타일 이름 | `label` | `label` |
   | `resultTitle` 운행 결과 제목 | `display` | `title` |
   | `resultClassification` 분류 문구 | `title` | `label` |
-  | `homeRoute` Home 기록 중 출발지·목적지 | `title`(NARROW만 `headline`) | `title` |
+  | `homeRoute` Home 기록 중 출발지·목적지 | WIDE `display` · NARROW `headline` | `title` |
   | `periodTitle` 달 이동 "2026년 11월" | `title` | `title` |
   | `headerTitle` 보조 화면 머리 줄 제목 | `title` | `title` |
 
@@ -583,3 +583,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.40 | 2026-11-10 | Home 기록 중 **분할 화면(NARROW)만**: 출발지·목적지 `title` 44 → `headline` 52 sp(글자 역할 `homeRoute`, `RouteFlow(textStyle)`), "운행 경로" 소제목과 출발지 사이 +24 dp(소제목이 12 dp 내려앉아 붙어 보였다). 넓은 화면은 그대로(사용자 지시) |
 | 1.41 | 2026-11-10 | Home 간격(사용자 지시): 분할 화면(NARROW)은 두 섹션을 상태 줄에서 48 dp 더 내리고 섹션 사이 32 → 64 dp. 넓은 화면은 소제목만 12 → 32 dp 내림(내용은 그대로 세로 가운데). 세로 창은 그대로 |
 | 1.42 | 2026-11-10 | Home 넓은 화면 소제목 32 → 64 dp 내림(사용자 지시) |
+| 1.43 | 2026-11-10 | Home 넓은 화면(사용자 지시): 소제목 64 → 96 dp 내림, 기록 중 출발지·목적지 `title` 44 → `display` 64 sp(`homeRoute`) |
