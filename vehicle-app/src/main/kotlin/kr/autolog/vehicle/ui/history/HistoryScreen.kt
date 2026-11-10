@@ -27,7 +27,6 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.Avatar
 import kr.autolog.vehicle.ui.design.components.PeriodSwitcher
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
@@ -35,6 +34,7 @@ import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.components.TripListRow
 import kr.autolog.vehicle.ui.design.components.tappable
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.trips.TripRowUi
 import kr.autolog.vehicle.ui.trips.tripMetaText
 import kr.autolog.vehicle.ui.trips.tripRouteText
@@ -60,7 +60,7 @@ fun HistoryScreen(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modi
     ) {
         ScreenHeader(stringResource(R.string.history_title)) { onAction(HistoryAction.Back) }
         Column(
-            Modifier.weight(1f).fillMaxWidth().widthIn(max = Size.sheetMaxWidth).align(Alignment.CenterHorizontally),
+            Modifier.weight(1f).widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(Space.s4),
         ) {
             Toolbar(state, onAction)
@@ -80,7 +80,7 @@ fun HistoryScreen(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modi
 
 /**
  * 달 이동(◀ 2026년 11월 ▶) · [운행기록부 내보내기] · 그 아래 합계("23회 운행 · 412.7 km").
- * 넓은 창은 달 이동과 버튼이 한 줄(버튼 오른쪽 끝), 좁은·세로 창은 달 이동 / 합계 / 버튼(전폭)을 위아래로(한 줄이면 버튼 글자가 꺾인다).
+ * 넓은 창·분할 화면은 달 이동과 버튼이 한 줄(버튼 오른쪽 끝), 세로로 긴 창은 달 이동 / 합계 / 버튼(전폭)을 위아래로.
  */
 @Composable
 private fun Toolbar(state: HistoryUiState, onAction: (HistoryAction) -> Unit) {
@@ -89,7 +89,7 @@ private fun Toolbar(state: HistoryUiState, onAction: (HistoryAction) -> Unit) {
             onAction(HistoryAction.OpenReport)
         }, modifier = modifier)
     }
-    if (LocalWindowLayout.current != WindowLayout.WIDE) {
+    if (!LocalWindowLayout.current.twoColumns) {
         Column(verticalArrangement = Arrangement.spacedBy(Space.s2)) {
             MonthSwitcher(state, onAction)
             Summary(state)

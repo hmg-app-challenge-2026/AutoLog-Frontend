@@ -32,11 +32,11 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ActionTile
 import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.ProfileTile
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
+import kr.autolog.vehicle.ui.design.twoColumns
 
 @Composable
 fun ProfilePickerRoute() {
@@ -48,7 +48,7 @@ fun ProfilePickerRoute() {
 
 /**
  * 스펙 7.1. 제목과 타일이 화면 가운데 주인공이다(넷플릭스식). 타일 순서는 [ProfilePickerUiState.tiles]가 정한다.
- * WIDE = 한 줄, NARROW·TALL = 3열.
+ * WIDE·NARROW(분할 한 칸) = 한 줄, TALL = 3열.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -60,17 +60,8 @@ fun ProfilePickerScreen(
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val layout = LocalWindowLayout.current
-    // WIDE 200 dp·한 줄 / TALL 160 dp·3열 / NARROW(분할 화면 한 칸) 128 dp·3열 — 세 개가 스크롤 없이 한 줄에 보이게
-    val tile =
-        when (layout) {
-            WindowLayout.WIDE -> Size.profileTileWide
-            WindowLayout.TALL -> Size.profileTileNarrow
-            WindowLayout.NARROW -> Size.profileTileCompact
-        }
-    val gap = if (layout == WindowLayout.NARROW) Space.s5 else Space.s6
-    // 분할 화면 한 칸(NARROW)은 한 줄에 안 들어간다 — 어절 단위 두 줄을 문자열로 정해 둔다
-    // (Phrase 줄바꿈은 기기에선 되지만 Robolectric 스크린샷에선 글자 단위로 꺾인다)
-    val title = if (layout == WindowLayout.NARROW) R.string.picker_title_two_lines else R.string.picker_title
+    // 넓은 창·분할 화면 한 칸 200 dp·한 줄 / 세로로 긴 창(TALL) 160 dp·3열
+    val tile = if (layout.twoColumns) Size.profileTileWide else Size.profileTileNarrow
     BoxWithConstraints(modifier.fillMaxSize()) {
         Column(
             Modifier
@@ -82,7 +73,7 @@ fun ProfilePickerScreen(
             verticalArrangement = Arrangement.spacedBy(Space.s6, Alignment.CenterVertically),
         ) {
             Text(
-                stringResource(title),
+                stringResource(R.string.picker_title),
                 style = AutoLogTheme.windowType.screenTitle,
                 color = c.textPrimary,
                 textAlign = TextAlign.Center,
@@ -91,9 +82,9 @@ fun ProfilePickerScreen(
                 Text(stringResource(R.string.picker_empty), style = t.body, color = c.textSecondary)
             }
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(Space.s6, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(Space.s5),
-                maxItemsInEachRow = if (layout == WindowLayout.WIDE) Int.MAX_VALUE else 3,
+                maxItemsInEachRow = if (layout.twoColumns) Int.MAX_VALUE else 3,
             ) {
                 state.tiles.forEach { PickerTileOf(it, tile, onAction) }
             }

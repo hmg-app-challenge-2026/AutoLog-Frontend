@@ -49,7 +49,7 @@ class TripResultViewModelTest {
 
         advanceTimeBy(30_000)
         assertEquals(Route.TripResult("t-s2", TripResultMode.REVIEW), g.navigator.current)
-        vm.onAction(TripResultAction.GoHome)
+        vm.onAction(TripResultAction.Close)
 
         assertEquals(Route.History, g.navigator.current)
         assertEquals(before, purposeOf(g, "t-s2"))
@@ -63,6 +63,7 @@ class TripResultViewModelTest {
         vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
         vm.onAction(TripResultAction.Save)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.History, g.navigator.current)
         assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
     }
@@ -72,7 +73,7 @@ class TripResultViewModelTest {
         val (g, vm) = review("t-s1")
         vm.uiState.first { !it.loading }
 
-        vm.onAction(TripResultAction.GoHome)
+        vm.onAction(TripResultAction.Close)
 
         assertEquals(Route.History, g.navigator.current)
         assertNull(purposeOf(g))
@@ -97,12 +98,13 @@ class TripResultViewModelTest {
         assertNull(purposeOf(g))
         advanceTimeBy(200)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, purposeOf(g)!!.category)
     }
 
     @Test
-    fun `수정하기 — 카운트다운이 멈추고 목적을 바꿔 저장하면 다시 카운트다운`() = runTest {
+    fun `수정하기 — 카운트다운이 멈추고 목적을 바꿔 저장하기를 누르면 저장하고 메인 화면으로`() = runTest {
         val (g, vm) = open()
         vm.uiState.first { !it.loading }
 
@@ -111,38 +113,93 @@ class TripResultViewModelTest {
         assertEquals(Route.TripResult("t-s1"), g.navigator.current) // 멈춰 있다
         vm.onAction(TripResultAction.Select(PurposeCategory.NON_BUSINESS))
         vm.onAction(TripResultAction.Save)
+        runCurrent()
 
-        assertEquals(PurposeCategory.NON_BUSINESS, purposeOf(g)!!.category)
-        assertEquals(5, vm.uiState.first { !it.editing && !it.saving }.autoCloseSec)
-        advanceTimeBy(5_100)
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.NON_BUSINESS, purposeOf(g)!!.category)
     }
 
     @Test
-    fun `보기 모드에선 목적을 못 바꾸고, 메인 화면으로는 바로 저장하고 돌아간다`() = runTest {
+    fun `보기 모드에선 목적을 못 바꾸고, 저장하기는 바로 저장하고 돌아간다`() = runTest {
         val (g, vm) = open()
         vm.uiState.first { !it.loading }
 
         vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
         assertEquals(PurposeCategory.BUSINESS, vm.uiState.first().selected)
-        vm.onAction(TripResultAction.GoHome)
+        vm.onAction(TripResultAction.Save)
+
+        acknowledgeSaved(g, vm)
+        assertEquals(Route.Home, g.navigator.current)
+        assertEquals(PurposeCategory.BUSINESS, purposeOf(g)!!.category)
+    }
+
+    @Test
+    fun `5초 마감 1ms 전엔 그대로, 마감이 지나면 저장하고 돌아간다 — 막대가 다 사라질 때`() = runTest {
+        val (g, vm) = open()
+        vm.uiState.first { !it.loading }
+
+        advanceTimeBy(4_999)
+        assertEquals(Route.TripResult("t-s1"), g.navigator.current)
+        advanceTimeBy(2)
+        acknowledgeSaved(g, vm)
+        assertEquals(Route.Home, g.navigator.current)
+    }
+
+    @Test
+    fun `수정 중 저장하기 — 고친 목적으로 저장된다`() = runTest {
+        val (g, vm) = open()
+        vm.uiState.first { !it.loading }
+
+        vm.onAction(TripResultAction.Edit)
+        vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
+        vm.onAction(TripResultAction.Save)
+
+        assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
+        acknowledgeSaved(g, vm)
+        assertTrue(g.navigator.current == Route.Home)
+    }
+
+    /**
+     * 저장 뒤엔 바로 떠나지 않고 저장 완료 화면 — 체크를 다 그렸다는 신호 뒤 1초가 지나야 들어온 화면으로 간다.
+     * 저장 완료 화면이 보이는지, 1초가 되기 전엔 그대로인지까지 확인한다.
+     */
+    private suspend fun TestScope.acknowledgeSaved(g: TestAppGraph, vm: TripResultViewModel) {
+        runCurrent()
+        val here = g.navigator.current
+        vm.uiState.first { it.saved } // 저장 완료 화면
+        assertTrue(here is Route.TripResult)
+        vm.onAction(TripResultAction.CheckDrawn)
+        advanceTimeBy(SAVED_HOLD_MS - 1)
+        assertEquals(here, g.navigator.current)
+        advanceTimeBy(2)
+    }
+
+    @Test
+    fun `저장 완료 화면 — 체크를 다 그리기 전엔 기다려도 닫히지 않고, 확인은 바로 닫는다`() = runTest {
+        val (g, vm) = open()
+        vm.uiState.first { !it.loading }
+        vm.onAction(TripResultAction.Save)
+        runCurrent()
+        assertNull(vm.uiState.first { it.saved }.autoCloseSec) // 저장 완료 화면엔 남은 시간이 없다
+
+        advanceTimeBy(10_000) // 화면이 뜬 때부터 세지 않는다
+        assertEquals(Route.TripResult("t-s1"), g.navigator.current)
+        vm.onAction(TripResultAction.Close)
 
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, purposeOf(g)!!.category)
     }
 
     @Test
-    fun `수정 중 메인 화면으로 — 고친 목적으로 저장된다`() = runTest {
-        val (g, vm) = open()
+    fun `종료 대기 — 기록 이어가기로 떠나면 저장 완료 화면은 없다`() = runTest {
+        val (_, vm) = ending()
         vm.uiState.first { !it.loading }
 
-        vm.onAction(TripResultAction.Edit)
-        vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
-        vm.onAction(TripResultAction.GoHome)
+        vm.onAction(TripResultAction.Continue)
+        runCurrent()
 
-        assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
-        assertTrue(g.navigator.current == Route.Home)
+        assertTrue(!vm.uiState.first().saved)
     }
 
     /** 기록 중 → 기어 P(종료 대기, 5초 뒤 종료) → Home 위 운행 결과 카드. */
@@ -162,7 +219,7 @@ class TripResultViewModelTest {
     }
 
     @Test
-    fun `종료 대기 — 남은 시간은 앱 A 종료 시각, 계속 기록하기면 되돌리고 돌아간다`() = runTest {
+    fun `종료 대기 — 남은 시간은 앱 A 종료 시각, 기록 이어가기면 되돌리고 돌아간다`() = runTest {
         val (g, vm) = ending()
         val s = vm.uiState.first { !it.loading }
         assertTrue(s.canContinue)
@@ -182,18 +239,20 @@ class TripResultViewModelTest {
 
         advanceTimeBy(5_100)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, g.store.trip(tripId)!!.purpose!!.category)
     }
 
     @Test
-    fun `종료 대기 — 메인 화면으로는 바로 끝내고 저장`() = runTest {
+    fun `종료 대기 — 저장하기는 바로 끝내고 저장`() = runTest {
         val (g, vm, tripId) = ending()
         vm.uiState.first { !it.loading }
 
-        vm.onAction(TripResultAction.GoHome)
+        vm.onAction(TripResultAction.Save)
         runCurrent()
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, g.store.trip(tripId)!!.purpose!!.category)
     }

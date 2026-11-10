@@ -63,7 +63,7 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
                     WindowLayoutHost {
                         when (tier) {
                             UsageTier.FULL -> FullApp(graph)
-                            UsageTier.PEEK -> DriverBadgeScaffold(onClick = null) { PeekRoute() } // 정차: 배지는 표시만
+                            UsageTier.PEEK -> PeekRoute() // 정차: 운전자 배지 없음(D-30 — 대기 중 Home에만)
                             UsageTier.BACKGROUND -> Unit
                         }
                     }

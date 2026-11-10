@@ -22,10 +22,10 @@ import kr.autolog.vehicle.ui.design.sharedAvatar
 
 /**
  * 디자인 언어 11장 DriverBadge — 넷플릭스처럼 화면 오른쪽 위에 네모 프로필 아이콘 + "○○님".
- * 운전자 이름은 앱 전체에서 이 자리에만 보인다. [onClick]이 null이면 표시 전용(Peek).
+ * 운전자 이름은 앱 전체에서 이 자리에만 보이고, 이 배지는 Home "대기 중"에만 있다(D-30). 누르면 운전자 선택.
  */
 @Composable
-fun DriverBadge(userId: String?, name: String?, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun DriverBadge(userId: String?, name: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
     Row(
         modifier

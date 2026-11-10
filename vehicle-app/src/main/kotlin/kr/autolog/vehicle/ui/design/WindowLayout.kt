@@ -14,7 +14,7 @@ enum class WindowLayout { NARROW, WIDE, TALL }
 
 const val WIDE_MIN_ASPECT = 1.25f
 const val WIDE_MIN_WIDTH_DP = 840f
-const val TALL_MAX_ASPECT = 0.70f // 0.80이면 분할 화면 한 칸(≈504×640, 0.79)까지 TALL로 잡혀 바꿈(2026-11-09)
+const val TALL_MAX_ASPECT = 0.70f // 세로로 긴 창만 TALL. Pleos 1:1 분할 한 칸(≈1280×1268, 1.0)은 NARROW
 
 fun windowLayoutOf(widthDp: Float, heightDp: Float): WindowLayout {
     val aspect = widthDp / heightDp
@@ -37,10 +37,16 @@ val LocalDriverSide = staticCompositionLocalOf { DriverSide.START }
  */
 @Composable
 fun screenMargin(): Dp = when (LocalWindowLayout.current) {
-    WindowLayout.WIDE -> Space.s7
+    WindowLayout.WIDE, WindowLayout.NARROW -> Space.s7
     WindowLayout.TALL -> Space.tallMargin
-    WindowLayout.NARROW -> Space.s6
 }
+
+/**
+ * 좌우 두 칸 배치가 들어가는 창인가 — 넓은 창(2560×1268)과 Pleos 1:1 분할 한 칸(≈1280×1268)은 높이가 같고 폭도 넉넉해
+ * 두 칸(운행 결과 요약|목적, 설정 목록|상세, 주유 영수증|칸, 한 줄 툴바)을 그대로 쓴다. 세로로 긴 창(TALL)만 한 칸으로 쌓는다.
+ * 화면은 "넓은 창이면"이 아니라 이 값으로 배치를 고른다(2026-11-10 — 근거 없던 504 dp 분할 가정을 버림).
+ */
+val WindowLayout.twoColumns: Boolean get() = this != WindowLayout.TALL
 
 /** 현재 창 크기로 [LocalWindowLayout]을 계산해 내려 준다. 루트와 스크린샷 테스트가 쓴다. */
 @Composable

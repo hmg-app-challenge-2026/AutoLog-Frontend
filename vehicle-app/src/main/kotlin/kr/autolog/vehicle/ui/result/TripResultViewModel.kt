@@ -20,14 +20,16 @@ import kr.autolog.vehicle.data.repository.TripResultRepository
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
 import kr.autolog.vehicle.nav.TripResultMode
-import kr.autolog.vehicle.ui.design.remainingSeconds
 
 /**
  * 운행 결과 카드(스펙 7.3, D-27·D-28). 두 단계를 한 카드가 이어서 맡는다:
- * 1. **종료 대기**(종료 조건은 됐지만 앱 A가 아직 끝내기 전): 남은 시간 = 앱 A 종료 시각. [계속 기록하기]로 되돌릴 수 있다.
+ * 1. **종료 대기**(종료 조건은 됐지만 앱 A가 아직 끝내기 전): 남은 시간 = 앱 A 종료 시각. [기록 이어가기]로 되돌릴 수 있다.
  *    시간이 다 되면(또는 [메인 화면으로]) 운행이 끝나고 → 지금 선택으로 저장 → 들어온 화면으로.
  * 2. **끝난 운행**(직접 [기록 종료]·시동 끔·알림·이력에서 연 경우): 자체 5초 카운트다운 → 저장 → 돌아간다.
- * [수정하기] 중엔 돌아가지 않는다(운행 자체는 앱 A 시각에 끝나고, 고른 목적은 그때·[저장] 때 저장).
+ * 저장을 마치면 곧바로 돌아가지 않고 **저장 완료 화면**(`saved`)을 보인다 — 체크를 다 그린 뒤([TripResultAction.CheckDrawn])
+ * [SAVED_HOLD_MS]가 지나거나 [확인]을 누르면 들어온 화면으로. [기록 이어가기]·주행 시작으로 떠날 때는 보이지 않는다.
+ * [수정하기] 중엔 돌아가지 않는다(운행 자체는 앱 A 시각에 끝나고, 고른 목적은 그때·[저장하기] 때 저장). [저장하기]는 보기·수정 어느 쪽이든
+ * 지금 선택으로 저장하고 돌아간다 — 시간이 다 됐을 때 저절로 일어나는 일과 같다.
  * 저장하지 않고 화면이 닫히면(주행 시작 등) 그 운행은 "목적 미입력"으로 남는다.
  *
  * [mode] = REVIEW(운행 기록 조회에서 연 사후 확인, D-29): 카운트다운도 자동 저장도 없다. 목적 미입력 운행은 수정 모드로 열리고,
@@ -47,12 +49,14 @@ class TripResultViewModel(
     private val loaded = MutableStateFlow<Loaded>(Loaded.NotYet)
     private var current: TripResult? = null
     private var countdown: Job? = null
+    private var hold: Job? = null
     private var finishing = false
     private var left = false
 
     val uiState: StateFlow<TripResultUiState> =
-        combine(loaded, interaction, ticker) { l, i, now ->
-            reduceTripResult((l as? Loaded.Value)?.result, l is Loaded.Value, i, now, mode)
+        // ticker는 1초마다 다시 계산하게 할 뿐 — 지금 시각은 계산할 때 시계에서(선택·수정으로 다시 계산할 때 옛 시각을 쓰지 않게)
+        combine(loaded, interaction, ticker) { l, i, _ ->
+            reduceTripResult((l as? Loaded.Value)?.result, l is Loaded.Value, i, clock.nowMs(), mode)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TripResultUiState())
 
     init {
@@ -67,7 +71,7 @@ class TripResultViewModel(
                     first && review -> if (r != null && !r.classified) interaction.update { it.copy(editing = true) }
                     // 종료 대기로 열렸다 — 막대 전체 길이 = 지금부터 종료 시각까지
                     first && r?.endsAt != null ->
-                        interaction.update { it.copy(autoCloseTotalSec = remainingSeconds(r.endsAt, clock.nowMs())) }
+                        interaction.update { it.copy(autoCloseTotalMs = (r.endsAt - clock.nowMs()).coerceAtLeast(1)) }
                     // 이미 끝난 운행으로 열렸다 — 자체 카운트다운
                     first && r != null && r.endsAt == null -> startCountdown()
                     // 종료 대기 → 끝남(시간 만료·[메인 화면으로]) 또는 사라짐(다시 출발해 앱 A가 종료를 취소)
@@ -84,11 +88,12 @@ class TripResultViewModel(
                 interaction.update { if (it.editing) it.copy(selected = action.category) else it }
             TripResultAction.Edit -> {
                 countdown?.cancel()
-                interaction.update { it.copy(editing = true, autoCloseSec = null) }
+                interaction.update { it.copy(editing = true, autoCloseAt = null) }
             }
-            TripResultAction.Save -> save()
-            // 사후 확인의 [닫기]는 저장하지 않고 돌아간다
-            TripResultAction.GoHome -> if (review) leave() else finish()
+            // [저장하기] = 남은 시간이 다 됐을 때와 같은 끝내기. 사후 확인은 고친 목적만 저장하고 목록으로
+            TripResultAction.Save -> if (review) saveReview() else finish()
+            TripResultAction.Close -> leave()
+            TripResultAction.CheckDrawn -> holdThenLeave()
         }
     }
 
@@ -107,7 +112,7 @@ class TripResultViewModel(
         }
         viewModelScope.launch {
             results.classify(tripId, selectedNow())
-            if (finishing || !interaction.value.editing) leave()
+            if (finishing || !interaction.value.editing) showSaved()
         }
     }
 
@@ -115,47 +120,54 @@ class TripResultViewModel(
         countdown?.cancel()
         countdown =
             viewModelScope.launch {
-                interaction.update { it.copy(autoCloseTotalSec = AUTO_CLOSE_SEC) }
-                for (sec in AUTO_CLOSE_SEC downTo 1) {
-                    interaction.update { it.copy(autoCloseSec = sec) }
-                    delay(1_000)
+                // 마감 시각 하나만 두고 그때 끝낸다 — 막대·버튼 글자는 마감까지 남은 시간에서 계산된다
+                interaction.update {
+                    it.copy(autoCloseAt = clock.nowMs() + AUTO_CLOSE_MS, autoCloseTotalMs = AUTO_CLOSE_MS)
                 }
+                delay(AUTO_CLOSE_MS)
                 finish()
             }
     }
 
-    private fun save() {
+    /** 사후 확인(D-29)의 [저장하기] — 고친 목적을 저장하고 저장 완료 화면 → 목록으로. */
+    private fun saveReview() {
         val now = interaction.value
         if (!now.editing || now.saving) return
-        if (current?.endsAt != null) {
-            // 아직 끝나기 전 — 고른 목적은 운행이 끝날 때 저장된다(onEnded). 카운트다운은 앱 A 시각을 다시 따른다
-            interaction.update { it.copy(editing = false) }
-            return
-        }
         interaction.update { it.copy(saving = true) }
         viewModelScope.launch {
             results.classify(tripId, selectedNow())
-            if (review) {
-                leave() // 사후 확인: 저장했으면 목록으로
-            } else {
-                interaction.update { it.copy(editing = false, saving = false) }
-                startCountdown()
-            }
+            showSaved()
         }
     }
 
-    /** 지금 선택으로 저장하고 들어온 화면으로. 종료 대기 중이면 먼저 바로 끝낸다(저장은 onEnded가). */
+    /** 저장을 마쳤다 — 저장 완료 화면으로. 이미 떠났으면(기록 이어가기·주행 시작) 보여 줄 것 없음. */
+    private fun showSaved() {
+        if (left) return
+        countdown?.cancel()
+        interaction.update { it.copy(saved = true, saving = false, editing = false, autoCloseAt = null) }
+    }
+
+    /** 체크를 다 그린 뒤 [SAVED_HOLD_MS] 보여 주고 들어온 화면으로. 한 번만. */
+    private fun holdThenLeave() {
+        if (!interaction.value.saved || hold != null) return
+        hold = viewModelScope.launch {
+            delay(SAVED_HOLD_MS)
+            leave()
+        }
+    }
+
+    /** 지금 선택으로 저장하고 저장 완료 화면으로(→ 들어온 화면). 종료 대기 중이면 먼저 바로 끝낸다(저장은 onEnded가). */
     private fun finish() {
         if (finishing) return
         finishing = true
         countdown?.cancel()
-        interaction.update { it.copy(saving = true, autoCloseSec = null) }
+        interaction.update { it.copy(saving = true, autoCloseAt = null) }
         viewModelScope.launch {
             if (current?.endsAt != null) {
                 session.endNow()
             } else {
                 results.classify(tripId, selectedNow())
-                leave()
+                showSaved()
             }
         }
     }

@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -59,6 +60,7 @@ private const val GLOW_SPREAD = 1.2f
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
  * [live] = 지금 달리는 운행(흐르는 화살표). 끝난 운행(운행 결과·이력)은 false — 화살표 대신 ○와 ●를 잇는 가는 선(지도 앱 경로 요약처럼),
  * 흐름이 "진행 중"으로 잘못 읽히지 않게.
+ * [textStyle]은 출발지·목적지 글자 크기, [markerScale]은 왼쪽 표시(○ · 갈매기 · ●) 배율 — 큰 글자 옆에서 표시가 작아 보이지 않게(Home).
  */
 @Composable
 fun RouteFlow(
@@ -67,18 +69,20 @@ fun RouteFlow(
     modifier: Modifier = Modifier,
     destinationColor: Color = AutoLogTheme.colors.textPrimary,
     live: Boolean = true,
+    textStyle: TextStyle = AutoLogTheme.type.title,
+    markerScale: Float = 1f,
 ) {
     val c = AutoLogTheme.colors
-    val t = AutoLogTheme.type
     val density = LocalDensity.current
-    val originStyle = t.title.copy(fontWeight = FontWeight.Normal)
-    val destinationStyle = t.title
+    // 출발지·목적지는 같은 크기 — 출발지는 보통 굵기·회색, 목적지는 굵게·기본색
+    val originStyle = textStyle.copy(fontWeight = FontWeight.Normal)
+    val destinationStyle = textStyle
     // 점을 그 줄 글자의 첫 줄 가운데에 맞추려고, 점 칸 높이를 글자 한 줄 높이로 둔다
     val originLine = with(density) { originStyle.lineHeight.toDp() }
     val destinationLine = with(density) { destinationStyle.lineHeight.toDp() }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s1)) {
         if (origin != null) {
-            RouteRow(markerHeight = originLine, marker = { OriginMarker() }) {
+            RouteRow(markerHeight = originLine, markerScale, marker = { OriginMarker(markerScale) }) {
                 Text(
                     origin,
                     style = originStyle,
@@ -87,9 +91,11 @@ fun RouteFlow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            RouteRow(markerHeight = null, marker = { if (live) FlowChevrons() else StaticConnector() }) {}
+            RouteRow(markerHeight = null, markerScale, marker = {
+                if (live) FlowChevrons(markerScale) else StaticConnector(markerScale)
+            }) {}
         }
-        RouteRow(markerHeight = destinationLine, marker = { DestinationMarker() }) {
+        RouteRow(markerHeight = destinationLine, markerScale, marker = { DestinationMarker(markerScale) }) {
             // 긴 거래처 이름은 두 줄까지, 넘치면 말줄임
             Text(
                 destination,
@@ -102,12 +108,20 @@ fun RouteFlow(
     }
 }
 
-/** 경로선 한 줄: 왼쪽 표시 칸(폭 `iconSm`, [markerHeight]가 있으면 그 높이 가운데) + 12 dp + 오른쪽 글자 칸. */
+/** 경로선 한 줄: 왼쪽 표시 칸(폭 `iconSm` × [scale], [markerHeight]가 있으면 그 높이 가운데) + 12 dp + 오른쪽 글자 칸. */
 @Composable
-private fun RouteRow(markerHeight: Dp?, marker: @Composable () -> Unit, text: @Composable () -> Unit) {
+private fun RouteRow(markerHeight: Dp?, scale: Float, marker: @Composable () -> Unit, text: @Composable () -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(Space.s3), verticalAlignment = Alignment.Top) {
         Box(
-            Modifier.width(Size.iconSm).then(if (markerHeight != null) Modifier.height(markerHeight) else Modifier),
+            Modifier.width(Size.iconSm * scale).then(
+                if (markerHeight !=
+                    null
+                ) {
+                    Modifier.height(markerHeight)
+                } else {
+                    Modifier
+                },
+            ),
             contentAlignment = Alignment.Center,
         ) { marker() }
         text()
@@ -116,10 +130,10 @@ private fun RouteRow(markerHeight: Dp?, marker: @Composable () -> Unit, text: @C
 
 /** 끝난 운행의 출발 → 도착 연결선: 굵기 `ring`(3 dp), `textTertiary`, 둥근 끝. */
 @Composable
-private fun StaticConnector() {
+private fun StaticConnector(scale: Float) {
     Box(
         Modifier
-            .size(width = Size.ring, height = Space.s4)
+            .size(width = Size.ring * scale, height = Space.s4 * scale)
             .clip(CircleShape)
             .background(AutoLogTheme.colors.textTertiary),
     )
@@ -127,19 +141,19 @@ private fun StaticConnector() {
 
 /** 출발 ○ — 회색 테두리 원. */
 @Composable
-private fun OriginMarker() {
-    Box(Modifier.size(Size.routeDot).border(Size.ring, AutoLogTheme.colors.textSecondary, CircleShape))
+private fun OriginMarker(scale: Float) {
+    Box(Modifier.size(Size.routeDot * scale).border(Size.ring * scale, AutoLogTheme.colors.textSecondary, CircleShape))
 }
 
 /** 도착 ● — 화살표와 같은 accent 채움. */
 @Composable
-private fun DestinationMarker() {
-    Box(Modifier.size(Size.routeDot).clip(CircleShape).background(AutoLogTheme.colors.accent))
+private fun DestinationMarker(scale: Float) {
+    Box(Modifier.size(Size.routeDot * scale).clip(CircleShape).background(AutoLogTheme.colors.accent))
 }
 
-/** 아래를 향한 갈매기 3개. 칸 높이 `space.3`(12 dp), 폭 `space.5`, 선 `ring`(3 dp), 둥근 끝. */
+/** 아래를 향한 갈매기 3개. 칸 높이 `space.3`(12 dp), 폭 `space.5`, 선 `ring`(3 dp), 둥근 끝 — 모두 × [scale]. */
 @Composable
-private fun FlowChevrons(modifier: Modifier = Modifier) {
+private fun FlowChevrons(scale: Float, modifier: Modifier = Modifier) {
     val motion = AutoLogTheme.motion
     val accent = AutoLogTheme.colors.accent
     val phase: State<Float> =
@@ -157,9 +171,9 @@ private fun FlowChevrons(modifier: Modifier = Modifier) {
             remember { mutableFloatStateOf(-1f) } // 정지: 아래 alphaOf가 고정 그라데이션을 쓴다
         }
     val p by phase
-    Canvas(modifier.size(width = Space.s5, height = Space.s3 * CHEVRONS)) {
+    Canvas(modifier.size(width = Space.s5 * scale, height = Space.s3 * CHEVRONS * scale)) {
         val cell = size.height / CHEVRONS
-        val stroke = Stroke(width = Size.ring.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val stroke = Stroke(width = (Size.ring * scale).toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         val inset = stroke.width / 2
         for (i in 0 until CHEVRONS) {
             val top = i * cell + cell * 0.25f

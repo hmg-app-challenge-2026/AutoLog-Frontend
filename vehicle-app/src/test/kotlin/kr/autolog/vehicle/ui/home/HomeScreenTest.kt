@@ -165,13 +165,13 @@ class HomeScreenshotTest {
     fun noDriver() = captureAll("home_nodriver", driver = ShotDriver(null, null)) { HomeScreen(ready, onAction = {}) }
 
     @Test
-    fun recording() = captureAll("home_recording", driver = SampleDriver) { HomeScreen(recording, onAction = {}) }
+    fun recording() = captureAll("home_recording") { HomeScreen(recording, onAction = {}) }
 
     @Test
-    fun recordingTrouble() = captureAll("home_recording_trouble", driver = SampleDriver) {
+    fun recordingTrouble() = captureAll("home_recording_trouble") {
         HomeScreen(recordingTrouble, onAction = {})
     }
 
     @Test
-    fun recovery() = captureAll("home_recovery", driver = SampleDriver) { HomeScreen(recovery, onAction = {}) }
+    fun recovery() = captureAll("home_recovery") { HomeScreen(recovery, onAction = {}) }
 }

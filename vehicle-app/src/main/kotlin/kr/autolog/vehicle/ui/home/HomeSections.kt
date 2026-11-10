@@ -46,19 +46,37 @@ internal fun homeSections(state: HomeUiState, onAction: (HomeAction) -> Unit): L
 @Composable
 private fun TripRoute(state: HomeUiState) {
     val c = AutoLogTheme.colors
+    // 분할 화면 한 칸은 소제목 바로 밑에 붙어 보여 소제목과 출발지 사이를 24 dp 더 띄운다(넓은 화면은 내용이 세로 가운데라 이미 떨어져 있다)
+    if (LocalWindowLayout.current == WindowLayout.NARROW) Spacer(Modifier.height(Space.s5))
     RouteFlow(
         origin = state.origin,
         destination = state.destination ?: stringResource(R.string.peek_no_destination),
         destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
+        textStyle = AutoLogTheme.windowType.homeRoute,
+        markerScale = routeMarkerScale(),
     )
 }
+
+/**
+ * 출발지·목적지를 키운 Home에서 ○ · 흐르는 갈매기 · ●도 함께 키운다(2026-11-10 사용자 지시 — 글자보다 한 단계 더, 방향이 한눈에).
+ * 넓은 화면 2배(갈매기 48×72 dp) · 분할 화면 1.6배 · 세로 창 그대로.
+ */
+@Composable
+private fun routeMarkerScale(): Float = when (LocalWindowLayout.current) {
+    WindowLayout.WIDE -> ROUTE_MARKER_SCALE_WIDE
+    WindowLayout.NARROW -> ROUTE_MARKER_SCALE_NARROW
+    WindowLayout.TALL -> 1f
+}
+
+private const val ROUTE_MARKER_SCALE_WIDE = 2f
+private const val ROUTE_MARKER_SCALE_NARROW = 1.6f
 
 /** 큰 숫자 크기 — 넓은 화면 140 sp, 세로 화면 112 sp, 좁은 분할 화면 80 sp. */
 @Composable
 private fun metricSize(): MetricSize = when (LocalWindowLayout.current) {
     WindowLayout.WIDE -> MetricSize.HERO
-    WindowLayout.TALL -> MetricSize.MEDIUM
-    WindowLayout.NARROW -> MetricSize.COMPACT
+    // 분할 화면 한 칸·세로 창은 세로 한 칸에 두 섹션을 쌓으므로 한 단계 작게(112 sp)
+    WindowLayout.NARROW, WindowLayout.TALL -> MetricSize.MEDIUM
 }
 
 @Composable

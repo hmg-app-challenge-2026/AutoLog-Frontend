@@ -24,6 +24,7 @@ import kr.autolog.vehicle.ui.design.LocalNavAnimatedScope
 import kr.autolog.vehicle.ui.design.LocalSharedTransitionScope
 import kr.autolog.vehicle.ui.history.HistoryRoute
 import kr.autolog.vehicle.ui.home.HomeRoute
+import kr.autolog.vehicle.ui.home.isIdle
 import kr.autolog.vehicle.ui.profile.ProfilePickerRoute
 import kr.autolog.vehicle.ui.receipt.FuelEntryRoute
 import kr.autolog.vehicle.ui.receipt.ReceiptQrRoute
@@ -36,6 +37,9 @@ import kr.autolog.vehicle.ui.settings.SettingsRoute
 @Composable
 fun FullApp(graph: AppGraph) {
     val stack by graph.navigator.backStack.collectAsStateWithLifecycle()
+    // 운전자 배지는 Home이 "대기 중"일 때만 — 모르는 동안(첫 값 전)은 숨긴다
+    val session by graph.session.state.collectAsStateWithLifecycle(initialValue = null)
+    val idle = session?.isIdle() == true
     val motion = AutoLogTheme.motion
     val stores: RouteViewModelStores = viewModel()
     // 스택에서 빠진 화면의 ViewModel은 지운다(전환 애니메이션이 끝난 뒤 다음 구성에서)
@@ -59,9 +63,11 @@ fun FullApp(graph: AppGraph) {
                 // 화면마다 자기 ViewModel 저장소 — 화면의 viewModel {}은 이 화면이 스택에 있는 동안만 산다
                 LocalViewModelStoreOwner provides remember(route) { stores.ownerFor(route) },
             ) {
-                if (route.showsDriverBadge()) {
-                    // 오른쪽 위 운전자 배지 → 탭하면 운전자 선택
-                    DriverBadgeScaffold(onClick = { graph.navigator.push(Route.ProfilePicker) }) { RouteContent(route) }
+                if (route == Route.Home) {
+                    // 오른쪽 위 운전자 배지 → 탭하면 운전자 선택. 기록 중에는 감춘다(틀은 그대로라 Home 상태가 바뀌어도 화면을 다시 만들지 않는다)
+                    DriverBadgeScaffold(visible = idle, onClick = { graph.navigator.push(Route.ProfilePicker) }) {
+                        RouteContent(route)
+                    }
                 } else {
                     RouteContent(route)
                 }
@@ -70,12 +76,8 @@ fun FullApp(graph: AppGraph) {
     }
 }
 
-/**
- * 오른쪽 위 운전자 배지를 얹는 화면인가(디자인 언어 11장 DriverBadge) — **Home 하나뿐**(D-30, 2026-11-10 사용자 결정).
- * 운전자는 Home에서 보고 바꾸는 것이고, 보조 화면(운행 결과·주유·운행 기록·운행기록부·설정)은 그 자리를 내용에 쓴다.
- * 정차 중 Peek은 FullApp 밖(AutoLogRoot)에서 표시만 하는 배지를 따로 얹는다.
- */
-private fun Route.showsDriverBadge(): Boolean = this == Route.Home
+// 오른쪽 위 운전자 배지(디자인 언어 11장 DriverBadge)는 **Home "대기 중" 하나뿐**(D-30, 2026-11-10 사용자 결정):
+// 운전자는 운행을 시작하기 전 메인 화면에서 보고 바꾸는 것이고, 기록 중 Home·Peek·보조 화면은 그 자리를 내용에 쓴다.
 
 @Composable
 private fun RouteContent(route: Route) {

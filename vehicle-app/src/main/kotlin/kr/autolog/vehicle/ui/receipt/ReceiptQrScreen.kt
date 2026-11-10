@@ -68,7 +68,7 @@ fun ReceiptQrScreen(state: ReceiptQrUiState, onAction: (ReceiptQrAction) -> Unit
             SecondaryButton(
                 stringResource(R.string.receipt_manual_entry),
                 onClick = { onAction(ReceiptQrAction.ManualEntry) },
-                modifier = Modifier.fillMaxWidth().widthIn(max = Size.dialogMaxWidth),
+                modifier = Modifier.widthIn(max = Size.dialogMaxWidth).fillMaxWidth(),
             )
         }
     }

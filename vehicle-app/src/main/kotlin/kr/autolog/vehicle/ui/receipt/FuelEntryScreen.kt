@@ -35,13 +35,13 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.tappable
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.design.twoColumns
 
 /** 넓은 창에서 영수증 사진이 차지하는 높이(화면 높이 대비). */
 private const val WIDE_IMAGE_HEIGHT = 0.55f
@@ -71,7 +71,8 @@ fun FuelEntryScreen(state: FuelEntryUiState, onAction: (FuelEntryAction) -> Unit
         val availableHeight = maxHeight
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             ScreenHeader(stringResource(R.string.fuel_entry_title)) { onAction(FuelEntryAction.Back) }
-            if (LocalWindowLayout.current == WindowLayout.WIDE && state.receipt != null) {
+            val twoColumns = LocalWindowLayout.current.twoColumns && state.receipt != null
+            if (twoColumns) {
                 Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     ReceiptImage(state, Modifier.weight(1f).height(availableHeight * WIDE_IMAGE_HEIGHT)) {
                         imageExpanded = true
@@ -97,10 +98,16 @@ fun FuelEntryScreen(state: FuelEntryUiState, onAction: (FuelEntryAction) -> Unit
                     }
                 }
             }
+            // 한 칸 배치면 [추가하기]도 칸과 같은 폭으로 가운데(넓은 화면에서 버튼만 화면 끝까지 퍼지지 않게)
             PrimaryButton(
                 stringResource(R.string.fuel_add_confirm),
                 onClick = { onAction(FuelEntryAction.Add) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                if (twoColumns) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier.widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally)
+                },
                 enabled = state.canAdd,
                 loading = state.saving,
             )

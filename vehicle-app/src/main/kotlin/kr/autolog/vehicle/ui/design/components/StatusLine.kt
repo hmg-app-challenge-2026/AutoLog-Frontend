@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
@@ -31,10 +32,18 @@ fun StatusLine(text: String, dot: Color, modifier: Modifier = Modifier, detail: 
         horizontalArrangement = Arrangement.spacedBy(Space.s3),
     ) {
         Box(Modifier.size(Size.statusDot).clip(CircleShape).background(dot))
-        Text(text, style = t.label, color = c.textPrimary)
+        // 상태 줄은 언제나 한 줄 — 폭이 모자라면 보조(detail) 끝을 말줄임(줄바꿈하면 배지 줄보다 높아진다)
+        Text(text, style = t.label, color = c.textPrimary, maxLines = 1)
         if (detail != null) {
             Text("·", style = t.label, color = c.textTertiary)
-            Text(detail, style = t.body, color = c.textSecondary)
+            Text(
+                detail,
+                Modifier.weight(1f, fill = false),
+                style = t.body,
+                color = c.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

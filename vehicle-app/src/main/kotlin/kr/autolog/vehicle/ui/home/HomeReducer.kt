@@ -19,7 +19,7 @@ internal fun reduceHome(
     month: MonthSummary? = null,
     recent: List<HistoryItem> = emptyList(),
 ): HomeUiState {
-    val idle = session is TripSession.Idle || session is TripSession.PendingReview
+    val idle = session.isIdle()
     // 놓친 운행은 운행이 없을 때만 묻는다 — 기록 중엔 지금 운행이 먼저
     val base =
         HomeUiState(
@@ -39,6 +39,12 @@ internal fun reduceHome(
             base.copy(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = formatKm(session.extraKm))
     }
 }
+
+/**
+ * 운행이 없는 대기 상태(Home "대기 중")인가 — 기록 중·종료 대기·복구 중이 아니다.
+ * 오른쪽 위 운전자 배지는 이때만 보인다(D-30, FullApp).
+ */
+internal fun TripSession.isIdle(): Boolean = this is TripSession.Idle || this is TripSession.PendingReview
 
 /** 기록 중·자동 종료 대기가 같이 쓰는 값: 거리 · 출발지 · 경과 분. */
 private fun HomeUiState.withTrip(phase: HomePhase, trip: ActiveTrip, liveKm: Double?, now: Long) = copy(

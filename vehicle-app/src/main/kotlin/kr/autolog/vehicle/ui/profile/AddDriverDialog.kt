@@ -34,7 +34,7 @@ import kr.autolog.vehicle.ui.design.components.initialsOf
  * 스펙 7.1 [+ 새 운전자 추가] 팝업(F-24, origin=LOCAL). 가운데 카드(`ModalCard`), 위에서 아래로 한 흐름:
  * 머리 줄(제목 "새 운전자 추가" 가운데 · 닫기 X 오른쪽) → 아바타 미리보기(이름을 치면 이니셜) → 이름·부서 → 안내 메시지 → [추가 및 시작하기].
  * 버튼·안내는 카드 하단에 고정(내용만 스크롤). 주 버튼은 전폭, 높이는 터치 하한 76 dp.
- * 아바타 TALL 160 dp, 그 외 120 dp. 높이 640 dp 창(WIDE·NARROW)은 이름·부서를 한 줄에 나란히 둔다.
+ * 아바타 TALL 160 dp, 그 외 120 dp. WIDE·NARROW는 이름·부서를 한 줄에 나란히 둔다.
  */
 @Composable
 fun AddDriverDialog(form: AddDriverForm, onAction: (ProfilePickerAction) -> Unit, modifier: Modifier = Modifier) {
@@ -76,15 +76,7 @@ private fun AddDriverFields(form: AddDriverForm, onAction: (ProfilePickerAction)
                 value = form.dept,
                 onValueChange = { onAction(ProfilePickerAction.AddDeptChanged(it)) },
                 enabled = !form.saving,
-                placeholder = stringResource(
-                    if (LocalWindowLayout.current ==
-                        WindowLayout.NARROW
-                    ) {
-                        R.string.picker_add_dept_short_hint
-                    } else {
-                        R.string.picker_add_dept_hint
-                    },
-                ),
+                placeholder = stringResource(R.string.picker_add_dept_hint),
                 modifier = m,
             )
         }

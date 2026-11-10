@@ -32,9 +32,8 @@ class TokenFloorTest {
                 type.section,
             )
         assertTrue(all.all { it.fontSize.value >= type.caption.fontSize.value })
-        assertTrue(type.caption.fontSize.value >= 22f)
-        assertTrue((all + type.caption).all { it.fontSize.value >= type.fine.fontSize.value })
-        assertTrue(type.fine.fontSize.value >= 20f)
+        // 가장 작은 글자 caption(28 sp)이 글자 하한 — Pleos 에뮬레이터(160 dpi)에서 확인한 크기(PR #4, 2026-11-10)
+        assertTrue(type.caption.fontSize.value >= 28f)
     }
 
     @Test
