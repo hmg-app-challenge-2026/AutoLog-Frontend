@@ -82,7 +82,7 @@ fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> U
     Crossfade(
         state.saved,
         modifier.fillMaxSize(),
-        animationSpec = AutoLogTheme.motion.fadeStandard(),
+        animationSpec = AutoLogTheme.motion.smooth(),
         label = "saved",
     ) { saved ->
         if (saved) {

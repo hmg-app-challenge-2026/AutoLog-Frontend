@@ -23,7 +23,7 @@ fun Modifier.sharedAvatar(userId: String): Modifier {
         this@sharedAvatar.sharedElement(
             state = rememberSharedContentState(key = "avatar-$userId"),
             animatedVisibilityScope = visibility,
-            boundsTransform = { _, _ -> motion.gentle() },
+            boundsTransform = { _, _ -> motion.smooth() },
         )
     }
 }

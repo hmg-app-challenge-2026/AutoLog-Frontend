@@ -17,7 +17,7 @@ import kr.autolog.vehicle.ui.design.Space
 /** 숫자 크기 3단계: HERO 140 sp / MEDIUM 112 sp / COMPACT 80 sp(긴 누적거리, 좁은 창). */
 enum class MetricSize { HERO, MEDIUM, COMPACT }
 
-/** 값이 바뀌었을 때 새 숫자가 이 투명도에서 1로 돌아온다(motion.fadeQuick). 정지형이면 즉시 교체. */
+/** 값이 바뀌었을 때 새 숫자가 이 투명도에서 1로 돌아온다(motion.quick). 정지형이면 즉시 교체. */
 private const val NUMBER_CHANGE_ALPHA = 0.4f
 
 /**
@@ -48,7 +48,7 @@ fun HeroMetric(
                     shown[0] = value
                     if (!motion.isStatic) {
                         alpha.snapTo(NUMBER_CHANGE_ALPHA)
-                        alpha.animateTo(1f, motion.fadeQuick())
+                        alpha.animateTo(1f, motion.quick())
                     }
                 }
             }

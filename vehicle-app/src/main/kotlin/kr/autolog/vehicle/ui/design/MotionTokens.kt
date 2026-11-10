@@ -58,17 +58,7 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
     /** 같은 자리 교체에서 들어오는 쪽 시작 배율(나가는 쪽은 `quick`으로 먼저 사라진다). */
     val swapScale: Float get() = 0.98f
 
-    fun <T> standard(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.9f, stiffness = 400f)
-
-    fun <T> gentle(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 1.0f, stiffness = 200f)
-
     fun <T> snappy(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.85f, stiffness = 700f)
-
-    /** 숫자 교체·작은 요소. 정지형에서도 FULL→PEEK 전환 한 번은 이 값까지 허용. */
-    fun <T> fadeQuick(): FiniteAnimationSpec<T> = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
-
-    fun <T> fadeStandard(): FiniteAnimationSpec<T> =
-        if (isStatic) tween(150, easing = LinearOutSlowInEasing) else tween(220, easing = FastOutSlowInEasing)
 
     val pressScale: Float get() = if (isStatic) 1f else 0.97f
 

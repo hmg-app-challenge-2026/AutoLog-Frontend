@@ -328,7 +328,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 주 버튼은 스크롤 영역 밖 **하단 고정**. 스크롤해야 보이는 주 버튼을 만들지 않는다.
 - **오른쪽 위 운전자 배지는 Home "대기 중"에만**(D-30 — 기록 중 Home·Peek에도 없다). Home의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 배지 자리를 비운다 — 배지가 실제로 잰 폭이 들어온다(배지가 없는 화면은 0). 보조 화면은 그 자리까지 내용에 쓴다.
 - 스크롤 영역에 더 볼 내용이 있으면 그 가장자리를 `Modifier.verticalScrollFade(state, space.7)`로 흐린다. 잘린 글자가 "깨짐"이 아니라 "더 있음"으로 읽힌다.
-- 창 크기가 바뀔 때 레이아웃 전환: 주차 중 `motion.layout`, Peek에서는 즉시.
+- 창 크기가 바뀔 때 레이아웃 전환: 주차 중 `smooth`, Peek에서는 즉시.
 - 시스템 UI가 겹칠 수 있으므로 핵심 정보는 창 가장자리에서 24 dp 안쪽에 두지 않는다.
 
 ---
@@ -389,8 +389,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 항목 | 주차 (FULL) | 정차 (PEEK) | 주행 (BACKGROUND) |
 |---|---|---|---|
 | 위치·크기 변화 | 스프링 | `snap()` (즉시) | 화면 없음 |
-| 투명도 변화 | `fade.*` | FULL→PEEK 전환 한 번만 `fade.quick` | 화면 없음 |
-| 화면 전환 | `motion.screen` | 없음(Peek 한 장) | 화면 없음 |
+| 투명도 변화 | `quick` | FULL→PEEK 전환 한 번만 `quick` | 화면 없음 |
+| 화면 전환 | 앞으로·뒤로·띄우기·같은 자리(8.2) | 없음(Peek 한 장) | 화면 없음 |
 | 숫자 갱신 | 크로스페이드 | 즉시 교체, 1초 스로틀 | 화면 없음 |
 | shared-element | `motion.hero` | 사용 안 함 | — |
 | 로딩 | `motion.loading` | 정적 문구 | — |
@@ -470,7 +470,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). `section` 38 sp(크기 모드는 하나 — 예전 `dense`는 1.33에서 삭제). `textSecondary`, 아래 `space.3`. 데이터 값과 카드 안 목록 항목은 소제목보다 클 수 있다 |
 | `Section` | `SectionHeader` + 내용 한 묶음. **같은 정보는 어느 화면·창 크기에서나 같은 소제목**(정보 종류마다 문구 하나): 주행 거리 · 운행 경로 · 누적 거리 · 이번 달 운행 정보 · 최근 운행 기록. Home(WIDE·NARROW·TALL)과 Peek이 함께 쓴다 |
 | `TripListRow` | 운행 한 건 목록 줄(Home 최근 운행 기록, 이력). `surface1`, `radius.md`, 위 경로(`label`, 한 줄) · 아래 날짜·거리·목적(`caption`, `textSecondary`). 목적이 없으면 끝이 "목적 미입력" — **색으로 재촉하지 않는다**(D-26). 줄 전체가 터치 대상, 끝에 ›  `extra` = 아래 줄 밑에 붙는 내용(운행 기록 조회의 "운전자 지정" 후보처럼 그 줄에서 바로 끝낼 일), 그 안의 버튼은 줄 탭과 따로 눌린다 |
-| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
+| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 열림·닫힘: `ModalHost`로 감싸 scrim 투명도 + 카드 0.92→1(열림 `smooth`) / 1→0.96(닫힘 `quick`), 닫히는 동안 눌림 없음(8.2). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
 | `CloseButton` | 닫기 X. 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 영역 76 dp. 접근성 이름 "닫기" |
 | `BackButton` | 뒤로(<, `ArrowBackIosNew`) — `RoundIconButton`과 같은 모양. **보조 화면 머리 줄 왼쪽**(D-30). 팝업은 뒤로가 아니라 오른쪽 위 X(`CloseButton`)로 끝낸다 |
 | `RoundIconButton` | 아이콘 하나짜리 동그란 버튼 — `CloseButton`(X)·`BackButton`(<)이 쓰는 모양: 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 76 dp. 비활성이면 아이콘 `textTertiary`·안 눌림. `label`은 접근성 이름 |
