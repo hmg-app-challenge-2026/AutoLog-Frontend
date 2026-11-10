@@ -19,7 +19,7 @@ import java.time.Instant
 /**
  * 운행 결과 카드에 보일 한 운행(스펙 7.3, D-27). [category] = 저장된 분류, 아직 없으면 [DefaultPurposePolicy]의 기본값.
  * [classified] = 분류가 이미 저장돼 있는지(운행 기록 조회에서 다시 열었을 때 true).
- * [endsAt] = 종료 조건은 됐지만 아직 끝나지 않은 운행(앱 A `StopCandidate`)의 종료 시각 — 그 전엔 [계속 기록하기]로 되돌릴 수 있다.
+ * [endsAt] = 종료 조건은 됐지만 아직 끝나지 않은 운행(앱 A `StopCandidate`)의 종료 시각 — 그 전엔 [기록 이어가기]로 되돌릴 수 있다.
  * null이면 이미 끝나 저장된 운행. 끝나기 전 [endTime]은 지금 시각(경과 시간 표시용).
  */
 data class TripResult(

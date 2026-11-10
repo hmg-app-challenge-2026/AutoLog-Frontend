@@ -171,7 +171,7 @@ class TripResultViewModelTest {
     }
 
     @Test
-    fun `종료 대기 — 남은 시간은 앱 A 종료 시각, 계속 기록하기면 되돌리고 돌아간다`() = runTest {
+    fun `종료 대기 — 남은 시간은 앱 A 종료 시각, 기록 이어가기면 되돌리고 돌아간다`() = runTest {
         val (g, vm) = ending()
         val s = vm.uiState.first { !it.loading }
         assertTrue(s.canContinue)

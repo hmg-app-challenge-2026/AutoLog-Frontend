@@ -29,7 +29,7 @@ data class TripResultUiState(
     /** 카운트다운 전체 길이(ms) — 맨 위 막대의 비율 분모. */
     val autoCloseTotalMs: Long = AUTO_CLOSE_MS,
     val saving: Boolean = false,
-    /** 종료 조건은 됐지만 아직 끝나기 전 — [계속 기록하기]로 되돌릴 수 있다(D-28). */
+    /** 종료 조건은 됐지만 아직 끝나기 전 — [기록 이어가기]로 되돌릴 수 있다(D-28). */
     val canContinue: Boolean = false,
     /** 운행 기록 조회에서 연 사후 확인(D-29) — 카운트다운 없음, 제목은 운행 시각, 오른쪽 버튼은 [닫기]. */
     val review: Boolean = false,
