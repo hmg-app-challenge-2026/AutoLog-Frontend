@@ -50,6 +50,16 @@
     <string name="home_choose_driver">운전자 선택</string>
     <!-- 운행 결과 카드 (스펙 7.3, D-27) -->
     <string name="result_title">운행 기록을 완료했어요</string>
+    <string name="result_review_title">%1$s 운행</string>
+    <string name="result_close">닫기</string>
+    <string name="history_title">운행 기록</string>
+    <string name="history_month">%1$d년 %2$d월</string>
+    <string name="history_summary">%1$d회 운행 · %2$s km</string>
+    <string name="history_report">운행기록부 내보내기</string>
+    <string name="history_empty">이 달에는 운행 기록이 없어요</string>
+    <string name="history_assign_driver">운전자 지정</string>
+    <string name="month_prev">이전 달</string>
+    <string name="month_next">다음 달</string>
     <string name="section_distance_time">운행 거리 · 시간</string>
     <string name="section_purpose">운행 목적</string>
     <string name="purpose_business">일반 업무</string>

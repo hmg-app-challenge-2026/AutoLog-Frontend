@@ -3,6 +3,7 @@ package kr.autolog.vehicle.ui.design.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -26,9 +27,16 @@ import kr.autolog.vehicle.ui.design.Space
  * 디자인 언어 11장 TripListRow — 운행 한 건 목록 줄(Home "최근 운행 기록", 이력). `surface1`, `radius.md`, 최소 높이 76 dp.
  * 위 [title](경로, `label`, 한 줄 말줄임) · 아래 [subtitle](날짜·거리·목적, `caption`, `textSecondary`).
  * 줄 전체가 터치 대상, 끝에 ›. 상태를 색으로 재촉하지 않는다 — 목적이 없으면 문장("목적 미입력")으로만 말한다(D-26).
+ * [extra]는 아래 줄 밑에 붙는 내용(운행 기록 조회의 "운전자 지정" 후보처럼 그 줄에서 바로 끝낼 일). 그 안의 버튼은 줄 탭과 따로 눌린다.
  */
 @Composable
-fun TripListRow(title: String, subtitle: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun TripListRow(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    extra: (@Composable ColumnScope.() -> Unit)? = null,
+) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     Row(
@@ -50,6 +58,7 @@ fun TripListRow(title: String, subtitle: String, onClick: () -> Unit, modifier: 
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            extra?.invoke(this)
         }
         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = c.textTertiary)
     }

@@ -81,7 +81,7 @@ private fun RouteContent(route: Route) {
     when (route) {
         Route.ProfilePicker -> ProfilePickerRoute()
         Route.Home -> HomeRoute()
-        is Route.TripResult -> TripResultRoute(route.tripId)
+        is Route.TripResult -> TripResultRoute(route.tripId, route.mode)
         Route.ReceiptQr -> ReceiptQrRoute()
         is Route.FuelEntry -> FuelEntryRoute(route.receiptId)
         Route.Report -> ReportRoute()

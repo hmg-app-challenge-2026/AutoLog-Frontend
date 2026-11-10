@@ -9,6 +9,8 @@ import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
+import kr.autolog.vehicle.ui.trips.TripDay
+import kr.autolog.vehicle.ui.trips.TripWhen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -94,4 +96,13 @@ class TripResultScreenshotTest {
 
     @Test
     fun ended() = captureAll("trip_result_ended") { TripResultScreen(ended, onAction = {}) }
+
+    /** 운행 기록 조회에서 연 사후 확인(D-29): 카운트다운 막대 없음, 제목은 운행 시각, 오른쪽 버튼 [닫기]. */
+    @Test
+    fun review() = captureAll("trip_result_review") {
+        TripResultScreen(
+            ended.copy(review = true, startedAt = TripWhen(TripDay.EARLIER, 11, 7, "19:34"), autoCloseSec = null),
+            onAction = {},
+        )
+    }
 }

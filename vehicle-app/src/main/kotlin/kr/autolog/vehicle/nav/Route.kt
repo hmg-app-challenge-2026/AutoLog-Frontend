@@ -6,8 +6,11 @@ sealed interface Route {
 
     data object Home : Route
 
-    /** 운행 결과 카드(스펙 7.3, D-27) — 운행이 끝나면 자동으로, 알림 탭으로, 운행 기록 조회에서 연다. */
-    data class TripResult(val tripId: String) : Route
+    /**
+     * 운행 결과 카드(스펙 7.3, D-27). 운행이 끝나면 자동으로·알림 탭으로 열 때는 [TripResultMode.AFTER_TRIP],
+     * 운행 기록 조회에서 지난 운행을 열 때는 [TripResultMode.REVIEW](카운트다운·자동 저장 없음, D-29).
+     */
+    data class TripResult(val tripId: String, val mode: TripResultMode = TripResultMode.AFTER_TRIP) : Route
 
     /** 주유 기록 추가의 기본 경로: 폰으로 영수증을 올릴 QR(스펙 7.4, D-20). */
     data object ReceiptQr : Route
@@ -23,4 +26,16 @@ sealed interface Route {
     data object History : Route
 
     data object Settings : Route
+}
+
+/** 운행 결과 카드를 어떤 상황에서 열었는지(D-29). */
+enum class TripResultMode {
+    /** 운행이 막 끝남 — 5초 뒤 지금 선택으로 저장하고 돌아간다(종료 대기면 앱 A 종료 시각). */
+    AFTER_TRIP,
+
+    /**
+     * 운행 기록 조회에서 지난 운행을 사후 확인 — 정차·주차 중 천천히 보는 것이라 카운트다운도 자동 저장도 없다.
+     * [저장]을 눌러야만 저장되고 목록으로 돌아간다. 목적 미입력 운행은 수정 모드로 열린다.
+     */
+    REVIEW,
 }

@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LocalGasStation
@@ -51,6 +53,12 @@ class GalleryScreenshotTest {
                 DriverBadge("u-1", "김영업", onClick = {})
                 DriverBadge(null, null, onClick = {})
                 CloseButton(onClick = {})
+                RoundIconButton(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, "이전 달", onClick = {})
+                RoundIconButton(Icons.AutoMirrored.Rounded.KeyboardArrowRight, "다음 달", onClick = {}, enabled = false)
+            }
+            // 줄 안에서 바로 끝낼 일(extra) — 운행 기록 조회의 운전자 지정
+            TripListRow("본사 → 강남 고객사", "11월 7일 14:05 · 운전자 미확정 · 8.6 km", onClick = {}) {
+                Text("운전자 지정", style = AutoLogTheme.type.caption, color = AutoLogTheme.colors.textSecondary)
             }
             HeroMetric("23.4", "km", "주행 거리", "계기판 거리를 읽지 못했어요", size = MetricSize.MEDIUM)
             RouteFlow("본사", "판교 테크노밸리 거래처")

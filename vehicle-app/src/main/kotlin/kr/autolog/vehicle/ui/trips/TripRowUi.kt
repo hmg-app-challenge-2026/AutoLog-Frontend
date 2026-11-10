@@ -36,8 +36,11 @@ data class TripRowUi(
 
 private val TIME = DateTimeFormatter.ofPattern("HH:mm")
 
-/** 저장소 항목 → 한 줄. [now]로 오늘·어제를 [AppZone](Asia/Seoul) 기준으로 가른다. 순수 함수. */
-fun HistoryItem.toTripRowUi(now: Long): TripRowUi {
+/** 운행이 시작된 때 — 화면이 [tripWhenText]로 "오늘 09:12" / "11월 7일 19:34"를 만든다. */
+data class TripWhen(val day: TripDay, val month: Int, val dayOfMonth: Int, val time: String)
+
+/** [startTime]을 [now] 기준 오늘·어제·그 전으로([AppZone] = Asia/Seoul). 순수 함수. */
+fun tripWhenOf(startTime: Long, now: Long): TripWhen {
     val start = Instant.ofEpochMilli(startTime).atZone(AppZone)
     val today = Instant.ofEpochMilli(now).atZone(AppZone).toLocalDate()
     val day =
@@ -46,15 +49,21 @@ fun HistoryItem.toTripRowUi(now: Long): TripRowUi {
             today.minusDays(1) -> TripDay.YESTERDAY
             else -> TripDay.EARLIER
         }
+    return TripWhen(day, start.monthValue, start.dayOfMonth, start.format(TIME))
+}
+
+/** 저장소 항목 → 한 줄. 순수 함수. */
+fun HistoryItem.toTripRowUi(now: Long): TripRowUi {
+    val at = tripWhenOf(startTime, now)
     return TripRowUi(
         tripId = tripId,
         origin = origin,
         destination = destination,
         km = formatKm(distanceKm),
-        day = day,
-        month = start.monthValue,
-        dayOfMonth = start.dayOfMonth,
-        time = start.format(TIME),
+        day = at.day,
+        month = at.month,
+        dayOfMonth = at.dayOfMonth,
+        time = at.time,
         purpose = purpose?.labelKo,
         driverName = driverName,
         driverUnset = driverUnset,
@@ -76,13 +85,7 @@ fun tripRouteText(row: TripRowUi): String {
 @Composable
 fun tripMetaText(row: TripRowUi, withDriver: Boolean = false, withUpload: Boolean = false): String {
     val parts = buildList {
-        add(
-            when (row.day) {
-                TripDay.TODAY -> stringResource(R.string.trip_day_today, row.time)
-                TripDay.YESTERDAY -> stringResource(R.string.trip_day_yesterday, row.time)
-                TripDay.EARLIER -> stringResource(R.string.trip_day_date, row.month, row.dayOfMonth, row.time)
-            },
-        )
+        add(tripWhenText(TripWhen(row.day, row.month, row.dayOfMonth, row.time)))
         if (withDriver) {
             add(row.driverName ?: stringResource(R.string.trip_driver_unset))
         }
@@ -93,6 +96,14 @@ fun tripMetaText(row: TripRowUi, withDriver: Boolean = false, withUpload: Boolea
         }
     }
     return parts.joinToString(stringResource(R.string.meta_separator))
+}
+
+/** "오늘 09:12" / "어제 17:40" / "11월 7일 19:34". */
+@Composable
+fun tripWhenText(at: TripWhen): String = when (at.day) {
+    TripDay.TODAY -> stringResource(R.string.trip_day_today, at.time)
+    TripDay.YESTERDAY -> stringResource(R.string.trip_day_yesterday, at.time)
+    TripDay.EARLIER -> stringResource(R.string.trip_day_date, at.month, at.dayOfMonth, at.time)
 }
 
 private fun uploadLabel(mark: UploadMark): Int = when (mark) {
