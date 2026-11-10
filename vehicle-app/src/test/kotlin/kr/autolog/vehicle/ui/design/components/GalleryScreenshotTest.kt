@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LocalGasStation
+import androidx.compose.material.icons.rounded.Mail
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Settings
@@ -100,6 +101,8 @@ class GalleryScreenshotTest {
     @Test
     fun forms() = captureAll("components_forms", tall) {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
+            NavRow(Icons.Rounded.Mail, "메일 계정", "메일 계정 연결됨", onClick = {})
+            NavRow(Icons.Rounded.Mail, "메일 계정", "메일 계정 연결됨", onClick = {}, selected = true)
             CheckRow("회계팀", checked = true, onClick = {}, detail = "회사 지정 · accounting@example.com")
             CheckRow("나", checked = false, onClick = {}, detail = "me@example.com")
             PeriodSwitcher(YearMonth.of(2026, 11), canGoNext = false, onPrev = {}, onNext = {})

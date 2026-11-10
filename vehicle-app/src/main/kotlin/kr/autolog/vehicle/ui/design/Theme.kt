@@ -20,6 +20,12 @@ val LocalMotion = staticCompositionLocalOf { MotionTokens.Standard }
 /** 스펙 6.9 4번: tier != FULL 또는 FULL 진입 직후 300 ms. 모든 상호작용 컴포넌트가 읽는다. */
 val LocalInputLocked = compositionLocalOf { false }
 
+/**
+ * 플랫폼 키보드 규제(`CarUxRestrictions.UX_RESTRICTIONS_NO_KEYBOARD`, `VehicleUsageRepository.noKeyboard`). 켜지면 글자 입력 칸만
+ * 비활성 + "지금은 입력할 수 없어요"(스펙 7.9) — 버튼·탭은 그대로 쓴다([LocalInputLocked]와 다른 점).
+ */
+val LocalKeyboardLocked = compositionLocalOf { false }
+
 object AutoLogTheme {
     val colors: AutoLogColors
         @Composable @ReadOnlyComposable

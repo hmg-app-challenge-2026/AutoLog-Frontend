@@ -21,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
-import kr.autolog.vehicle.core.MailError
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
@@ -36,6 +35,7 @@ import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.mail.mailErrorText
 
 @Composable
 fun ReportRoute() {
@@ -188,12 +188,4 @@ private fun primaryEnabled(state: ReportUiState): Boolean = when (state.step) {
     ReportStep.Ready, is ReportStep.BuildFailed -> (state.summary?.tripCount ?: 0) > 0
     ReportStep.Built, is ReportStep.SendFailed -> !state.smtpConfigured || state.selectedCount > 0
     else -> true
-}
-
-private fun mailErrorText(error: MailError): Int = when (error) {
-    MailError.NOT_CONFIGURED -> R.string.mail_not_configured
-    MailError.AUTH -> R.string.mail_error_auth
-    MailError.NETWORK -> R.string.mail_error_network
-    MailError.INVALID_RECIPIENT -> R.string.mail_error_recipient
-    MailError.UNKNOWN -> R.string.mail_error_unknown
 }
