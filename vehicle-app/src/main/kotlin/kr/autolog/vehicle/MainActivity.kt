@@ -41,7 +41,13 @@ class MainActivity : ComponentActivity() {
         started = true
         pendingIntent?.let(::openDeepLink)
         pendingIntent = null
-        setContent { AutoLogRoot(graph = graph, onRequestBackground = { moveTaskToBack(true) }) }
+        val appGraph = graph
+        setContent { AutoLogRoot(graph = appGraph, onRequestBackground = { moveTaskToBack(true) }) }
+        window.decorView.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+            RecordingPill.setAppArea(view)
+        }
+        window.decorView.post { RecordingPill.setAppArea(window.decorView) }
+        RecordingPill.requestPermissionIfAvailable(this)
     }
 
     /** 앱이 떠 있을 때 알림을 누르면 여기로 온다(스펙 6.10). 아직 권한을 묻는 중이면 띄울 때 적용한다. */

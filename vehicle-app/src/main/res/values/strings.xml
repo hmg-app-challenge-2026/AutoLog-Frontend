@@ -187,6 +187,11 @@
     <string name="settings_unreachable_vehicle">%1$s · 서버에 연결할 수 없어요</string>
     <string name="settings_vehicle_plate">차량 %1$s</string>
     <string name="settings_vehicle_hint">회사에서 받은 연결 코드로 이 차를 사내 서버에 연결해요</string>
+    <string name="settings_recording_pill_on">주행 중 기록 표시 켜짐</string>
+    <string name="settings_recording_pill_off">주행 중 기록 표시 권한 필요</string>
+    <string name="settings_recording_pill_hint">권한을 허용하면 내비 화면 위에 운행 거리와 시간을 표시해요</string>
+    <string name="settings_recording_pill_allow">화면 위 표시 권한 허용</string>
+    <string name="settings_recording_pill_unavailable">이 차량은 권한 설정 화면을 제공하지 않아요. 운행 알림에서 기록 상태를 확인할 수 있어요.</string>
     <string name="settings_register">연결 코드 입력</string>
     <string name="settings_register_again">다시 연결</string>
     <string name="settings_register_title">차량 연결</string>

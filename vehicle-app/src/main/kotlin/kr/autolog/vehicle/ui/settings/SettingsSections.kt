@@ -1,5 +1,9 @@
 package kr.autolog.vehicle.ui.settings
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,15 +19,23 @@ import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import kr.autolog.vehicle.R
+import kr.autolog.vehicle.RecordingPill
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
@@ -90,6 +102,42 @@ private fun Vehicle(state: SettingsUiState, onAction: (SettingsAction) -> Unit) 
         )
     }
     ResultLine(state, SettingsTask.REGISTER)
+    if (!state.app.demo) RecordingPermission()
+}
+
+/** 주행 중 내비 위 상태 표시를 위한 Android 특수 권한. 거절 뒤에도 다시 허용할 수 있다. */
+@Composable
+private fun RecordingPermission() {
+    val context = LocalContext.current
+    val c = AutoLogTheme.colors
+    var allowed by remember(context) { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var settingsUnavailable by remember { mutableStateOf(false) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        allowed = Settings.canDrawOverlays(context)
+    }
+    StatusCard(
+        stringResource(if (allowed) R.string.settings_recording_pill_on else R.string.settings_recording_pill_off),
+        if (allowed) c.success else c.warning,
+        listOf(stringResource(R.string.settings_recording_pill_hint)),
+    )
+    if (!allowed) {
+        SecondaryButton(
+            stringResource(R.string.settings_recording_pill_allow),
+            onClick = {
+                settingsUnavailable = context.findActivity()?.let(RecordingPill::openPermissionSettings) != true
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (settingsUnavailable) {
+            ButtonNote(stringResource(R.string.settings_recording_pill_unavailable))
+        }
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 /** 2. 사내 서버(8장) — 주소 · 상태 · 전송 대기 · 마지막 전송 + [지금 전송]. 차량을 연결하기 전엔 차량 연결로 안내. */

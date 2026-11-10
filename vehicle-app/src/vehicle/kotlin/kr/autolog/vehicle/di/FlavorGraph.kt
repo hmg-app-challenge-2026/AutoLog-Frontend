@@ -6,6 +6,7 @@ import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kr.autolog.vehicle.RecordingPill
 import kr.autolog.vehicle.core.AutoLog
 import kr.autolog.vehicle.data.usage.AndroidCarUxSource
 
@@ -17,7 +18,9 @@ import kr.autolog.vehicle.data.usage.AndroidCarUxSource
 fun createAppGraph(app: Application): AppGraph {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val carUx = AndroidCarUxSource(app).also { it.start() }
-    return RealAppGraph(AutoLog.create(app), carUx, scope)
+    val components = AutoLog.create(app)
+    RecordingPill.start(app, components.session)
+    return RealAppGraph(components, carUx, scope)
 }
 
 /**
