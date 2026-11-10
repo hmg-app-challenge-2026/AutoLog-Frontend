@@ -1,5 +1,11 @@
 package kr.autolog.vehicle.ui.root
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -61,10 +67,24 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
                     ).windowInsetsPadding(WindowInsets.safeDrawing),
                 ) {
                     WindowLayoutHost {
-                        when (tier) {
-                            UsageTier.FULL -> FullApp(graph)
-                            UsageTier.PEEK -> PeekRoute() // 정차: 운전자 배지 없음(D-30 — 대기 중 Home에만)
-                            UsageTier.BACKGROUND -> Unit
+                        val motion = AutoLogTheme.motion
+                        // 주차 ↔ 정차는 한 번 페이드 — 나가는 화면이 먼저 빠진 뒤 들어온다. 주행(BACKGROUND)으로 갈 땐 화면을 바로 비운다
+                        AnimatedContent(
+                            targetState = tier,
+                            transitionSpec = {
+                                if (initialState == UsageTier.BACKGROUND || targetState == UsageTier.BACKGROUND) {
+                                    EnterTransition.None togetherWith ExitTransition.None
+                                } else {
+                                    fadeIn(motion.tierFadeIn()) togetherWith fadeOut(motion.tierFadeOut())
+                                }
+                            },
+                            label = "tier",
+                        ) { shown ->
+                            when (shown) {
+                                UsageTier.FULL -> FullApp(graph)
+                                UsageTier.PEEK -> PeekRoute() // 정차: 운전자 배지 없음(D-30 — 대기 중 Home에만)
+                                UsageTier.BACKGROUND -> Unit
+                            }
                         }
                     }
                     graph.demoOverlay?.invoke()

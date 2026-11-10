@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kr.autolog.vehicle.TestAppGraph
+import kr.autolog.vehicle.data.interim.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import kr.autolog.vehicle.screenshot.recordMotionFrames
 import org.junit.Rule
@@ -69,5 +70,11 @@ class NavMotionTest {
     fun `같은 자리 교체 — QR에서 주유 입력 창으로`() {
         val graph = open(Route.Home, Route.ReceiptQr)
         compose.recordMotionFrames("fade_through_qr_fuel") { graph.navigator.replaceTop(Route.FuelEntry()) }
+    }
+
+    @Test
+    fun `주차에서 정차로 — 한 번 페이드`() {
+        val graph = open(Route.Home)
+        compose.recordMotionFrames("tier_full_to_peek") { graph.trip.setMotion(VehicleMotion.STOPPED) }
     }
 }
