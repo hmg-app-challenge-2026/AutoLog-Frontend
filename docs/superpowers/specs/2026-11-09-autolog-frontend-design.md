@@ -589,6 +589,7 @@ fun windowLayoutOf(widthDp: Float, heightDp: Float): WindowLayout {
 ```
 
 - 임계값(1.25, 0.70, 840 dp)은 **잠정값 [검증 필요 V-01]**이다. (TALL 기준은 처음 0.80이었으나 분할 화면 한 칸 ≈504×640dp(0.79)까지 TALL로 잡혀 2026-11-09 구현 중 0.70으로 바꿈) FormFactorConsole 프리셋을 측정한 뒤 고친다.
+- **스크린샷 크기(2026-11-10 사용자 지시)**: 넓은 화면 2560×1268 dp, 1:1 분할 한 칸 1280×1268 dp(Pleos Window Policy "앱 2개 실행 시 1:1, 기본값") 두 가지만. 근거 없던 잠정 크기는 지웠다.
 - **기준 화면(2026-11-10)**: Pleos Connect v2.1.0 에뮬레이터(API 34) 기본 디스플레이는 **2560×1440 px, 밀도 1.0(160 dpi)** — 캡처에서 넓은 화면 여백 48 dp가 48 px, 하단 타일 네모 112 dp가 112 px로 찍힌다. 위 상태 표시줄 76 px·아래 하단 바 96 px를 빼면 **앱 영역 ≈ 2560×1268 dp**(WIDE). 2026-11-10 사용자가 이 에뮬레이터에서 지금 글자 크기·위치(PR #4)를 보고 괜찮다고 확인 — 글자·간격을 바꿀 때 기준은 이 화면이다. 분할 화면 한 칸과 FormFactorConsole 프리셋 크기는 아직 재지 않았다(V-01).
 - `AutoLogRoot`가 `BoxWithConstraints`로 계산해 `LocalWindowLayout` CompositionLocal로 내려 준다. 화면은 이 값으로 배치만 바꾸고, **상태·기능은 3단계 모두 같다**(Pleos: 어떤 창 크기에서도 핵심 기능 사용 가능).
 - 창 크기 변경은 Activity 재생성 없이 리컴포즈된다(5.4 `configChanges`). 레이아웃 전환은 주차(FULL) 중 `motion.layout`, Peek에서는 즉시 교체(D-11).
@@ -990,7 +991,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 
 | ID | 항목 | 영향 | 확인 방법 | 상태 |
 |---|---|---|---|---|
-| V-01 | FormFactorConsole 프리셋별 앱 창 dp·DPI·px | 6.8 임계값, 10.2 스크린샷 크기, 글자 mm 환산 | 맥 에뮬레이터 + Host Display Bridge | 일부 — 기본 디스플레이(앱 영역 2560×1268 dp, 밀도 1.0)는 확인해 스크린샷 기준 크기 `pleos/`로 씀(2026-11-10). 프리셋·분할 화면은 대기 |
+| V-01 | FormFactorConsole 프리셋별 앱 창 dp·DPI·px | 6.8 임계값, 10.2 스크린샷 크기, 글자 mm 환산 | 맥 에뮬레이터 + Host Display Bridge | 일부 — 기본 디스플레이(앱 영역 2560×1268 dp, 밀도 1.0) 확인. 스크린샷은 실제 크기 둘만: 넓은 화면 2560×1268 · 1:1 분할 한 칸 1280×1268(Window Policy 기본 1:1을 적용한 값, 경계 폭은 미측정)(2026-11-10). 프리셋·2:1 분할·분할 경계는 대기 |
 | V-02 | composite build `dependencySubstitution` 동작 | 5.3 | `assembleDemoDebug` | 대기 |
 | V-03 | DO 선언 방식(`distractionOptimized` meta-data)이 Pleos에서 유효한지 | 5.4 | VHAL로 기어 D·속도 주입 후 앱 상태 | 대기 |
 | V-04 | `CarUxRestrictionsManager`를 일반 앱에서 얻을 수 있는지(권한), Pleos 에뮬레이터에서 값이 바뀌는지 | 6.9 | 로그 | 대기 |

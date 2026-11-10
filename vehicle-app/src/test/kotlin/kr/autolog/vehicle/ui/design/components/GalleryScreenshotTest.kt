@@ -40,10 +40,11 @@ import java.time.YearMonth
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34])
 class GalleryScreenshotTest {
-    private val tall = listOf(ShotSize.TALL)
+    /** 컴포넌트 갤러리는 세로 공간이 넉넉한 좁은 화면(분할 한 칸) 한 크기로. */
+    private val gallerySize = listOf(ShotSize.NARROW)
 
     @Test
-    fun basics() = captureAll("components", tall) {
+    fun basics() = captureAll("components", gallerySize) {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             PrimaryButton("계속 기록", onClick = {}, modifier = Modifier.fillMaxWidth())
             SecondaryButton("기록 종료", onClick = {}, modifier = Modifier.fillMaxWidth())
@@ -69,7 +70,7 @@ class GalleryScreenshotTest {
     }
 
     @Test
-    fun tiles() = captureAll("components_tiles", tall) {
+    fun tiles() = captureAll("components_tiles", gallerySize) {
         val c = AutoLogTheme.colors
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s6)) {
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s5)) {
@@ -99,7 +100,7 @@ class GalleryScreenshotTest {
     }
 
     @Test
-    fun forms() = captureAll("components_forms", tall) {
+    fun forms() = captureAll("components_forms", gallerySize) {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
             NavRow(Icons.Rounded.Mail, "메일 계정", "메일 계정 연결됨", onClick = {})
             NavRow(Icons.Rounded.Mail, "메일 계정", "메일 계정 연결됨", onClick = {}, selected = true)
@@ -120,7 +121,7 @@ class GalleryScreenshotTest {
     }
 
     @Test
-    fun modalList() = captureAll("components_modal_close", tall) {
+    fun modalList() = captureAll("components_modal_close", gallerySize) {
         Box {
             Text(
                 "뒤 화면",
@@ -135,7 +136,7 @@ class GalleryScreenshotTest {
     }
 
     @Test
-    fun modal() = captureAll("components_modal", tall) {
+    fun modal() = captureAll("components_modal", gallerySize) {
         Box {
             Text(
                 "뒤 화면",
