@@ -97,7 +97,11 @@ fun HistoryScreen(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modi
  */
 @Composable
 private fun Toolbar(state: HistoryUiState, onAction: (HistoryAction) -> Unit) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s2), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Space.s2),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         MonthSwitcher(state, onAction)
         Summary(state)
     }
@@ -119,7 +123,12 @@ private fun Summary(state: HistoryUiState) {
         contentAlignment = Alignment.Center,
         label = "historySummary",
     ) {
-        Text(it, style = AutoLogTheme.type.body, color = AutoLogTheme.colors.textSecondary, textAlign = TextAlign.Center)
+        Text(
+            it,
+            style = AutoLogTheme.type.body,
+            color = AutoLogTheme.colors.textSecondary,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
