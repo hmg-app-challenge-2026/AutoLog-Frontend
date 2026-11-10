@@ -30,7 +30,7 @@
 | `TripResultRepository` | `TripSessionApi.state/confirmPurpose` · `LocalStore.trip` · `PurposeEngine.suggest` | `TripSessionManager` · `DefaultPurposeEngine` | 연결 |
 | `ReceiptRepository` | `ReceiptApi` · `LocalStore.receiptInbox` · `VoiceApi` | `ReceiptService`(확정 안에서 ack) · `RoomLocalStore` · `VoiceService` | 연결 |
 | `ReportRepository` | `ReportApi` · `MailApi` · `SettingsApi.recipients` | `ReportBuilder` · `MailService` · `SettingsService` | 연결 |
-| `SettingsRepository` | `DeviceApi` · `SettingsApi` · `MailApi` · (업로드) | `DeviceRepository` · `SettingsService` · `MailService` · **없음** | 연결(업로드는 G-04, 연결 코드는 G-01) |
+| `SettingsRepository` | `DeviceApi` · `SettingsApi` · `MailApi` · (업로드) | `DeviceRepository` · `SettingsService` · `MailService` · **없음** | 연결(업로드는 G-04) |
 | 알림 딥링크 | `core.DeepLink` | `TripRecordingService` 알림 | 연결(R-3) |
 
 앱 시작: `MainActivity`가 런타임 권한(알림 · `pleos.car.permission.FUSED_LOCATION`)을 받은 뒤 처음으로 그래프를 꺼내고, 그때 `AutoLog.create`가 불린다(백엔드 주석 "Activity onCreate에서 — 포그라운드 서비스 시작이 허용되는 시점"). 부팅 뒤에는 백엔드 `BootReceiver`가 먼저 조립해 두고 앱은 같은 인스턴스를 받는다. 데모 flavor 매니페스트에서는 백엔드 `TripRecordingService`·`BootReceiver`를 뺀다.
@@ -56,40 +56,48 @@
 
 **결정이 필요한 순서로 정렬했다.** "바꾼 것"이 있으면 그 칸에 적었다.
 
-### G-01 차량 연결 코드 형식이 다르다 — **실제 등록이 막힘**
-- **현상:** 서버 연결 코드는 대문자·숫자 6자리(0·1·I·O 제외, `[2-9A-HJ-NP-Z]{6}` — `DeviceRepository.CODE`, relay `Tokens.newConnectCode`, DB 스키마 2.4). 프론트 설정의 연결 코드 팝업은 **숫자판(0~9)만** 받는다(`SettingsDialogs.CodeBoxes` + `NumericKeypad`, `SettingsAction.RegisterKey(digit)`).
-- **영향:** 코드 대부분에 글자가 섞이므로 실제 앱에서 차량 등록(F-01)을 할 수 없다 → 등록이 전제인 영수증 QR(F-30)·inbox 수신(F-11)·직원·수신자 배포도 막힌다.
-- **결정 필요:** ① 글자+숫자 키패드(32자: 2~9, A~Z에서 I·O 뺀 것)로 바꾸기(키보드 없이, 차 화면에 맞는 큰 키 — 추천) ② 텍스트 키보드 입력(주차 중만 — `LocalKeyboardLocked` 규칙 적용) ③ 서버에 숫자 전용 코드를 요청(백엔드 변경이라 이 리포 범위 밖).
+> 2026-11-10 사용자 결정: G-01 = ①(글자+숫자 키패드, 해결), G-02 = R-10 요청, G-03~G-08 = 보류(기록만 유지).
 
-### G-02 차량 id를 계약으로 받을 수 없다
+### G-01 차량 연결 코드 형식이 다르다 — ✅ 해결 (2026-11-10 사용자 결정 ①)
+- **현상(이전):** 서버 연결 코드는 대문자·숫자 6자리(0·1·I·O 제외, `[2-9A-HJ-NP-Z]{6}` — `DeviceRepository.CODE`, relay `Tokens.newConnectCode`, DB 스키마 2.4). 프론트 설정의 연결 코드 팝업은 숫자판(0~9)만 받아서 실제 앱에서 차량 등록(F-01)을 할 수 없었다(등록이 전제인 영수증 QR F-30·inbox F-11·직원·수신자 배포도 막힘).
+- **결정:** ① 글자+숫자 키패드. 키보드 없이, 차 화면에 맞는 큰 키. ②(텍스트 키보드)·③(서버에 숫자 코드 요청)은 기각 — ②는 주차 중 시스템 키보드가 화면 절반을 가리고 0/O·1/I를 그대로 받게 되며, ③은 백엔드 변경이다.
+- **바꾼 것:**
+  - `data/repository/ConnectCode.kt` — 서버와 같은 규칙 한곳(길이 6, 글자표 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`, 소문자는 대문자로, 표에 없는 글자·7번째 글자는 무시). ViewModel·데모 가짜가 함께 쓴다.
+  - `ui/design/components/CodeKeypad.kt` — 8열 × 4줄(2~9 / A~H / J~R / S~Z) + 마지막 줄 오른쪽 지우기(2칸 폭). 키 모양·지우기 글리프는 `NumericKeypad`와 공유(`KeypadKey`·`DeleteGlyph`).
+  - 키 바탕을 `surface2` → `surface3`으로 — 어두운 팝업(`surface2`) 위에서 키가 안 보였다(숫자판도 같이).
+  - 데모 가짜 `FakeDeviceApi`는 숫자 6자리 대신 같은 규칙으로 검사한다.
+- **남은 확인:** 맥 에뮬레이터에서 relay가 발급한 실제 코드로 등록(5.3 A 스크립트와 함께).
+
+### G-02 차량 id를 계약으로 받을 수 없다 — 📨 R-10 요청함 (2026-11-10)
 - **현상:** `PurposeEngine.orderedUsers(vehicleId, now)`·`suggest(TripFacts(vehicleId=…))`·`unassignedTrips(vehicleId, …)`는 차량 id가 필요한데, 화면이 받는 `DeviceApi`·`ConnectionState`에는 번호판 라벨(`vehicleLabel`)만 있다. 실제 id는 `DeviceRepository.vehicleId`(data 패키지 — 화면 import 금지)에만 있다.
 - **바꾼 것:** `RealAppGraph`는 등록 전 운행과 같은 `"unregistered"`를 넘긴다.
 - **영향:** 배차 기반 운전자 순서·"배차" 배지(F-15)와 배차 규칙 목적 추천(F-08 a)이 실제 앱에서 비어 있다(배차는 `schedules.vehicleId`로 거른다). 최근 운전자·이름순·다른 추천 규칙은 그대로.
-- **요청(R-10 제안):** `ConnectionState.Registered`(또는 `DeviceApi`)에 `vehicleId` 노출.
+- **요청(R-10, 2026-11-10 요청함 — 사용자 결정):** `DeviceApi`에 `val vehicleId: StateFlow<String?>` 추가(추천) 또는 `ConnectionState.Registered`·`Unreachable`에 `vehicleId` 필드. 요청서: [`requests/R-10-vehicle-id.md`](requests/R-10-vehicle-id.md). 백엔드 조립(`AutoLog.create`)은 이미 `device.vehicleId`를 세션·보고서에 넘기고 있어 **화면 쪽 길만 없다**.
+- **받으면 바꿀 곳:** `RealAppGraph.vehicleId()` 한 줄(지금 `"unregistered"` 고정) — 화면·Repository는 그대로.
 
-### G-03 "검토 필요 N건"이 화면과 엑셀에서 다를 수 있다
+### G-03 "검토 필요 N건"이 화면과 엑셀에서 다를 수 있다 — ⏸ 보류 (2026-11-10 사용자 결정)
 - **현상:** 운행기록부 내보내기 요약의 검토 수는 프론트가 계산한다(목적·운전자·거리 미확정 운행 수 — `DefaultTripRepository.summary`). 엑셀·메일 본문의 검토 수는 백엔드 `ReviewCalculator`의 7종(목적 미확정 7일, 운전자 미확정, 거리 미확정, 배차–운행 불일치, 증빙 없음, 중복 영수증, 연료 이상치)이다.
 - **영향:** 같은 달인데 화면 "2건", 엑셀 "4건"처럼 다를 수 있다.
 - **결정 필요:** ① 만든 뒤에는 `ReportFile.reviewCount`로 바꿔 보여 주기(만들기 전 숫자는 "미확정 N건"처럼 이름을 바꿈) ② 백엔드에 미리보기 계약 요청 ③ 그대로 두고 설명만.
 
-### G-04 사내 서버 업로드(기능명세 ②) 계약이 없다
+### G-04 사내 서버 업로드(기능명세 ②) 계약이 없다 — ⏸ 보류 (2026-11-10 사용자 결정)
 - **현상:** 백엔드에 차 → 서버 운행 사본 전송이 없다(core `UploadState` 주석 "2차 합의 전이라 지금은 항상 null", R-4).
 - **바꾼 것:** 실제 앱은 `UnavailableUploadApi`(꺼짐 · 대기 0건 · [지금 전송]은 "사내 서버 전송은 아직 준비 중이에요"로 실패). 내보내기 화면의 "사내 서버로도 자동 전송돼요"는 업로드가 **켜져 있을 때만** 보이게 했다 — 연결만 됐을 때 이 문장은 사실이 아니다. 업로드 자리표시 계약은 `data/upload/UploadApi.kt`(프론트 소유, 계약이 오면 삭제).
 - **결정 필요:** 설정 "사내 서버" 섹션을 업로드가 꺼져 있을 때 어떻게 보일지 — 지금은 전송 대기 0건·마지막 전송 없음·[지금 전송](누르면 실패 문구). 숨기기 / "준비 중" 한 줄 / 그대로 중 선택. 운행 기록 줄의 전송 표시는 `TripRow.upload`가 늘 null이라 저절로 안 보인다.
 
-### G-05 권한을 나중에 허용하면 좌표가 다시 붙지 않을 수 있다
+### G-05 권한을 나중에 허용하면 좌표가 다시 붙지 않을 수 있다 — ⏸ 보류 (2026-11-10 사용자 결정)
 - **현상:** `AutoLog.create`는 프로세스당 한 번이고, `LocationGateway.start()`는 조립 때 한 번만 `initialize()`한다. 부팅 직후 `BootReceiver`가 권한 없이 먼저 조립했거나 사용자가 처음에 거절했다가 설정에서 허용하면, 앱을 다시 시작할 때까지 좌표(F-07 출발·도착)가 없을 수 있다.
 - **영향:** 운행 기록·거리는 그대로, 출발·도착 좌표와 그에 기댄 추천(거래처·장소 매칭)만 빠진다.
 - **확인 필요:** 맥 에뮬레이터에서 거절 → 허용 순서로 재현. 필요하면 앱 B에 "권한 허용 뒤 다시 시작" 요청.
 
-### G-06 앱 시작 시 메인 스레드 작업
+### G-06 앱 시작 시 메인 스레드 작업 — ⏸ 보류 (2026-11-10 사용자 결정)
 - **현상:** `AutoLog.create`는 호출 스레드에서 `EncryptedSharedPreferences`(키스토어)·Room 빌더·게이트웨이 시작을 한다. 앱은 이를 `MainActivity`(메인 스레드)에서 부른다(백엔드가 정한 시점).
 - **영향:** 첫 화면이 조금 늦게 뜰 수 있다(키스토어 첫 접근 수백 ms). 맥 에뮬레이터에서 체감 확인.
 
-### G-07 계약은 있는데 화면이 일부러 쓰지 않는 것 (의도, 참고)
+### G-07 계약은 있는데 화면이 일부러 쓰지 않는 것 (의도, 참고) — ⏸ 보류
 - `PurposeEngine.unassignedTrips`·`shouldProposePlace`·`registerClientPlace`(F-20 선택 화면 질문, F-17 거래처 등록), `VoiceApi.listenPurpose`·`listenFuel`(F-09·F-18 음성) — D-19·D-27·D-20 결정으로 화면에서 뺐다. 계약·구현은 남아 있어 되살리기 쉽다.
 
-### G-08 계약이 없는 화면 기능 (참고)
+### G-08 계약이 없는 화면 기능 (참고) — ⏸ 보류
 - 직원 지우기(설정) — `SettingsApi`에 없음. 운행기록부 보관함(F-24) — Room `reports` 테이블은 있으나 조회 계약이 없음.
 
 ## 5. DB에 프론트 목업 데이터 넣기 — 계획 (구현 전, 결정 필요)
@@ -111,7 +119,7 @@
 ### 5.3 A. 서버 기준 정보 — 관리자 API (추천, 백엔드 변경 없음)
 - 로컬 relay를 띄운다: `backend/ops/docker-compose.yml`(relay·postgres·minio). **실험은 WSL 로컬에서만** — 외부로 나가지 않게 docker 내부 네트워크, `ADMIN_TOKEN`은 로컬 값.
 - `tools/seed/seed-relay.sh`(curl, 헤더 `X-Admin-Token`): `POST /admin/vehicles`(번호판 12가3456) → `POST /admin/users`·`/admin/places`(좌표 직접)·`/admin/recipients`·`/admin/schedules`(오늘 ±1h, 김영업) → `POST /admin/vehicles/{id}/connect-code`로 연결 코드 출력.
-- 차에서: 설정 → 차량 연결(서버 주소 + 코드) → 등록 직후 inbox 1회 수신으로 직원·장소·배차·수신자가 Room에 `origin=SERVER`로 들어온다. **G-01(연결 코드 글자)이 먼저 풀려야 한다.**
+- 차에서: 설정 → 차량 연결(서버 주소 + 코드) → 등록 직후 inbox 1회 수신으로 직원·장소·배차·수신자가 Room에 `origin=SERVER`로 들어온다. G-01(연결 코드 글자)은 해결됐다(2026-11-10).
 - 장점: 실제 경로 그대로라 F-01·F-11·F-15·F-24가 같이 검증된다. 반복 실행 가능(같은 이름이 있으면 건너뛰기 — 스크립트가 `GET`으로 확인).
 
 ### 5.4 B. 차 운행·비용 이력 — 시드 DB 파일 (추천, 백엔드 변경 없음)
@@ -129,7 +137,7 @@
 - 대안: 5.4의 시드 DB에 `receipt_inbox` 한 건(데모와 같은 OCR 값)을 함께 넣는다.
 
 ### 5.7 추천 순서
-1. G-01 결정·구현(연결 코드) — A가 이것 없이는 못 돈다.
+1. ~~G-01 결정·구현(연결 코드)~~ ✅ 2026-11-10.
 2. `demo-fixture.json` + A(관리자 API 스크립트) — 실제 경로, 백엔드 변경 없음.
 3. B(시드 DB) — 앱 A 동의 뒤.
 4. (선택) 프론트 가짜도 fixture를 읽게.

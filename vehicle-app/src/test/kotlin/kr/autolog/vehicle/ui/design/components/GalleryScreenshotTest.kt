@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.screenshot.ShotSize
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
@@ -118,7 +119,15 @@ class GalleryScreenshotTest {
             ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
             ConfidenceRow("금액", null, null, onClick = {})
             QrImage("https://autolog.example/r/abcd1234?t=demo", Space.s9 * 2)
-            NumericKeypad(onDigit = {}, onDelete = {}, allowDecimal = false)
+        }
+    }
+
+    /** 키패드 둘 — 숫자판(금액·리터)과 코드 키패드(차량 연결 코드, 글자+숫자 32자). */
+    @Test
+    fun keypads() = captureAll("components_keypads", gallerySize) {
+        Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s6)) {
+            NumericKeypad(onDigit = {}, onDelete = {}, allowDecimal = true)
+            CodeKeypad(ConnectCode.ALPHABET, onKey = {}, onDelete = {})
         }
     }
 

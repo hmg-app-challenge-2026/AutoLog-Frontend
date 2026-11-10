@@ -98,6 +98,6 @@ class ScreenRepositoriesTest {
 
         val result = g.settings.register("https://autolog.acme.co.kr", "12")
 
-        assertEquals(Outcome.Failed("연결 코드는 숫자 6자리예요"), result)
+        assertEquals(Outcome.Failed("연결 코드 6자리를 확인해 주세요"), result)
     }
 }

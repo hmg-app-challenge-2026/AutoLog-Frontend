@@ -39,10 +39,10 @@ class SettingsViewModelTest {
         val (_, vm) = open()
         vm.onAction(SettingsAction.StartRegister)
         vm.onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, "https://new.example"))
-        "1234567".forEach { vm.onAction(SettingsAction.RegisterKey(it)) } // 7번째는 무시
+        "7kq3mzW".forEach { vm.onAction(SettingsAction.RegisterKey(it)) } // 소문자는 대문자로, 7번째는 무시
 
         val dialog = vm.uiState.first { (it.dialog as? SettingsDialog.Register)?.code?.length == 6 }.dialog
-        assertEquals("123456", (dialog as SettingsDialog.Register).code)
+        assertEquals("7KQ3MZ", (dialog as SettingsDialog.Register).code)
         vm.onAction(SettingsAction.SubmitDialog)
         advanceUntilIdle()
 
@@ -59,11 +59,21 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `연결 코드 — 서버가 쓰지 않는 0·1·I·O와 기호는 들어가지 않는다`() = runTest {
+        val (_, vm) = open()
+        vm.onAction(SettingsAction.StartRegister)
+        "01IO-#A2".forEach { vm.onAction(SettingsAction.RegisterKey(it)) }
+
+        val dialog = vm.uiState.first { (it.dialog as? SettingsDialog.Register)?.code?.length == 2 }.dialog
+        assertEquals("A2", (dialog as SettingsDialog.Register).code)
+    }
+
+    @Test
     fun `연결 실패면 팝업에 이유를 남긴다`() = runTest {
         val (_, vm) = open()
         vm.onAction(SettingsAction.StartRegister)
         vm.onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, "ftp://x"))
-        "123456".forEach { vm.onAction(SettingsAction.RegisterKey(it)) }
+        "7KQ3MZ".forEach { vm.onAction(SettingsAction.RegisterKey(it)) }
         vm.onAction(SettingsAction.SubmitDialog)
         advanceUntilIdle()
 

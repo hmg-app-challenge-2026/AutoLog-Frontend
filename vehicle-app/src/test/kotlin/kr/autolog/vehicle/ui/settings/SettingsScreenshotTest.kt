@@ -59,7 +59,7 @@ class SettingsScreenshotTest {
         SettingsScreen(
             base.copy(
                 section = SettingsSection.VEHICLE,
-                dialog = SettingsDialog.Register("https://autolog.acme.co.kr", "1234"),
+                dialog = SettingsDialog.Register("https://autolog.acme.co.kr", "7KQ3"),
             ),
             onAction = {},
         )

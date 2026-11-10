@@ -780,7 +780,7 @@ Home 하단 타일 [설정]으로 들어온다. 머리 줄 "설정"(왼쪽 뒤�
 
 섹션(위에서 아래, 목록 줄의 요약):
 
-1. **차량 연결**(요약 "12가3456 · 연결됨") — 상태 카드(연결됨 `success` / 연결 안 됨 / 서버에 연결할 수 없어요 `warning` + 차량 번호 · 서버 주소) + [연결 코드 입력](연결 안 됨) / [다시 연결]. 팝업: 서버 주소(프리셋 = 지금 주소, 없으면 `https://`) + 연결 코드 6칸 + `NumericKeypad` → [연결](`DeviceApi.register`). 실패하면 팝업 안에 원천 사유, 성공하면 팝업이 닫히고 "차량을 연결했어요".
+1. **차량 연결**(요약 "12가3456 · 연결됨") — 상태 카드(연결됨 `success` / 연결 안 됨 / 서버에 연결할 수 없어요 `warning` + 차량 번호 · 서버 주소) + [연결 코드 입력](연결 안 됨) / [다시 연결]. 팝업: 서버 주소(프리셋 = 지금 주소, 없으면 `https://`) + 연결 코드 6칸 + `CodeKeypad`(글자+숫자 32자 — 서버 코드 `[2-9A-HJ-NP-Z]{6}`, 규칙은 `ConnectCode` 한곳, 소문자는 대문자로) → [연결](`DeviceApi.register`). 실패하면 팝업 안에 원천 사유, 성공하면 팝업이 닫히고 "차량을 연결했어요".
 2. **사내 서버**(요약 "전송 대기 2건") — 서버 주소 · 상태 · 전송 대기 N건 · 마지막 전송(오늘 09:24) + 마지막 오류 + [지금 전송](`UploadApi.uploadNow`). 차량을 연결하기 전엔 "차량을 먼저 연결해 주세요" + [차량 연결로]. 8장.
 3. **메일 계정**(요약 "메일 계정 연결됨/안 됨") — SMTP 서버 · 포트(숫자만) · 아이디(메일 주소) · 앱 비밀번호(항상 가림) + [연결 확인](`MailApi.saveSmtp`, 칸이 다 차야 활성). 성공하면 비밀번호 칸을 비운다(화면에 남기지 않는다). 실패는 `MailError`별 문구(운행기록부와 같은 `ui/mail/MailErrorText`).
 4. **받는 사람**(요약 "2명") — 회사 지정(서버 배포분 — 자물쇠, 아래 줄 앞 "회사 지정", 못 지움) 먼저 + 직접 추가분(오른쪽 지우기 → "○○을(를) 받는 사람에서 지울까요? 되돌릴 수 없어요" 1회 확인) + [받는 사람 추가](이메일 · 이름 선택).
@@ -960,7 +960,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | R-7 | ✅ 2026-11-10 `TripSessionManager`. 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos Gear → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
 | R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
 | R-9 | ✅ 2026-11-10 `LiveTrip.originLabel`. 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
-| R-10 | 차량 id를 계약으로: `ConnectionState.Registered`(또는 `DeviceApi`)에 `vehicleId` — `orderedUsers`·`suggest`·`unassignedTrips`가 받는 값 | A | 배차 기반 운전자 순서·배차 목적 추천(G-02) | 제안 2026-11-10 |
+| R-10 | 📨 2026-11-10 요청함(사용자 결정, 요청서 `docs/integration/requests/R-10-vehicle-id.md`). 차량 id를 계약으로: `DeviceApi.vehicleId: StateFlow<String?>`(추천, 또는 `ConnectionState.Registered`·`Unreachable`에 필드) — `orderedUsers`·`suggest`·`unassignedTrips`가 받는 값 | A | 배차 기반 운전자 순서·배차 목적 추천(G-02). 받으면 `RealAppGraph.vehicleId()` 한 줄만 바꾼다 | 11.13 |
 | R-11 | (선택) 디버그 전용 시드 계약 `DebugSeedApi` — 데모 운행·비용 이력을 앱 A 규칙으로 넣기 | A | 시연 DB 준비(`docs/integration/backend-link.md` 5.5) | 제안 2026-11-10 |
 
 ---
@@ -1046,3 +1046,4 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 1.10 | 2026-11-10 | 7.3 저장 완료 화면(체크 애니메이션 · "운행 기록을 저장했어요" · [확인], 체크를 다 그린 뒤 1초 뒤 자동으로 닫힘) |
 | 1.11 | 2026-11-10 | 모션 다시 설계(디자인 언어 1.45~): 화면 전환 방향(앞으로·뒤로·띄우기·같은 자리, `navTransitionOf`), 팝업 닫힘(`ModalHost`), 화면 안 교체·펼침·선택, 정차·주차 전환 페이드. 모두 스프링. V-18 추가 |
 | 1.12 | 2026-11-10 | 6.6 앱 A 계약 연결 완료(interim 삭제, `data/fake`·`data/upload`), 6.7 vehicle = `RealAppGraph`(`AutoLog.create`, 런타임 권한 뒤 조립), 12장 R-1·2·3·7·9 완료, R-10·R-11 제안. 연결 기록 `docs/integration/backend-link.md` |
+| 1.13 | 2026-11-10 | 7.9 연결 코드 입력 `NumericKeypad` → `CodeKeypad`(서버 코드에 글자가 섞여 숫자판으로는 등록 불가 — G-01, 사용자 결정 ①). R-10 요청함. G-03~G-08 보류(사용자 결정) |

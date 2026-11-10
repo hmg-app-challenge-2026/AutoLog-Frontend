@@ -1,13 +1,13 @@
 package kr.autolog.vehicle.ui.settings
 
 import kr.autolog.vehicle.core.MailError
+import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.ui.trips.TripWhen
 
 /** 설정 섹션(스펙 7.9) — 선언 순서 = 목록 순서. 이름·아이콘·요약 문구는 화면이 정한다. */
 enum class SettingsSection { VEHICLE, SERVER, MAIL, RECIPIENTS, STAFF, AUTOMATION, SYNC, ABOUT }
 
 /** 연결 코드 자릿수(앱 A `DeviceApi.register` 규칙). */
-const val REGISTER_CODE_LENGTH = 6
 
 /**
  * 설정 화면 상태(스펙 7.9, F-24·F-01·8장). 저장소 값은 [reduceSettings]가 표시용으로 바꾸고,
@@ -111,7 +111,8 @@ sealed interface SettingsAction {
 
     data object StartRegister : SettingsAction
 
-    data class RegisterKey(val digit: Char) : SettingsAction
+    /** 연결 코드 키 하나(2~9, A~Z 중 I·O 제외 — [ConnectCode]). */
+    data class RegisterKey(val key: Char) : SettingsAction
 
     data object RegisterDelete : SettingsAction
 

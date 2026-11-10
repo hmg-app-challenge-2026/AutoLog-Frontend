@@ -482,7 +482,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `ScreenHeader` | 보조 화면(주유·운행 기록·운행기록부 …) 맨 위 머리 줄: **왼쪽 뒤로(<) + 가운데 제목**(`headerTitle`, 두 줄까지). 배지가 Home에만 있어 모든 창 크기에서 맨 위 한 줄 — 제목 양옆을 뒤로 버튼 폭(76 dp)만큼 똑같이 비워 화면 가운데를 지킨다 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
-| `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
+| `NumericKeypad` | 3×4 키, 키 높이 96 dp(`iconButton`)·폭 120 dp, `radius.lg`, 바탕 `surface3`(어두운 팝업 `surface2` 위에서도 보이게, 1.47). 입력값은 위에 `heroSmall`로 표시 |
+| `CodeKeypad` | 글자+숫자 키패드(차량 연결 코드, F-01): 받는 글자를 그대로 줄 세움 — 8열 × 4줄(2~9 / A~H / J~R / S~Z, 헷갈리는 0·1·I·O 없음) + 마지막 줄 오른쪽 지우기(2칸 폭). 키 모양은 `NumericKeypad`와 같고(높이 96 dp, `surface3`) 폭은 줄을 똑같이 나눈다, 키 사이 `space.3`. 키보드 없이 큰 키로 — 시스템 키보드는 화면 절반을 가린다 |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
 | `ChoiceRow` | 여러 개 중 하나를 고르는 **선택형 행**(운행 결과의 운행 목적). 같은 폭 행을 8 dp 간격으로 쌓아 한 묶음으로 읽히게: `surface1` 면 · `radius.md` · 76 dp, 왼쪽 원 28 dp + 글자 `body`, 행 전체 터치. 선택 = `accent` 테두리 3 dp + 원 가운데 점, 고르지 않은 행 = `outline` 1 dp 테두리(바탕에 묻히지 않게). `onClick = null`이면 보기 전용(누를 수 없을 뿐 글자는 같은 색) |
 | `CheckRow` | 여러 개를 함께 고르는 체크 행(운행기록부 받는 사람). `ChoiceRow`와 같은 틀(면·테두리·76 dp) — 표시만 네모: 고름 = `accentFill` 네모 + 흰 ✓, 안 고름 = `textTertiary` 테두리. `detail` = 이름 아래 보조 줄(`caption`, `textSecondary`) |
@@ -608,3 +609,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.44 | 2026-11-10 | Home 기록 중 운행 경로 표시(○ · 갈매기 · ●)를 글자에 맞게 키움(`RouteFlow(markerScale)`, 넓은 화면 2배 · 분할 화면 1.6배). **운전자 배지는 Home "대기 중"에만** — 기록 중 Home·Peek에서 뺌(사용자 지시 "완전히 메인 화면일 때만") |
 | 1.45 | 2026-11-10 | **모션 다시 설계**(사용자 지시 "토스·iOS처럼 부드럽고 자연스럽게", 계획 `docs/superpowers/plans/2026-11-10-motion.md`): 모든 움직임을 스프링 세 가지(`smooth`·`quick`·`bouncy`)로, 화면 앞으로·뒤로 방향(iOS 패럴랙스)·띄우기·같은 자리 교체·팝업 닫힘·펼침·선택. 8.1·8.2 다시 씀 |
 | 1.46 | 2026-11-10 | 모션 구현 마무리: 같은 자리 교체를 fade-through 순서로(나가는 쪽 `swapOut` → 90 ms 뒤 `swapIn`, `DelayedSpec` — 프레임 검토에서 옛 숫자와 새 숫자가 포개져 보였다), 팝업 `ModalHost`(닫힘 포함), 선택·강조·누름(`pressAlpha`), Home·운행 결과·운행 기록·내보내기·설정 화면 안 교체, 정차·주차 전환 페이드. 도우미만 쓰는 규칙 |
+| 1.47 | 2026-11-10 | `CodeKeypad` 추가(차량 연결 코드 = 서버 규칙 2~9·A~Z에서 I·O 뺀 32자, 백엔드 연결 G-01 — 사용자 결정 "글자+숫자 키패드"). 키패드 키 바탕 `surface2` → `surface3`(어두운 팝업 위에서 키가 안 보였다) |

@@ -17,16 +17,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import kr.autolog.vehicle.R
+import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.components.CodeKeypad
 import kr.autolog.vehicle.ui.design.components.DangerButton
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.ModalHost
 import kr.autolog.vehicle.ui.design.components.ModalText
-import kr.autolog.vehicle.ui.design.components.NumericKeypad
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 
 /**
@@ -49,7 +50,9 @@ private fun SettingsDialogCard(
     submit: () -> Unit,
 ) {
     when (d) {
+        // 코드 키패드(8칸 × 4줄)가 차 화면에서 누르기 쉬운 크기가 되게 팝업을 넓게(키 하나 ≈ 100 dp)
         is SettingsDialog.Register -> ModalCard(
+            maxWidth = Size.sheetMaxWidth,
             title = stringResource(R.string.settings_register_title),
             onClose = dismiss,
             footer = {
@@ -57,7 +60,7 @@ private fun SettingsDialogCard(
                     stringResource(R.string.settings_register_submit),
                     onClick = submit,
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = d.code.length == REGISTER_CODE_LENGTH && d.serverUrl.isNotBlank(),
+                    enabled = ConnectCode.isComplete(d.code) && d.serverUrl.isNotBlank(),
                     loading = state.running == SettingsTask.REGISTER,
                 )
             },
@@ -75,11 +78,11 @@ private fun SettingsDialogCard(
                     color = AutoLogTheme.colors.textSecondary,
                 )
                 CodeBoxes(d.code)
-                NumericKeypad(
-                    onDigit = { onAction(SettingsAction.RegisterKey(it)) },
+                // 서버가 만드는 코드는 글자와 숫자가 섞인다(2~9, A~Z 중 I·O 제외) — 숫자판으로는 넣을 수 없다(G-01)
+                CodeKeypad(
+                    ConnectCode.ALPHABET,
+                    onKey = { onAction(SettingsAction.RegisterKey(it)) },
                     onDelete = { onAction(SettingsAction.RegisterDelete) },
-                    allowDecimal = false,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
                 DialogError(state, SettingsTask.REGISTER)
             }
@@ -188,7 +191,7 @@ private fun CodeBoxes(code: String) {
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Space.s2, Alignment.CenterHorizontally),
     ) {
-        repeat(REGISTER_CODE_LENGTH) { i ->
+        repeat(ConnectCode.LENGTH) { i ->
             Box(
                 Modifier.size(Size.touchMin).clip(RoundedCornerShape(Radius.sm)).background(c.surface3),
                 contentAlignment = Alignment.Center,

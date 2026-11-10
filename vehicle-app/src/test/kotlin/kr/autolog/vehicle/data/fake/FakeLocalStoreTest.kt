@@ -80,12 +80,13 @@ class FakeLocalStoreTest {
     }
 
     @Test
-    fun `연결 코드는 6자리 숫자여야 한다`() = runTest {
+    fun `연결 코드는 서버와 같은 대문자·숫자 6자리여야 한다 — 0·1·I·O는 없다`() = runTest {
         val device = FakeDeviceApi(clock)
 
-        assertTrue(device.register("https://autolog.acme.co.kr", "12a") is RegisterResult.Invalid)
-        assertTrue(device.register("autolog.acme.co.kr", "123456") is RegisterResult.Invalid)
-        assertEquals(RegisterResult.Ok, device.register("https://autolog.acme.co.kr", "123456"))
+        assertTrue(device.register("https://autolog.acme.co.kr", "7KQ") is RegisterResult.Invalid)
+        assertTrue(device.register("https://autolog.acme.co.kr", "7KQ3M0") is RegisterResult.Invalid)
+        assertTrue(device.register("autolog.acme.co.kr", "7KQ3MZ") is RegisterResult.Invalid)
+        assertEquals(RegisterResult.Ok, device.register("https://autolog.acme.co.kr", "7kq3mz"))
         assertTrue(device.connection.value is ConnectionState.Registered)
     }
 

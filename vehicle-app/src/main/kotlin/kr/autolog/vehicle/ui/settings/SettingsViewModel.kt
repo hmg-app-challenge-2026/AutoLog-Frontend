@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.MailResult
 import kr.autolog.vehicle.core.SmtpConfig
+import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.data.repository.Outcome
 import kr.autolog.vehicle.data.repository.SettingsRepository
 import kr.autolog.vehicle.nav.Navigator
@@ -50,15 +51,7 @@ class SettingsViewModel(
             SettingsAction.Back -> navigator.pop()
             SettingsAction.StartRegister ->
                 openDialog(SettingsDialog.Register(registerPreset(settings.link.value)), SettingsTask.REGISTER)
-            is SettingsAction.RegisterKey -> editRegisterCode {
-                if (it.length <
-                    REGISTER_CODE_LENGTH
-                ) {
-                    it + action.digit
-                } else {
-                    it
-                }
-            }
+            is SettingsAction.RegisterKey -> editRegisterCode { ConnectCode.append(it, action.key) }
             SettingsAction.RegisterDelete -> editRegisterCode { it.dropLast(1) }
             SettingsAction.UploadNow -> run(SettingsTask.UPLOAD) { settings.uploadNow().toResult() }
             is SettingsAction.EditMail -> local.update { it.copy(mail = it.mail.edit(action.field, action.value)) }
@@ -107,7 +100,7 @@ class SettingsViewModel(
     private fun submitDialog() {
         when (val d = local.value.dialog) {
             is SettingsDialog.Register -> {
-                if (d.code.length != REGISTER_CODE_LENGTH || d.serverUrl.isBlank()) return
+                if (!ConnectCode.isComplete(d.code) || d.serverUrl.isBlank()) return
                 run(SettingsTask.REGISTER) { settings.register(d.serverUrl, d.code).toResult() }
             }
             is SettingsDialog.AddRecipient -> {
