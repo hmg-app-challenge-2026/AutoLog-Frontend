@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
+import kr.autolog.vehicle.ui.design.LocalKeyboardLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
@@ -49,7 +50,9 @@ fun InputField(
 ) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
-    val locked = LocalInputLocked.current || !enabled
+    // 주행·정차 잠금 또는 플랫폼 키보드 규제면 입력 불가 + 안내 한 줄
+    val restricted = LocalInputLocked.current || LocalKeyboardLocked.current
+    val locked = restricted || !enabled
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val shape = RoundedCornerShape(Radius.md)
@@ -87,6 +90,6 @@ fun InputField(
                 }
             },
         )
-        if (LocalInputLocked.current) Text(stringResource(R.string.input_locked), style = t.caption, color = c.warning)
+        if (restricted) Text(stringResource(R.string.input_locked), style = t.caption, color = c.warning)
     }
 }

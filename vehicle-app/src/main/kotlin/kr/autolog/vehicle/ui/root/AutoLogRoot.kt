@@ -21,6 +21,7 @@ import kr.autolog.vehicle.di.AppGraph
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalInputLocked
+import kr.autolog.vehicle.ui.design.LocalKeyboardLocked
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
 import kr.autolog.vehicle.ui.peek.PeekRoute
 
@@ -34,6 +35,7 @@ const val FULL_ENTRY_GUARD_MS = 300L
 @Composable
 fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
     val tier by graph.usage.tier.collectAsStateWithLifecycle()
+    val noKeyboard by graph.usage.noKeyboard.collectAsStateWithLifecycle()
     var entryGuard by remember { mutableStateOf(false) }
     LaunchedEffect(tier) {
         graph.navigator.onTierChanged(tier)
@@ -49,7 +51,10 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
     }
     CompositionLocalProvider(LocalAppGraph provides graph) {
         AutoLogTheme(staticMotion = tier != UsageTier.FULL) {
-            CompositionLocalProvider(LocalInputLocked provides (tier != UsageTier.FULL || entryGuard)) {
+            CompositionLocalProvider(
+                LocalInputLocked provides (tier != UsageTier.FULL || entryGuard),
+                LocalKeyboardLocked provides noKeyboard,
+            ) {
                 Box(
                     Modifier.fillMaxSize().background(
                         AutoLogTheme.colors.bg,
