@@ -28,6 +28,7 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.components.ButtonNote
 import kr.autolog.vehicle.ui.design.components.CheckRow
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
@@ -112,7 +113,7 @@ private fun Server(state: SettingsUiState, onAction: (SettingsAction) -> Unit) {
                 (state.upload.lastUpload?.let { tripWhenText(it) } ?: stringResource(R.string.settings_never)),
         ),
     )
-    state.upload.lastError?.let { Text(it, style = AutoLogTheme.type.caption, color = c.danger) }
+    state.upload.lastError?.let { ButtonNote(it, style = AutoLogTheme.type.caption, color = c.danger) }
     PrimaryButton(
         stringResource(R.string.settings_upload_now),
         onClick = { onAction(SettingsAction.UploadNow) },
@@ -292,11 +293,7 @@ private fun About(state: SettingsUiState) {
 /** 차량을 연결하기 전엔 쓸 수 없는 섹션: 이유 한 줄 + [차량 연결로]. */
 @Composable
 private fun NeedsLink(onAction: (SettingsAction) -> Unit) {
-    Text(
-        stringResource(R.string.settings_needs_link),
-        style = AutoLogTheme.type.body,
-        color = AutoLogTheme.colors.textSecondary,
-    )
+    ButtonNote(stringResource(R.string.settings_needs_link))
     SecondaryButton(
         stringResource(R.string.settings_go_vehicle),
         onClick = { onAction(SettingsAction.Open(SettingsSection.VEHICLE)) },

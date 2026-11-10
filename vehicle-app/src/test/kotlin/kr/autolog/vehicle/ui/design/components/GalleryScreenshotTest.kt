@@ -112,6 +112,7 @@ class GalleryScreenshotTest {
             InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
             InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
             CodeField(label = "연결 코드 6자리", value = "7KQ3", length = 6, onValueChange = {})
+            ButtonNote("네트워크에 연결하지 못했어요. 연결되면 다시 보내 주세요", color = AutoLogTheme.colors.danger)
             ChoiceRow("일반 업무", selected = true, onClick = {})
             ChoiceRow("출퇴근", selected = false, onClick = {})
             ChoiceRow("개인 용무", selected = false, onClick = null) // 보기 전용

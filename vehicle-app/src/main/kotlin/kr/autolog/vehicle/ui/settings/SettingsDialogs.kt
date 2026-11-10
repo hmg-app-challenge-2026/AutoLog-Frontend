@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -168,9 +167,9 @@ private fun DialogBody(content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s4), content = content)
 }
 
-/** 팝업 안 실패 한 줄(성공이면 팝업이 닫히므로 실패만). */
+/** 팝업 안 실패 한 줄(성공이면 팝업이 닫히므로 실패만). 버튼 바로 위라 가운데(`ModalText`). */
 @Composable
 private fun DialogError(state: SettingsUiState, task: SettingsTask) {
     val failed = state.results[task] as? TaskResult.Failed ?: return
-    Text(failed.reason, style = AutoLogTheme.type.body, color = AutoLogTheme.colors.danger)
+    ModalText(failed.reason, color = AutoLogTheme.colors.danger)
 }

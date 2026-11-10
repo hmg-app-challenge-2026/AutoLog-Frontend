@@ -484,6 +484,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 높이 96 dp(`iconButton`)·폭 120 dp, `radius.lg`, 바탕 `surface3`(어두운 팝업 `surface2` 위에서도 보이게, 1.47). 입력값은 위에 `heroSmall`로 표시 |
 | `CodeField` | 정해진 길이의 코드(차량 연결 코드 6자리) — **칸 N개**(76 dp 정사각, `radius.sm`, `surface3`, 글자 `title`, 칸 사이 `space.2`, 가운데 정렬)로 보여 주고 **시스템 키보드로** 받는다. 칸을 누르면 키보드, 다음 글자가 들어갈 칸에 `accent` 3 dp 초점 링. 글자는 끝에 붙고 끝에서 지운다(커서 끝 고정). 대문자 키보드·자동 수정 끔을 요청하지만 대문자화·허용 글자는 값 규칙(`ConnectCode.normalize`)이 맡는다. 잠금이면 `surface2`·`textTertiary` + "지금은 입력할 수 없어요" |
+| `ButtonNote` | **버튼 바로 위 설명글**(단계 안내·실패 이유·"먼저 차량을 연결해 주세요") — 칸 폭 전체에 **가운데 정렬**, 기본 `body`·`textSecondary`(실패는 `danger`). 화면마다 `Text`를 왼쪽 정렬로 두지 않는다(2026-11-10 사용자 지시, 전 화면 통일). 팝업 안은 같은 규칙의 `ModalText` |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
 | `ChoiceRow` | 여러 개 중 하나를 고르는 **선택형 행**(운행 결과의 운행 목적). 같은 폭 행을 8 dp 간격으로 쌓아 한 묶음으로 읽히게: `surface1` 면 · `radius.md` · 76 dp, 왼쪽 원 28 dp + 글자 `body`, 행 전체 터치. 선택 = `accent` 테두리 3 dp + 원 가운데 점, 고르지 않은 행 = `outline` 1 dp 테두리(바탕에 묻히지 않게). `onClick = null`이면 보기 전용(누를 수 없을 뿐 글자는 같은 색) |
 | `CheckRow` | 여러 개를 함께 고르는 체크 행(운행기록부 받는 사람). `ChoiceRow`와 같은 틀(면·테두리·76 dp) — 표시만 네모: 고름 = `accentFill` 네모 + 흰 ✓, 안 고름 = `textTertiary` 테두리. `detail` = 이름 아래 보조 줄(`caption`, `textSecondary`) |
@@ -612,3 +613,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.47 | 2026-11-10 | `CodeKeypad` 추가(차량 연결 코드 = 서버 규칙 2~9·A~Z에서 I·O 뺀 32자, 백엔드 연결 G-01 — 사용자 결정 "글자+숫자 키패드"). 키패드 키 바탕 `surface2` → `surface3`(어두운 팝업 위에서 키가 안 보였다) |
 | 1.48 | 2026-11-10 | `CodeKeypad` 삭제 — 차량 연결 코드는 서버 주소와 같은 `InputField` 키보드 입력으로(사용자 지시 "키보드로 바꿔줘", 한 팝업에 입력 방식 하나 · 차 한 대에 한 번 하는 조작). `InputField(code = true)`: 대문자 키보드·자동 수정 끔. 숫자판 `surface3`은 유지 |
 | 1.49 | 2026-11-10 | `CodeField` 추가 — 연결 코드를 다시 **6칸 상자**로 보여 주고 입력만 키보드로(사용자 지시 "칸은 이전 디자인으로"). 1.48의 `InputField(code = true)`는 지움 |
+| 1.50 | 2026-11-10 | `ButtonNote` 추가 — 버튼 바로 위 설명글은 모두 가운데(사용자 지시 "전수조사해서 다 가운데"). 바꾼 곳: 운행기록부 내보내기 단계 안내, 운행 결과 "찾을 수 없어요", 설정 사내 서버 전송 실패, 설정 "먼저 차량을 연결해 주세요", 설정 팝업 실패 한 줄(`ModalText`). 이미 가운데였던 곳: 영수증 QR 문제 안내, 운행 결과 분류 문구, 저장 완료, 운전자 추가·놓친 운행·복구 팝업 |
