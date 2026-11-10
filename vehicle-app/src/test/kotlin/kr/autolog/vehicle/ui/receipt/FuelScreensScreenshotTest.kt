@@ -2,7 +2,6 @@ package kr.autolog.vehicle.ui.receipt
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.fake.FakeReceiptApi
-import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,7 +13,7 @@ import org.robolectric.annotation.GraphicsMode
 @Config(sdk = [34])
 class FuelScreensScreenshotTest {
     @Test
-    fun qr() = captureAll("fuel_qr", driver = SampleDriver) {
+    fun qr() = captureAll("fuel_qr") {
         ReceiptQrScreen(
             ReceiptQrUiState(
                 loading = false,
@@ -27,12 +26,12 @@ class FuelScreensScreenshotTest {
     }
 
     @Test
-    fun manual() = captureAll("fuel_manual", driver = SampleDriver) {
+    fun manual() = captureAll("fuel_manual") {
         FuelEntryScreen(FuelEntryUiState(), onAction = {})
     }
 
     @Test
-    fun ocr() = captureAll("fuel_ocr", driver = SampleDriver) {
+    fun ocr() = captureAll("fuel_ocr") {
         val receipt = FakeReceiptApi.SAMPLE_RECEIPT.copy(thumbUrl = "")
         FuelEntryScreen(reduceReceiptEntry(receipt, FakeReceiptApi.SAMPLE_CANDIDATES), onAction = {})
     }

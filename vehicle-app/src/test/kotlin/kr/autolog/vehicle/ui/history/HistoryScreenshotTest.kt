@@ -2,7 +2,6 @@ package kr.autolog.vehicle.ui.history
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.data.repository.UploadMark
-import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.trips.TripDay
 import kr.autolog.vehicle.ui.trips.TripRowUi
@@ -39,10 +38,10 @@ class HistoryScreenshotTest {
     )
 
     @Test
-    fun list() = captureAll("history", driver = SampleDriver) { HistoryScreen(state, onAction = {}) }
+    fun list() = captureAll("history") { HistoryScreen(state, onAction = {}) }
 
     @Test
-    fun empty() = captureAll("history_empty", driver = SampleDriver) {
+    fun empty() = captureAll("history_empty") {
         HistoryScreen(
             state.copy(
                 month = YearMonth.of(2026, 10),

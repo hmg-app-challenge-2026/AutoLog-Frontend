@@ -2,7 +2,6 @@ package kr.autolog.vehicle.ui.report
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kr.autolog.vehicle.core.MailError
-import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,25 +24,25 @@ class ReportScreenshotTest {
     )
 
     @Test
-    fun ready() = captureAll("report", driver = SampleDriver) { ReportScreen(ready, onAction = {}) }
+    fun ready() = captureAll("report") { ReportScreen(ready, onAction = {}) }
 
     @Test
-    fun built() = captureAll("report_built", driver = SampleDriver) {
+    fun built() = captureAll("report_built") {
         ReportScreen(ready.copy(step = ReportStep.Built), onAction = {})
     }
 
     @Test
-    fun noMail() = captureAll("report_no_mail", driver = SampleDriver) {
+    fun noMail() = captureAll("report_no_mail") {
         ReportScreen(ready.copy(step = ReportStep.Built, smtpConfigured = false), onAction = {})
     }
 
     @Test
-    fun failed() = captureAll("report_failed", driver = SampleDriver) {
+    fun failed() = captureAll("report_failed") {
         ReportScreen(ready.copy(step = ReportStep.SendFailed(MailError.NETWORK)), onAction = {})
     }
 
     @Test
-    fun sent() = captureAll("report_sent", driver = SampleDriver) {
+    fun sent() = captureAll("report_sent") {
         ReportScreen(ready.copy(step = ReportStep.Sent(2)), onAction = {})
     }
 }
