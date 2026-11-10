@@ -990,7 +990,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 
 | ID | 항목 | 영향 | 확인 방법 | 상태 |
 |---|---|---|---|---|
-| V-01 | FormFactorConsole 프리셋별 앱 창 dp·DPI·px | 6.8 임계값, 10.2 스크린샷 크기, 글자 mm 환산 | 맥 에뮬레이터 + Host Display Bridge | 대기 |
+| V-01 | FormFactorConsole 프리셋별 앱 창 dp·DPI·px | 6.8 임계값, 10.2 스크린샷 크기, 글자 mm 환산 | 맥 에뮬레이터 + Host Display Bridge | 일부 — 기본 디스플레이(앱 영역 2560×1268 dp, 밀도 1.0)는 확인해 스크린샷 기준 크기 `pleos/`로 씀(2026-11-10). 프리셋·분할 화면은 대기 |
 | V-02 | composite build `dependencySubstitution` 동작 | 5.3 | `assembleDemoDebug` | 대기 |
 | V-03 | DO 선언 방식(`distractionOptimized` meta-data)이 Pleos에서 유효한지 | 5.4 | VHAL로 기어 D·속도 주입 후 앱 상태 | 대기 |
 | V-04 | `CarUxRestrictionsManager`를 일반 앱에서 얻을 수 있는지(권한), Pleos 에뮬레이터에서 값이 바뀌는지 | 6.9 | 로그 | 대기 |
