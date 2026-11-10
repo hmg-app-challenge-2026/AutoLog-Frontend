@@ -19,8 +19,8 @@ import kr.autolog.vehicle.nav.Route
 internal const val DEMO_QR_LIFETIME_MS = 10 * 60_000L
 
 /**
- * 영수증 QR(스펙 7.4). 들어오자마자 inbox를 본다 — 아직 확정하지 않은 영수증이 있으면 QR 없이 곧바로 입력 창으로,
- * 없으면 QR을 발급하고 기다리다가 영수증이 도착하면 입력 창으로 바꾼다(같은 경로 하나, 맨 위 화면만 교체).
+ * 영수증 QR(스펙 7.4). 기존 inbox 항목은 이번 QR의 응답이 아니므로 화면을 열 때 기억만 한다.
+ * QR을 발급하고 기다리다가 새 영수증이 도착하면 입력 창으로 바꾼다(같은 경로 하나, 맨 위 화면만 교체).
  */
 class ReceiptQrViewModel(
     private val receipts: ReceiptRepository,
@@ -38,9 +38,14 @@ class ReceiptQrViewModel(
 
     init {
         viewModelScope.launch {
+            var knownReceiptIds: Set<String>? = null
             receipts.inbox.collect { inbox ->
                 if (left) return@collect
-                val latest = inbox.maxByOrNull { it.takenAt.orEmpty() }
+                val currentIds = inbox.map { it.receiptId }.toSet()
+                val latest = knownReceiptIds?.let { known ->
+                    inbox.filterNot { it.receiptId in known }.maxByOrNull { it.takenAt.orEmpty() }
+                }
+                knownReceiptIds = currentIds
                 when {
                     latest != null -> left = navigator.replaceTop(Route.FuelEntry(latest.receiptId))
                     !issued -> {

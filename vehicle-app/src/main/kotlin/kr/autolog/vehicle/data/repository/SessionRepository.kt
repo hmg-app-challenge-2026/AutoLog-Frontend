@@ -57,6 +57,8 @@ interface SessionRepository {
 
     suspend fun endNow()
 
+    suspend fun requestStop()
+
     suspend fun keepRecording()
 
     suspend fun assignDriver(tripId: String, userId: String)
@@ -82,6 +84,8 @@ class DefaultSessionRepository(private val api: TripSessionApi) : SessionReposit
     }
 
     override suspend fun endNow() = api.finalize()
+
+    override suspend fun requestStop() = api.requestStop()
 
     override suspend fun keepRecording() = api.resume()
 
