@@ -367,12 +367,16 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 선택 | 색·테두리(`quick`), 점·체크 표시 0→1(`bouncy`) | `ChoiceRow`·`CheckRow`·강조 타일·`NavRow` 선택·버튼 활성 |
 | `pressScale` | 누름 0.97배 `tween(90)` → 뗌 `snappy` | 모든 버튼·타일·카드 |
 | hero | `SharedTransitionLayout` + `smooth` | 프로필 타일 → Home 배지 |
-| 정차·주차 전환 | 투명도(`quick`) | FULL ↔ PEEK |
+| 정차·주차 전환 | 나가는 화면 `tierFadeOut`(spring 1600) → 90 ms 뒤 들어오는 화면 `tierFadeIn`(quick). 정차(Static)에서도 이 한 번은 움직임, `Still`이면 즉시. 주행으로는 바로 비움 | FULL ↔ PEEK |
 | `success*` | 원 `spring(0.55, 320)` → 테두리 퍼짐 → 체크 긋기 → 톡(약 1초, 한 번) | 저장 완료(`SuccessCheck`) |
 | 로딩 | 결정형 진행 막대 우선. 불확정이면 1200 ms 주기의 느린 밝기 변화(주차 전용) | 엑셀 생성, QR 발급 |
 
 - 정지형(`Static` — 정차 Peek, `Still` — 시스템 "애니메이션 줄이기"·스크린샷)이면 위 스프링이 모두 `snap()` — 즉시 끝난다.
-- 예전 `spring.standard`·`spring.gentle`·`fade.quick`·`fade.standard`·`motion.screen`(4% 슬라이드)은 이 표로 옮기며 없앤다(1.45).
+- 예전 `spring.standard`·`spring.gentle`·`fade.quick`·`fade.standard`·`motion.screen`(4% 슬라이드)은 이 표로 옮기며 없앴다(1.45).
+- **화면·컴포넌트는 도우미만 쓴다**(`ui/design/motion/`): 화면 전환은 `FullApp`이 알아서(`navTransitionOf`), 팝업은 `ModalHost`, 같은 자리 교체 `FadeThrough`, 방향 교체 `DirectionalContent`, 펼침·접힘 `ExpandVisibility`, 있다 없다 하는 한 줄 `ExpandSwap`, 점·체크 "톡" `PopVisibility`, 선택 색 `animateSelectColor`·`animateSelectDp`, 목록 줄 `Modifier.animateItem`(fadeIn `quick` · 자리 `smooth` · fadeOut `swapOut`). `AnimatedContent`·`animate*AsState`를 화면에서 직접 쓰지 않는다.
+- **`FadeThrough` 상자로 폭을 채우지 않는다** — 채우면 안쪽 `widthIn(max)` 상한이 무시된다(운행 결과 버튼이 전체 폭으로 늘어난 회귀, 1.46). 가운데 정렬은 바깥 `Box`가 맡는다.
+- 누름: `pressScale` 0.97 + `pressAlpha` 0.85(살짝 옅어짐 — 면 모양과 상관없어 둥근 모서리 밖으로 번지지 않는다).
+- 검토: WSL에서는 움직임을 못 보므로 `recordRoborazziDemoDebug`가 전환마다 0~600 ms 프레임을 이어 붙인 `src/test/screenshots/motion/*.png`를 남긴다. 느낌·성능은 맥 에뮬레이터(V-18).
 
 ### 8.3 눌림 피드백
 
@@ -603,3 +607,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.43 | 2026-11-10 | Home 넓은 화면(사용자 지시): 소제목 64 → 96 dp 내림, 기록 중 출발지·목적지 `title` 44 → `display` 64 sp(`homeRoute`) |
 | 1.44 | 2026-11-10 | Home 기록 중 운행 경로 표시(○ · 갈매기 · ●)를 글자에 맞게 키움(`RouteFlow(markerScale)`, 넓은 화면 2배 · 분할 화면 1.6배). **운전자 배지는 Home "대기 중"에만** — 기록 중 Home·Peek에서 뺌(사용자 지시 "완전히 메인 화면일 때만") |
 | 1.45 | 2026-11-10 | **모션 다시 설계**(사용자 지시 "토스·iOS처럼 부드럽고 자연스럽게", 계획 `docs/superpowers/plans/2026-11-10-motion.md`): 모든 움직임을 스프링 세 가지(`smooth`·`quick`·`bouncy`)로, 화면 앞으로·뒤로 방향(iOS 패럴랙스)·띄우기·같은 자리 교체·팝업 닫힘·펼침·선택. 8.1·8.2 다시 씀 |
+| 1.46 | 2026-11-10 | 모션 구현 마무리: 같은 자리 교체를 fade-through 순서로(나가는 쪽 `swapOut` → 90 ms 뒤 `swapIn`, `DelayedSpec` — 프레임 검토에서 옛 숫자와 새 숫자가 포개져 보였다), 팝업 `ModalHost`(닫힘 포함), 선택·강조·누름(`pressAlpha`), Home·운행 결과·운행 기록·내보내기·설정 화면 안 교체, 정차·주차 전환 페이드. 도우미만 쓰는 규칙 |

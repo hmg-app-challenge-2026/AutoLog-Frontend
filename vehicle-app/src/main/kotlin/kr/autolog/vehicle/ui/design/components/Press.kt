@@ -24,7 +24,7 @@ import kr.autolog.vehicle.ui.design.confirmHaptic
  * - 누름 피드백: 0.97배 tween(90) / 뗌 spring.snappy, 정지형이면 크기 변화 없음(디자인 언어 8.2 press).
  * - 확인 햅틱(디자인 언어 8.3), 물결(ripple)은 쓰지 않는다.
  *
- * [onClick]이 null이면 아무것도 하지 않는다(표시 전용 — Peek의 운전자 배지). [enabled]가 false면 그 요소만 비활성.
+ * [onClick]이 null이면 아무것도 하지 않는다(표시 전용). [enabled]가 false면 그 요소만 비활성.
  * **clip·background보다 앞에** 붙인다 — 누름 배율이 면까지 같이 줄어들고, 터치 영역은 그 시점의 크기(안쪽 padding 앞)다.
  */
 fun Modifier.tappable(onClick: (() -> Unit)?, enabled: Boolean = true, role: Role = Role.Button): Modifier {

@@ -20,9 +20,12 @@
 | V-14 | | — | | Backend sdk-findings #5 |
 | V-15 | | 맥 에뮬레이터 | | |
 | V-16 | | 맥 에뮬레이터 | | |
+| V-17 | | 맥 에뮬레이터 | | |
+| V-18 | | 맥 에뮬레이터 | | 모션 — 애니메이션 배율이 0이면 모든 모션이 꺼진다. WSL에서는 `recordRoborazziDemoDebug`가 남기는 `src/test/screenshots/motion/*.png` 프레임 시트로만 확인 |
 
 ## 구현 중 발견한 사실 (2026-11-09, WSL)
 
 - **Robolectric에서 한국어 구문 줄바꿈(`LineBreak.WordBreak.Phrase`)이 적용되지 않는다** — 스크린샷에서 "달 / 렸어요"처럼 어절 중간이 끊긴다. 실기기(Android 13+)에서는 적용될 것으로 보이나 맥 에뮬레이터에서 확인 필요. 그동안은 끊기기 쉬운 문장을 나눠 설계한다.
 - **Robolectric 기본 화면(320×470dp)에서는 큰 타일이 화면 밖으로 밀려 클릭 테스트가 실패한다** — 동작 테스트에 `@Config(qualifiers = "w1024dp-h640dp")`를 준다.
 - **무한 애니메이션이 화면에 있으면 Roborazzi 캡처 1장당 약 3분** — 스크린샷에 로딩 회전을 넣지 않는다(V-09 메모).
+- **모션 테스트에서 시계를 멈추면(`mainClock.autoAdvance = false`) `captureToImage`가 다시 그리기를 기다리다 멈춘다**(2026-11-10) — 프레임은 Roborazzi `captureRoboImage`로 찍고(`screenshot/MotionFrames.kt`), 상태를 바꾼 뒤 `Snapshot.sendApplyNotifications()`로 알려야 다음 프레임이 바뀐 값을 그린다. 0초 스프링(`snap`)으로 끝나는 `MutableTransitionState`는 이 조건에서 끝나지 않아 `ModalHost`는 `Animatable`로 만들었다.

@@ -39,6 +39,7 @@
 - ViewModel·Reducer는 화면 문구를 모른다. 사람에게 보일 이름·오류는 sealed 타입(예: `FuelTripLabel`, `FuelEntryError`)으로 내보내고 화면이 `strings.xml`로 바꾼다.
 - 화면 하나의 상태 계산은 `XxxReducer.kt`의 순수 함수(`reduceXxx`)로 두고 Repository 값 타입만 입력으로 받는다. `data/interim` 타입은 `ui/`에 들어오지 않는다(스펙 6.6).
 - 색·글자·간격·모양·모션은 **반드시 `AutoLogTheme` 토큰**. 리터럴 `Color(0xFF…)`, `16.dp`, `24.sp`를 화면 코드에 쓰지 않는다(토큰 정의 파일 제외).
+- 모션은 `ui/design/motion/`의 도우미로만(디자인 언어 8.2): 팝업은 `ModalHost`로 감싸고(닫힘 모션), 같은 자리 교체 `FadeThrough`, 달 이동 `DirectionalContent`, 생겼다 사라지는 것 `ExpandVisibility`·`ExpandSwap`, 선택 `animateSelectColor`. 화면 코드에 `AnimatedContent`·`animate*AsState`·`spring(...)`·`tween(...)`을 직접 쓰지 않는다. 화면 전환 모양은 `FullApp`이 스택 변화로 정한다 — 화면은 Navigator만 부른다.
 - 문자열은 `strings.xml`. 화면 코드에 한국어 리터럴을 쓰지 않는다(Preview·테스트 제외).
 - TypeScript(web/admin): ESLint 기본 + `strict: true`. 컴포넌트 PascalCase, 훅 `useXxx`, API 함수 동사형.
 
