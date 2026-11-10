@@ -34,6 +34,9 @@
 - Composable 이름은 PascalCase 명사, 파라미터 순서: 필수 데이터 → `onXxx` 콜백 → `modifier: Modifier = Modifier` (마지막).
 - **누를 수 있는 요소는 모두 `Modifier.tappable`**(`ui/design/components/Press.kt`)로 만든다. 입력 잠금(스펙 6.9)·누름 피드백·햅틱이 한곳에 있다 — `clickable`을 직접 쓰지 않는다.
 - 화면 바깥 여백은 `screenMargin()`(창 크기별 하나). 화면마다 `Space.s7`/`tallMargin`을 따로 고르지 않는다.
+- 창 크기에 따라 달라지는 글자는 `AutoLogTheme.windowType.<역할>`(`ui/design/WindowType.kt`). 화면·컴포넌트에서 `if (LocalWindowLayout.current == NARROW) type.a else type.b`로 글자를 고르지 않는다 — 새 역할이 필요하면 그 표에 한 줄 더한다.
+- 입력 칸이 여러 개인 화면은 칸 정의(이름·단위·입력 방법·계약 키)를 enum 하나에 모은다(예: `ui/receipt/FuelField.kt`). 칸마다 `when`을 여러 곳에 두지 않는다.
+- ViewModel·Reducer는 화면 문구를 모른다. 사람에게 보일 이름·오류는 sealed 타입(예: `FuelTripLabel`, `FuelEntryError`)으로 내보내고 화면이 `strings.xml`로 바꾼다.
 - 화면 하나의 상태 계산은 `XxxReducer.kt`의 순수 함수(`reduceXxx`)로 두고 Repository 값 타입만 입력으로 받는다. `data/interim` 타입은 `ui/`에 들어오지 않는다(스펙 6.6).
 - 색·글자·간격·모양·모션은 **반드시 `AutoLogTheme` 토큰**. 리터럴 `Color(0xFF…)`, `16.dp`, `24.sp`를 화면 코드에 쓰지 않는다(토큰 정의 파일 제외).
 - 문자열은 `strings.xml`. 화면 코드에 한국어 리터럴을 쓰지 않는다(Preview·테스트 제외).

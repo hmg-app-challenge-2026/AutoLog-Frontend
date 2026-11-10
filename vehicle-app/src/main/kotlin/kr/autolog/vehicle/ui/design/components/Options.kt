@@ -67,7 +67,7 @@ fun ChoiceRow(
             Box(Modifier.size(Size.iconSm).border(Size.ring, ring, CircleShape), contentAlignment = Alignment.Center) {
                 if (selected) Box(Modifier.size(Size.statusDot).clip(CircleShape).background(c.accent))
             }
-            // dense(좁은 창): 글자도 한 단계 작게(`caption` 22 sp — 글자 하한)
+            // dense(좁은 창): 글자도 한 단계 작게(`caption` 28 sp)
             Text(text, style = if (dense) AutoLogTheme.type.caption else AutoLogTheme.type.body, color = c.textPrimary)
         }
     }

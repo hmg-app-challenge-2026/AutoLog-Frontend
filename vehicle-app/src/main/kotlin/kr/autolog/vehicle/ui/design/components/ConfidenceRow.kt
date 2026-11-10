@@ -30,10 +30,16 @@ import kr.autolog.vehicle.ui.design.Space
 /** OCR 신뢰도 3단계(스펙 7.5). 값이 없으면 MISSING. */
 enum class ConfidenceLevel { OK, CHECK, RECHECK, MISSING }
 
+/** 이 신뢰도 이상이면 "확인됨"(초록). 영수증 자동 조건(스펙 7.5 — 모든 칸 초록)도 같은 값을 쓴다. */
+const val CONFIDENCE_OK = 0.95
+
+/** 이 신뢰도 이상이면 "확인 필요"(노랑), 미만이면 "다시 확인"(빨강). */
+const val CONFIDENCE_CHECK = 0.75
+
 fun confidenceLevelOf(value: String?, confidence: Double?): ConfidenceLevel = when {
     value == null -> ConfidenceLevel.MISSING
-    confidence == null || confidence >= 0.95 -> ConfidenceLevel.OK
-    confidence >= 0.75 -> ConfidenceLevel.CHECK
+    confidence == null || confidence >= CONFIDENCE_OK -> ConfidenceLevel.OK
+    confidence >= CONFIDENCE_CHECK -> ConfidenceLevel.CHECK
     else -> ConfidenceLevel.RECHECK
 }
 

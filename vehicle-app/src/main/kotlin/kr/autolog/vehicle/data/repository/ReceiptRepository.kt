@@ -30,10 +30,15 @@ interface ReceiptRepository {
 
     suspend fun saveFuel(tripId: String?, fuel: VoiceFuel, byVoice: Boolean): ConfirmResult
 
+    /** 영수증 OCR·직접 입력을 같은 초안으로 받아 출처에 맞는 저장 API로 보낸다. */
+    suspend fun add(draft: FuelDraft): ConfirmResult
+
     val voiceAvailable: StateFlow<Boolean>
 
     suspend fun listenFuel(): VoiceResult<VoiceFuel>
 }
+
+data class FuelDraft(val receipt: ReceiptPayload?, val fields: ReceiptFields, val tripId: String?)
 
 /**
  * [ack]: 확정한 영수증을 inbox에서 지운다. 실제 ReceiptApi(앱 B)는 confirm 안에서 ack하지만,
@@ -63,6 +68,14 @@ class DefaultReceiptRepository(
 
     override suspend fun saveFuel(tripId: String?, fuel: VoiceFuel, byVoice: Boolean): ConfirmResult =
         api.saveFuel(tripId, fuel, if (byVoice) ExpenseSource.VOICE else ExpenseSource.TAP, clock.nowMs())
+
+    override suspend fun add(draft: FuelDraft): ConfirmResult =
+        draft.receipt?.let { confirm(it, draft.tripId, draft.fields) }
+            ?: saveFuel(
+                draft.tripId,
+                VoiceFuel(draft.fields.amountWon, draft.fields.liters, draft.fields.unitPrice),
+                byVoice = false,
+            )
 
     override val voiceAvailable: StateFlow<Boolean> = voice.available
 

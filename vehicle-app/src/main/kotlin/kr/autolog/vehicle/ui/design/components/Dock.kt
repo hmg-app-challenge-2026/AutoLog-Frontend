@@ -67,7 +67,7 @@ fun DockTile(
         }
         Text(
             label,
-            style = if (layout == WindowLayout.NARROW) AutoLogTheme.type.caption else AutoLogTheme.type.label,
+            style = AutoLogTheme.windowType.dockLabel,
             color = if (emphasized) c.accent else c.textSecondary,
             textAlign = TextAlign.Center,
             maxLines = 2,

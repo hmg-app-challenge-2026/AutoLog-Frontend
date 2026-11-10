@@ -83,7 +83,7 @@ fun ProfilePickerScreen(
         ) {
             Text(
                 stringResource(title),
-                style = if (layout == WindowLayout.NARROW) t.headline else t.display,
+                style = AutoLogTheme.windowType.screenTitle,
                 color = c.textPrimary,
                 textAlign = TextAlign.Center,
             )

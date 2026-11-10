@@ -42,6 +42,9 @@ object Size {
     val peekMaxWidth = 560.dp
     val sheetMaxWidth = 960.dp
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
+
+    /** 화면 한 칸의 높이가 이 이상이면 차량 전체 화면(Pleos 에뮬레이터 앱 영역 ≈ 2560×1268 dp)처럼 넉넉한 창 — 간격을 넓힌다. */
+    val spaciousHeight = 800.dp
     val hairline = 1.dp
     val progressBar = 8.dp
     val edgeBar = 4.dp // EdgeCountdownBar — 화면 맨 위 가는 남은 시간 막대

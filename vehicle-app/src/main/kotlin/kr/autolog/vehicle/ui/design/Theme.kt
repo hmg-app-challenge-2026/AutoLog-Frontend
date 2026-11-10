@@ -30,6 +30,11 @@ object AutoLogTheme {
     val motion: MotionTokens
         @Composable @ReadOnlyComposable
         get() = LocalMotion.current
+
+    /** 창 크기에 따라 달라지는 글자 역할([WindowType]). */
+    val windowType: WindowType
+        @Composable @ReadOnlyComposable
+        get() = windowTypeOf(LocalWindowLayout.current, LocalAutoLogType.current)
 }
 
 @Composable
