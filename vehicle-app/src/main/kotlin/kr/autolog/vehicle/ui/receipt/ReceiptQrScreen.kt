@@ -28,6 +28,7 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.clockText
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.QrImage
+import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.screenMargin
 
@@ -51,7 +52,7 @@ fun ReceiptQrScreen(state: ReceiptQrUiState, onAction: (ReceiptQrAction) -> Unit
     BoxWithConstraints(modifier.fillMaxSize().padding(screenMargin())) {
         val qrSize = minOf(maxWidth, maxHeight) * QR_SHORT_SIDE_RATIO
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            FuelScreenHeader(stringResource(R.string.fuel_qr_title)) { onAction(ReceiptQrAction.Back) }
+            ScreenHeader(stringResource(R.string.fuel_qr_title)) { onAction(ReceiptQrAction.Back) }
             Column(
                 Modifier.weight(1f).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,

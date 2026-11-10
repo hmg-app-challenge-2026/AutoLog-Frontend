@@ -3,28 +3,13 @@ package kr.autolog.vehicle.ui.home
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import kr.autolog.vehicle.data.repository.RecoveryAction
+import kr.autolog.vehicle.ui.trips.TripRowUi
 
 /** 스펙 7.2 상태 3가지(종료 대기는 Home이 아니라 운행 결과 카드가 맡는다 — D-28). 상태 계산은 [reduceHome](HomeReducer.kt). */
 enum class HomePhase { READY, RECORDING_PARKED, NEEDS_RECOVERY }
 
 /** 대기 상태의 주인공 — 이번 달 요약(스펙 7.2, D-23). */
 data class MonthUi(val tripCount: Int, val totalKm: String, val businessKm: String)
-
-/** 최근 운행 한 줄의 날짜 구분 — 화면이 "오늘/어제/11월 7일"로 말한다. */
-enum class TripDay { TODAY, YESTERDAY, EARLIER }
-
-/** 대기 오른쪽 "최근 운행 기록"의 한 줄(D-25). [purpose]가 null이면 화면이 "목적 미입력"(회색)으로 말한다 — 고치는 곳은 운행 기록 조회(D-26). */
-data class RecentTripUi(
-    val tripId: String,
-    val origin: String?,
-    val destination: String?,
-    val km: String?,
-    val day: TripDay,
-    val month: Int,
-    val dayOfMonth: Int,
-    val time: String,
-    val purpose: String?,
-)
 
 /** Home 가운데 섹션 한 칸: 소제목 + 내용. **무엇을** 보여 줄지는 [homeSections], 창 크기별 **배치**는 [HomeScreen]이 정한다. */
 internal class HomeSection(val title: String, val content: @Composable ColumnScope.() -> Unit)
@@ -37,8 +22,8 @@ data class HomeUiState(
     val origin: String? = null,
     val destination: String? = null,
     val elapsedMin: Int? = null,
-    /** 대기 오른쪽 "최근 운행 기록", 최신 순 최대 [RECENT_TRIPS]건. */
-    val recentTrips: List<RecentTripUi> = emptyList(),
+    /** 대기 오른쪽 "최근 운행 기록", 최신 순 최대 [RECENT_TRIPS]건(D-25). 목적이 없으면 "목적 미입력" — 고치는 곳은 운행 기록 조회(D-26). */
+    val recentTrips: List<TripRowUi> = emptyList(),
     val recoveryExtraKm: String? = null,
     /** 앱이 꺼진 동안 달린 거리(F-10). 대기 상태에서만 채워지고, 있으면 Home이 [추가하기]·X 팝업으로 한 번 묻는다(D-26). */
     val missedKm: String? = null,

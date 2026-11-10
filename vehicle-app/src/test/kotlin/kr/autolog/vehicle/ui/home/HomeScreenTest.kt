@@ -12,6 +12,8 @@ import kr.autolog.vehicle.screenshot.ShotDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
+import kr.autolog.vehicle.ui.trips.TripDay
+import kr.autolog.vehicle.ui.trips.TripRowUi
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -23,9 +25,9 @@ private val month = MonthUi(tripCount = 23, totalKm = "412.6", businessKm = "388
 
 private val recent =
     listOf(
-        RecentTripUi("t-1", "본사", "판교 테크노밸리 거래처", "23.4", TripDay.TODAY, 11, 9, "09:12", null),
-        RecentTripUi("t-2", "판교 테크노밸리 거래처", "본사", "22.8", TripDay.YESTERDAY, 11, 8, "17:40", "거래처 방문"),
-        RecentTripUi("t-3", "본사", "수원 물류센터", "41.2", TripDay.EARLIER, 11, 6, "13:05", "외근"),
+        TripRowUi("t-1", "본사", "판교 테크노밸리 거래처", "23.4", TripDay.TODAY, 11, 9, "09:12", null),
+        TripRowUi("t-2", "판교 테크노밸리 거래처", "본사", "22.8", TripDay.YESTERDAY, 11, 8, "17:40", "거래처 방문"),
+        TripRowUi("t-3", "본사", "수원 물류센터", "41.2", TripDay.EARLIER, 11, 6, "13:05", "외근"),
     )
 
 private val ready = HomeUiState(phase = HomePhase.READY, month = month, recentTrips = recent)

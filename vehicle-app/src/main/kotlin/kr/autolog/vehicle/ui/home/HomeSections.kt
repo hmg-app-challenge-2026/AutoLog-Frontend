@@ -17,6 +17,9 @@ import kr.autolog.vehicle.ui.design.components.HeroMetric
 import kr.autolog.vehicle.ui.design.components.MetricSize
 import kr.autolog.vehicle.ui.design.components.RouteFlow
 import kr.autolog.vehicle.ui.design.components.TripListRow
+import kr.autolog.vehicle.ui.trips.TripRowUi
+import kr.autolog.vehicle.ui.trips.tripMetaText
+import kr.autolog.vehicle.ui.trips.tripRouteText
 
 /**
  * Home 가운데 두 섹션(D-25). 상태마다 "사용자가 지금 알고 싶은 것"을 왼쪽(값)·오른쪽(맥락) 순서로 돌려준다.
@@ -109,7 +112,7 @@ private fun TripDistance(tripKm: String?) {
  * 어느 줄을 눌러도 운행 기록 조회로 간다 — 목적을 고치는 곳은 거기 하나다(D-26).
  */
 @Composable
-private fun RecentTrips(trips: List<RecentTripUi>, onAction: (HomeAction) -> Unit) {
+private fun RecentTrips(trips: List<TripRowUi>, onAction: (HomeAction) -> Unit) {
     if (trips.isEmpty()) {
         Text(
             stringResource(R.string.recent_empty),
@@ -121,30 +124,10 @@ private fun RecentTrips(trips: List<RecentTripUi>, onAction: (HomeAction) -> Uni
     Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
         trips.forEach { trip ->
             TripListRow(
-                title = routeText(trip.origin, trip.destination),
+                title = tripRouteText(trip),
                 subtitle = tripMetaText(trip),
                 onClick = { onAction(HomeAction.OpenRecords) },
             )
         }
     }
-}
-
-@Composable
-private fun routeText(origin: String?, destination: String?): String {
-    val unknown = stringResource(R.string.place_unknown)
-    return stringResource(R.string.trip_route, origin ?: unknown, destination ?: unknown)
-}
-
-/** "오늘 09:12 · 23.4 km · 거래처 방문" / 목적이 없으면 끝이 "목적 미입력". */
-@Composable
-private fun tripMetaText(trip: RecentTripUi): String {
-    val whenText =
-        when (trip.day) {
-            TripDay.TODAY -> stringResource(R.string.trip_day_today, trip.time)
-            TripDay.YESTERDAY -> stringResource(R.string.trip_day_yesterday, trip.time)
-            TripDay.EARLIER -> stringResource(R.string.trip_day_date, trip.month, trip.dayOfMonth, trip.time)
-        }
-    val km = trip.km?.let { stringResource(R.string.trip_km, it) } ?: stringResource(R.string.trip_km_unknown)
-    val purpose = trip.purpose ?: stringResource(R.string.trip_no_purpose)
-    return stringResource(R.string.trip_meta, whenText, km, purpose)
 }

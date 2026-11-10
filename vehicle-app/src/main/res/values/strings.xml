@@ -41,7 +41,12 @@
     <string name="trip_km_unknown">거리 미확정</string>
     <string name="trip_km_unknown_reason">계기판 거리를 읽지 못하고 있어요</string>
     <string name="trip_no_purpose">목적 미입력</string>
-    <string name="trip_meta">%1$s · %2$s · %3$s</string>
+    <!-- 앞뒤 공백은 따옴표로 지킨다(aapt가 맨 앞·뒤 공백을 지운다) -->
+    <string name="meta_separator">" · "</string>
+    <string name="trip_driver_unset">운전자 미확정</string>
+    <string name="upload_pending">전송 대기</string>
+    <string name="upload_done">전송됨</string>
+    <string name="upload_failed">전송 실패</string>
     <string name="home_choose_driver">운전자 선택</string>
     <!-- 운행 결과 카드 (스펙 7.3, D-27) -->
     <string name="result_title">운행 기록을 완료했어요</string>
@@ -111,7 +116,7 @@
     <string name="fuel_arith_ok">금액 검산 통과</string>
     <string name="fuel_arith_failed">금액이 맞지 않아요</string>
     <string name="fuel_link_trip">연결할 운행</string>
-    <string name="fuel_stop_badge"> · 주유 정차</string>
+    <string name="fuel_stop_badge">" · 주유 정차"</string>
     <string name="fuel_no_trip">연결 안 함</string>
     <string name="action_done">완료</string>
     <string name="unit_won">원</string>
