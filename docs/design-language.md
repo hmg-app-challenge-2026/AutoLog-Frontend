@@ -354,7 +354,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `motion.hero` | `SharedTransitionLayout` + `boundsTransform = spring.gentle` | 프로필 타일 → Home 칩 |
 | `motion.layout` | `animateContentSize`·`Modifier.animateBounds` + `spring.gentle` | WIDE↔NARROW 전환 |
 | `motion.loading` | 결정형 진행 막대 우선. 불확정이면 1200 ms 주기의 느린 밝기 변화(주차 전용) | 엑셀 생성, QR 발급 |
-| `motion.success` | 원 `spring(0.55, 320)`(한 번 넘쳤다 자리 잡음) → 160 ms 뒤 테두리 한 번 퍼짐 `tween(640, LinearOutSlowIn)` → 120 ms 뒤 체크 긋기 `tween(420, cubic(0.65,0,0.35,1))`(짧은 획 → 긴 획) → 톡 `tween(90)` 1.06배 · `spring(0.5, 600)` 복귀 + 햅틱. 전체 약 1초, **한 번만** | 저장 완료(`SuccessCheck`) |
+| `motion.success` | 원 `spring(0.55, 320)`(한 번 넘쳤다 자리 잡음) → 160 ms 뒤 테두리 한 번 퍼짐 `tween(640, LinearOutSlowIn)` → 120 ms 뒤 체크 긋기 `tween(420, cubic(0.65,0,0.35,1))`(짧은 획 → 긴 획) → 톡 `tween(90)` 1.06배 · `spring(0.5, 600)` 복귀(진동 없음). 전체 약 1초, **한 번만** | 저장 완료(`SuccessCheck`) |
 
 ### 8.3 눌림 피드백
 
@@ -466,7 +466,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `CheckRow` | 여러 개를 함께 고르는 체크 행(운행기록부 받는 사람). `ChoiceRow`와 같은 틀(면·테두리·76 dp) — 표시만 네모: 고름 = `accentFill` 네모 + 흰 ✓, 안 고름 = `textTertiary` 테두리. `detail` = 이름 아래 보조 줄(`caption`, `textSecondary`) |
 | `NavRow` | 다른 화면·상세로 들어가는 목록 줄(설정 섹션 목록): 왼쪽 아이콘(36 dp, `accent`) · 이름(`label`) + 지금 상태 한 줄(`caption`, `textSecondary`) · 오른쪽 ›. `surface1`, `radius.md`, 76 dp. `selected`(넓은 창에서 오른쪽에 열린 것) = `accent` 3 dp 테두리, › 숨김 |
 | `EdgeCountdownBar` | 화면 맨 위 가장자리의 가는 남은 시간 막대(4 dp, `accent`, 양 끝 둥글게, 바탕 줄 없음). 좌우 화면 끝에서 16 dp 띄운다(1.34). 남은 비율만큼 왼쪽부터 채워 있고 오른쪽 끝이 왼쪽으로 줄어든다. 남은 시간(ms)·전체 길이를 받아 **마감 순간 정확히 0**이 되게 선형으로 줄이고, 새 값을 받을 때마다 그 값에 맞춰 다시 이어 간다(정지형이면 지금 비율만). 운행 결과에서 분류 문구 뒤 "3초 후 자동 저장돼요."와 함께 쓴다 |
-| `SuccessCheck` | "끝났다"를 한 번에 알리는 완료 표시: `accentFill` 원(200 dp) 안에 흰 체크(`onAccent`, 둥근 끝, 굵기 반지름의 17%). `motion.success` 순서로 원이 튀어 오르고 → 테두리가 한 번 퍼지고 → 체크가 손으로 긋듯 그려지고 → 톡 + 햅틱, 그 순간 `onDrawn`. 정지형(정차·애니메이션 줄이기·스크린샷)이면 완성된 모양을 바로 그리고 `onDrawn`도 바로. 운행 결과 저장 완료 화면에서 쓴다 |
+| `SuccessCheck` | "끝났다"를 한 번에 알리는 완료 표시: `accentFill` 원(200 dp) 안에 흰 체크(`onAccent`, 둥근 끝, 굵기 반지름의 17%). `motion.success` 순서로 원이 튀어 오르고 → 테두리가 한 번 퍼지고 → 체크가 손으로 긋듯 그려지고 → 톡, 그 순간 `onDrawn`. 진동은 넣지 않는다(차량 디스플레이에 진동 장치가 없는 경우가 많고, 완료 알림엔 필요 없다 — 사용자 결정). 정지형(정차·애니메이션 줄이기·스크린샷)이면 완성된 모양을 바로 그리고 `onDrawn`도 바로. 운행 결과 저장 완료 화면에서 쓴다 |
 | `TopLine` · `ScrollColumn` | 전체 화면 공용 뼈대. `TopLine` = 맨 위 76 dp 줄(상태 줄·화면 제목), 오른쪽은 운전자 배지 자리로 비운다. `ScrollColumn` = 위쪽 정렬 + 넘치면 스크롤 + 가장자리 흐림 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusLine`: 초록 점 + `기록 중`, 터치 불가. 운전자는 오른쪽 위 `DriverBadge`) ② 섹션 "주행 거리"(`HeroMetric`, `heroSmall`) ③ 섹션 "운행 경로"(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) — 소제목·모양은 Home과 같은 `Section` ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
@@ -578,3 +578,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.36 | 2026-11-10 | 운행 결과(사용자 지시): 제목 "운행 기록을 완료했어요" `title` → `display`(넓은·분할 화면). 주 버튼 [메인 화면으로 · n초] → **[저장하기]**(남은 시간 글자 없음, 글자 역할 `resultHomeButton` 삭제), 남은 시간은 분류 문구 뒤 "3초 후 자동 저장돼요."(`textSecondary`). 수정 모드는 [수정하기]가 빠져 버튼 하나 줄어듦. `EdgeCountdownBar`가 남은 ms를 받아 마감 순간 정확히 0 — 예전엔 초를 1초 늦게 따라가 1/5쯤 남은 채 화면이 넘어갔다 |
 | 1.37 | 2026-11-10 | 운행 결과 [계속 기록하기] → **[기록 이어가기]**(사용자 결정 — 홈 [기록 시작]·[기록 종료]와 같은 말, 새 기록이 아니라 같은 운행을 잇는다는 뜻이 분명) |
 | 1.38 | 2026-11-10 | **저장 완료 화면**(사용자 지시 — 토스 송금 완료·Face ID처럼): 5초가 다 되거나 [저장하기]로 저장을 마치면 결과 카드가 크로스페이드로 바뀌어 가운데 `SuccessCheck`(새 컴포넌트, `motion.success`) + "운행 기록을 저장했어요"(`screenTitle`, 체크를 긋기 시작할 때 아래에서 떠오름) + 맨 아래 [확인](방금 누른 [저장하기] 자리). **체크를 다 그린 뒤** 1초가 지나면 저절로 들어온 화면으로(화면이 뜬 때 기준 아님), [확인]은 바로. `size.successBadge` 200 dp |
+| 1.39 | 2026-11-10 | `SuccessCheck` 진동 삭제(사용자 결정 — 차량 디스플레이엔 진동 장치가 없는 경우가 많고, 있어도 완료 알림엔 필요 없다). 버튼 눌림 햅틱(8.3)은 그대로(V-07) |

@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -24,14 +23,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
-import kr.autolog.vehicle.ui.design.confirmHaptic
 
 /**
  * 디자인 언어 11장 SuccessCheck — "끝났다"를 한 번에 알리는 완료 표시(운행 기록 저장 완료). 순서(`motion.success*`, 약 1초):
  * 1. 원이 0에서 살짝 튀어 오르며 커진다(`successCircle` — 덜 감쇠된 스프링이라 한 번 넘쳤다 자리 잡는다).
  * 2. 원이 자리 잡을 즈음 같은 색 테두리가 한 번 퍼지며 사라진다(`successRingMs`) — 반복하지 않는다.
  * 3. 흰 체크가 **왼쪽 짧은 획 → 오른쪽 긴 획** 순서로 손으로 긋듯 그려진다(`successStrokeMs`, 끝에서 천천히).
- * 4. 다 그려지면 원 전체가 한 번 톡 커졌다 돌아오고(`successPop`) 햅틱 — 그 순간 [onDrawn].
+ * 4. 다 그려지면 원 전체가 한 번 톡 커졌다 돌아온다(`successPop`) — 그 순간 [onDrawn]. 진동은 넣지 않는다
+ *    (차량 디스플레이엔 진동 장치가 없는 경우가 많고, 있어도 완료 알림엔 필요 없다 — 2026-11-10 사용자 결정).
  * 정지형 모션(정차·애니메이션 줄이기·스크린샷)이면 완성된 모양을 바로 그리고 [onDrawn]도 바로 부른다.
  */
 @Composable
@@ -43,7 +42,6 @@ fun SuccessCheck(
 ) {
     val motion = AutoLogTheme.motion
     val c = AutoLogTheme.colors
-    val view = LocalView.current
     val drawn by rememberUpdatedState(onDrawn)
     val start = if (motion.isStatic) 1f else 0f
     val circle = remember { Animatable(start) }
@@ -61,7 +59,6 @@ fun SuccessCheck(
         launch { ring.animateTo(1f, motion.successRing()) }
         delay(motion.successStrokeDelayMs.toLong())
         stroke.animateTo(1f, motion.successStroke())
-        view.confirmHaptic()
         pop.animateTo(SUCCESS_POP_SCALE, motion.successPopOut())
         pop.animateTo(1f, motion.successPopBack())
         drawn()
