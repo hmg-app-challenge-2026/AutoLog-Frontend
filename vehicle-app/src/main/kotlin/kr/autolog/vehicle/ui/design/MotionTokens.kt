@@ -45,8 +45,8 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
     /** 화면 앞으로 갈 때 뒤 화면이 왼쪽으로 밀리는 비율(폭 대비, iOS 패럴랙스). */
     val pushParallax: Float get() = 0.3f
 
-    /** 밀린 뒤 화면 위 덮개의 최대 투명도(`scrim` 색). */
-    val pushBehindDim: Float get() = 0.35f
+    /** 밀린 뒤 화면 위 덮개의 최대 세기 — `scrim` 색의 이 비율(다크 ≈ 34%, 라이트 ≈ 19% 검정). */
+    val pushBehindDim: Float get() = 0.6f
 
     /** 팝업 카드가 열릴 때 시작 배율 · 닫힐 때 끝 배율. */
     val modalEnterScale: Float get() = 0.92f
@@ -55,9 +55,8 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
     /** 띄우는 화면(운행 결과)이 아래에서 떠오를 때 시작 배율. */
     val presentScale: Float get() = 0.96f
 
-    /** 같은 자리 교체(fade-through)에서 들어오는 쪽 시작 배율 · 나가는 쪽이 거의 사라진 뒤 보이게 하는 지연. */
+    /** 같은 자리 교체에서 들어오는 쪽 시작 배율(나가는 쪽은 `quick`으로 먼저 사라진다). */
     val swapScale: Float get() = 0.98f
-    val swapDelayMs: Int get() = 90
 
     fun <T> standard(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.9f, stiffness = 400f)
 
