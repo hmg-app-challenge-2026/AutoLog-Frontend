@@ -1,5 +1,6 @@
 package kr.autolog.vehicle.ui.history
 
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
@@ -33,6 +35,7 @@ import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.components.TripListRow
 import kr.autolog.vehicle.ui.design.components.tappable
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.screenMargin
 import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.trips.TripRowUi
@@ -64,15 +67,20 @@ fun HistoryScreen(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modi
             verticalArrangement = Arrangement.spacedBy(Space.s4),
         ) {
             Toolbar(state, onAction)
-            when {
-                state.loading -> Unit
-                state.rows.isEmpty() ->
-                    Text(
-                        stringResource(R.string.history_empty),
-                        style = AutoLogTheme.type.body,
-                        color = AutoLogTheme.colors.textTertiary,
-                    )
-                else -> TripList(state, onAction, Modifier.weight(1f))
+            // 달이 바뀌면 목록이 그 자리에서 교체된다(같은 달 안의 변화 — 운전자 지정 등 — 는 줄 단위로 움직인다)
+            FadeThrough(state, Modifier.weight(1f), contentKey = {
+                it.month to it.loading
+            }, label = "historyMonth") { shown ->
+                when {
+                    shown.loading -> Unit
+                    shown.rows.isEmpty() ->
+                        Text(
+                            stringResource(R.string.history_empty),
+                            style = AutoLogTheme.type.body,
+                            color = AutoLogTheme.colors.textTertiary,
+                        )
+                    else -> TripList(shown, onAction, Modifier.fillMaxSize())
+                }
             }
         }
     }
@@ -117,18 +125,22 @@ private fun MonthSwitcher(state: HistoryUiState, onAction: (HistoryAction) -> Un
 
 @Composable
 private fun Summary(state: HistoryUiState) {
-    Text(
-        stringResource(R.string.history_summary, state.tripCount, state.totalKm),
-        style = AutoLogTheme.type.body,
-        color = AutoLogTheme.colors.textSecondary,
-    )
+    FadeThrough(stringResource(R.string.history_summary, state.tripCount, state.totalKm), label = "historySummary") {
+        Text(it, style = AutoLogTheme.type.body, color = AutoLogTheme.colors.textSecondary)
+    }
 }
 
 @Composable
 private fun TripList(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modifier: Modifier) {
+    val motion = AutoLogTheme.motion
     LazyColumn(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s3)) {
         items(state.rows, key = { it.tripId }) { row ->
             TripListRow(
+                modifier = Modifier.animateItem(
+                    fadeInSpec = motion.quick(),
+                    placementSpec = motion.smooth(IntOffset.VisibilityThreshold),
+                    fadeOutSpec = motion.swapOut(),
+                ),
                 title = tripRouteText(row),
                 subtitle = tripMetaText(row, withDriver = true, withUpload = true),
                 onClick = { onAction(HistoryAction.Open(row.tripId)) },

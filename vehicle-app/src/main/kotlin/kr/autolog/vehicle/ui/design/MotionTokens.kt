@@ -8,6 +8,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Immutable
+import kr.autolog.vehicle.ui.design.motion.DelayedSpec
 
 /**
  * 디자인 언어 8.2·8.4. [isStatic]은 tier != FULL(정차 Peek) 또는 시스템 "애니메이션 줄이기"일 때 — 화면 전환·등장 모션이 멈춘다.
@@ -17,19 +18,74 @@ import androidx.compose.runtime.Immutable
  */
 @Immutable
 class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boolean) {
-    fun <T> standard(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.9f, stiffness = 400f)
+    // ── 스프링 세 가지(디자인 언어 8.2, 2026-11-10 사용자 결정 — iOS·Apple 방식) ──
+    // 멈춘 상태에서 출발하는 스프링은 속도 0에서 가속해 정점을 찍고 길게 감속한다("느리게 출발 → 빠르게 → 천천히 끝").
+    // 전환 도중 방향이 바뀌어도 지금 속도를 이어받아 자연스럽게 되돌아간다. 모든 움직임은 이 셋 중 하나다.
 
-    fun <T> gentle(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 1.0f, stiffness = 200f)
+    /** 넘침 없음, 응답 ≈ 0.35 s(SwiftUI `.smooth`) — 화면 이동·띄우기·내용 교체·펼침·달 이동. */
+    fun <T> smooth(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else spring(dampingRatio = 1f, stiffness = SMOOTH_STIFFNESS, visibilityThreshold)
+
+    /** 넘침 없음, 응답 ≈ 0.24 s — 사라짐·닫힘·투명도·색. 나타나는 쪽보다 빨리 끝나 새 내용에 시선이 간다. */
+    fun <T> quick(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else spring(dampingRatio = 1f, stiffness = QUICK_STIFFNESS, visibilityThreshold)
+
+    /** 살짝 튐 — 손에 바로 반응하는 작은 "톡"(라디오 점·체크 표시)에만. 큰 면에는 쓰지 않는다. */
+    fun <T> bouncy(visibilityThreshold: T? = null): FiniteAnimationSpec<T> = if (isStatic) {
+        snap()
+    } else {
+        spring(
+            dampingRatio = BOUNCY_DAMPING,
+            stiffness = BOUNCY_STIFFNESS,
+            visibilityThreshold,
+        )
+    }
+
+    // ── 모양(배율·비율) — 이동 거리 dp는 Space 토큰, 여기는 단위 없는 값만 ──
+
+    /** 화면 앞으로 갈 때 뒤 화면이 왼쪽으로 밀리는 비율(폭 대비, iOS 패럴랙스). */
+    val pushParallax: Float get() = 0.3f
+
+    /** 밀린 뒤 화면 위 덮개의 최대 세기 — `scrim` 색의 이 비율(다크 ≈ 34%, 라이트 ≈ 19% 검정). */
+    val pushBehindDim: Float get() = 0.6f
+
+    /** 팝업 카드가 열릴 때 시작 배율 · 닫힐 때 끝 배율. */
+    val modalEnterScale: Float get() = 0.92f
+    val modalExitScale: Float get() = 0.96f
+
+    /** 띄우는 화면(운행 결과)이 아래에서 떠오를 때 시작 배율. */
+    val presentScale: Float get() = 0.96f
+
+    /**
+     * 정차 ↔ 주차 전환 한 번의 페이드(디자인 언어 8.4 — 정차 화면 안은 움직이지 않지만 들어오고 나가는 순간 한 번은 허용).
+     * 정지형(`Static`, 정차)이어도 움직이고, 시스템 "애니메이션 줄이기"·스크린샷(`Still`)이면 즉시.
+     */
+    fun <T> tierFadeOut(): FiniteAnimationSpec<T> =
+        if (!ambient) snap() else spring(dampingRatio = 1f, stiffness = SWAP_OUT_STIFFNESS)
+
+    /** 나가는 화면이 먼저 사라진 뒤(90 ms) 들어온다 — 같은 자리 교체와 같은 순서. */
+    fun <T> tierFadeIn(): FiniteAnimationSpec<T> =
+        if (!ambient) snap() else DelayedSpec(SWAP_DELAY_MS, spring(dampingRatio = 1f, stiffness = QUICK_STIFFNESS))
+
+    /** 같은 자리 교체에서 들어오는 쪽 시작 배율. */
+    val swapScale: Float get() = 0.98f
+
+    /**
+     * 같은 자리 교체(fade-through): 나가는 쪽은 아주 빨리 사라지고(`swapOut`, 응답 ≈ 0.15 s) 들어오는 쪽은 90 ms 뒤에
+     * `smooth`로 떠오른다(`swapIn`) — 옛 내용과 새 내용이 겹쳐 읽히지 않는다(프레임 검토 2026-11-10: 겹치면 412.6과 0.0이 포개져 보였다).
+     */
+    fun <T> swapOut(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else spring(dampingRatio = 1f, stiffness = SWAP_OUT_STIFFNESS, visibilityThreshold)
+
+    fun <T> swapIn(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else DelayedSpec(SWAP_DELAY_MS, smooth(visibilityThreshold))
 
     fun <T> snappy(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.85f, stiffness = 700f)
 
-    /** 숫자 교체·작은 요소. 정지형에서도 FULL→PEEK 전환 한 번은 이 값까지 허용. */
-    fun <T> fadeQuick(): FiniteAnimationSpec<T> = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
-
-    fun <T> fadeStandard(): FiniteAnimationSpec<T> =
-        if (isStatic) tween(150, easing = LinearOutSlowInEasing) else tween(220, easing = FastOutSlowInEasing)
-
     val pressScale: Float get() = if (isStatic) 1f else 0.97f
+
+    /** 누르는 동안 살짝 옅어진다(iOS·토스처럼 "눌렸다"가 바로 보인다). 면 모양과 상관없이 같은 방식이라 둥근 모서리 밖으로 번지지 않는다. */
+    val pressAlpha: Float get() = if (isStatic) 1f else 0.85f
 
     /** 흐름 표시(경로 화살표) 한 바퀴 시간. 급하지 않게 — 숨 쉬는 속도보다 조금 빠른 정도. */
     val flowPeriodMs: Int get() = 1_400
@@ -57,6 +113,13 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
     fun <T> successPopBack(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.5f, stiffness = 600f)
 
     companion object {
+        private const val SMOOTH_STIFFNESS = 320f
+        private const val QUICK_STIFFNESS = 700f
+        private const val BOUNCY_DAMPING = 0.55f
+        private const val BOUNCY_STIFFNESS = 600f
+        private const val SWAP_OUT_STIFFNESS = 1_600f
+        private const val SWAP_DELAY_MS = 90
+
         val Standard = MotionTokens(isStatic = false, ambient = true)
         val Static = MotionTokens(isStatic = true, ambient = true)
 

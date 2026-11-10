@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +22,8 @@ import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
+import kr.autolog.vehicle.ui.design.motion.animateSelectColor
 
 /**
  * 디자인 언어 11장 DockTile — 화면 맨 아래 동작. **아이콘 네모 + 그 아래 이름**(앱 아이콘·테슬라 하단 바 방식).
@@ -50,26 +53,29 @@ fun DockTile(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {
+        // 같은 자리에서 동작이 바뀌면([기록 시작] → [기록 종료]) 색은 교차하고 아이콘·이름은 그 자리에서 바뀐다
+        val face by animateSelectColor(if (emphasized) c.accentFill else c.surface1)
+        val tint by animateSelectColor(if (emphasized) c.onAccent else c.accent)
+        val labelColor by animateSelectColor(if (emphasized) c.accent else c.textSecondary)
         Box(
             Modifier
                 .size(iconSize)
                 .clip(RoundedCornerShape(Radius.lg))
-                .background(if (emphasized) c.accentFill else c.surface1),
+                .background(face),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = if (emphasized) c.onAccent else c.accent,
-                modifier = Modifier.size(Size.iconLg),
+            FadeThrough(icon, contentAlignment = Alignment.Center, label = "dockIcon") {
+                Icon(it, contentDescription = null, tint = tint, modifier = Modifier.size(Size.iconLg))
+            }
+        }
+        FadeThrough(label, contentAlignment = Alignment.TopCenter, label = "dockLabel") {
+            Text(
+                it,
+                style = AutoLogTheme.windowType.dockLabel,
+                color = labelColor,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
             )
         }
-        Text(
-            label,
-            style = AutoLogTheme.windowType.dockLabel,
-            color = if (emphasized) c.accent else c.textSecondary,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-        )
     }
 }

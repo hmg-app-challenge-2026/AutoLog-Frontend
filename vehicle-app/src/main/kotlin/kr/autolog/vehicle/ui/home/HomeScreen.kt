@@ -24,10 +24,12 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.ModalHost
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.components.TopLine
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.screenMargin
 
 @Composable
@@ -56,7 +58,6 @@ fun HomeRoute() {
 @Composable
 fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    val sections = homeSections(state, onAction)
     // 상태 줄 아래 소제목만 내려 배치하고, 값·목록·하단 동작의 레이아웃 높이는 유지한다.
     // 넓은 화면은 내용이 세로 가운데라 소제목만 96 dp 내려 상태 줄과 떼어 둔다(2026-11-10 사용자 지시)
     val sectionTitleOffset = Modifier.offset(y = if (layout == WindowLayout.WIDE) Space.s9 else Space.s3)
@@ -70,12 +71,15 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 TopLine { HomeStatus(state) }
                 // 좌우 반반. 소제목은 위에 나란히 고정하고, 내용은 그 아래 남는 높이의 세로 가운데에 —
                 // 짧은 내용(기록 중 거리·경로)이 소제목 바로 밑에 붙어 위로 쏠리지 않게. 길면(최근 운행 3건) 칸을 다 쓰고 그 칸만 스크롤
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
-                    sections.forEach { section ->
-                        Column(Modifier.weight(1f).fillMaxHeight()) {
-                            SectionHeader(section.title, sectionTitleOffset)
-                            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                                ScrollColumn(Modifier.fillMaxWidth(), content = section.content)
+                // 대기 ↔ 기록 중이 바뀌면 두 섹션이 그 자리에서 교체된다(디자인 언어 8.2 — 나가는 쪽은 자기 상태로 그려진다)
+                FadeThrough(state, Modifier.weight(1f), contentKey = { it.phase }, label = "homeSections") { shown ->
+                    Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
+                        homeSections(shown, onAction).forEach { section ->
+                            Column(Modifier.weight(1f).fillMaxHeight()) {
+                                SectionHeader(section.title, sectionTitleOffset)
+                                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                                    ScrollColumn(Modifier.fillMaxWidth(), content = section.content)
+                                }
                             }
                         }
                     }
@@ -92,25 +96,28 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 // 분할 화면 한 칸은 높이가 넉넉해 두 섹션을 상태 줄에서 48 dp 내리고 섹션 사이를 64 dp로(2026-11-10 사용자 지시).
                 // 세로 창은 그대로(바로 아래 32 dp)
                 val narrow = layout == WindowLayout.NARROW
-                ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {
-                    if (narrow) Spacer(Modifier.height(Space.s7))
-                    // 한 칸에 위아래로: 값 → 맥락
-                    sections.forEachIndexed { i, section ->
-                        if (i > 0) Spacer(Modifier.height(if (narrow) Space.s8 else Space.s6))
-                        Column {
-                            SectionHeader(section.title, sectionTitleOffset)
-                            section.content(this)
+                FadeThrough(state, Modifier.weight(1f).fillMaxWidth(), contentKey = {
+                    it.phase
+                }, label = "homeSections") { shown ->
+                    ScrollColumn(Modifier.fillMaxSize()) {
+                        if (narrow) Spacer(Modifier.height(Space.s7))
+                        // 한 칸에 위아래로: 값 → 맥락
+                        homeSections(shown, onAction).forEachIndexed { i, section ->
+                            if (i > 0) Spacer(Modifier.height(if (narrow) Space.s8 else Space.s6))
+                            Column {
+                                SectionHeader(section.title, sectionTitleOffset)
+                                section.content(this)
+                            }
                         }
                     }
                 }
                 HomeDock(state, onAction)
             }
         }
-        if (state.phase == HomePhase.NEEDS_RECOVERY) {
+        ModalHost(visible = state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
         }
-        val missedKm = state.missedKm
-        if (state.phase == HomePhase.READY && missedKm != null) {
+        ModalHost(state.missedKm?.takeIf { state.phase == HomePhase.READY }) { missedKm ->
             MissedTripDialog(
                 missedKm,
                 onAdd = { onAction(HomeAction.AcceptMissedTrip) },

@@ -17,9 +17,11 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -27,6 +29,9 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.motion.PopVisibility
+import kr.autolog.vehicle.ui.design.motion.animateSelectColor
+import kr.autolog.vehicle.ui.design.motion.animateSelectDp
 
 /**
  * 디자인 언어 11장 ChoiceRow — 여러 개 중 **하나**를 고르는 선택형 행(운행 결과의 운행 목적, 주유 연결 운행).
@@ -37,12 +42,11 @@ import kr.autolog.vehicle.ui.design.Space
 @Composable
 fun ChoiceRow(text: String, selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     val c = AutoLogTheme.colors
+    val ring by animateSelectColor(if (selected) c.accent else c.textTertiary)
     OptionRow(text, null, selected, onClick, Role.RadioButton, modifier) {
-        Box(
-            Modifier.size(Size.iconSm).border(Size.ring, if (selected) c.accent else c.textTertiary, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (selected) Box(Modifier.size(Size.statusDot).clip(CircleShape).background(c.accent))
+        Box(Modifier.size(Size.iconSm).border(Size.ring, ring, CircleShape), contentAlignment = Alignment.Center) {
+            // 고르면 가운데 점이 "톡" 나타난다(디자인 언어 8.2 선택)
+            PopVisibility(selected) { Box(Modifier.size(Size.statusDot).clip(CircleShape).background(c.accent)) }
         }
     }
 }
@@ -61,17 +65,14 @@ fun CheckRow(
 ) {
     val c = AutoLogTheme.colors
     val box = RoundedCornerShape(Radius.sm)
+    val fill by animateSelectColor(if (checked) c.accentFill else Color.Transparent)
+    val edge by animateSelectColor(if (checked) c.accentFill else c.textTertiary)
     OptionRow(text, detail, checked, onClick, Role.Checkbox, modifier) {
         Box(
-            Modifier
-                .size(Size.iconSm)
-                .clip(box)
-                .then(
-                    if (checked) Modifier.background(c.accentFill) else Modifier.border(Size.ring, c.textTertiary, box),
-                ),
+            Modifier.size(Size.iconSm).clip(box).background(fill).border(Size.ring, edge, box),
             contentAlignment = Alignment.Center,
         ) {
-            if (checked) Icon(Icons.Rounded.Check, contentDescription = null, tint = c.onAccent)
+            PopVisibility(checked) { Icon(Icons.Rounded.Check, contentDescription = null, tint = c.onAccent) }
         }
     }
 }
@@ -90,6 +91,8 @@ private fun OptionRow(
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val shape = RoundedCornerShape(Radius.md)
+    val edgeWidth by animateSelectDp(if (selected) Size.ring else Size.hairline)
+    val edgeColor by animateSelectColor(if (selected) c.accent else c.outline)
     Box(
         modifier
             .fillMaxWidth()
@@ -103,7 +106,7 @@ private fun OptionRow(
                 .matchParentSize()
                 .clip(shape)
                 .background(c.surface1)
-                .border(if (selected) Size.ring else Size.hairline, if (selected) c.accent else c.outline, shape),
+                .border(edgeWidth, edgeColor, shape),
         )
         Row(
             Modifier.padding(horizontal = Space.s5),

@@ -1009,6 +1009,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | V-15 | Pleos에서 AAOS `GEAR_SELECTION`·`CURRENT_GEAR`·`PARKING_BRAKE_ON`·`IGNITION_STATE`가 읽히는지(권한 `CAR_POWERTRAIN`), 에뮬레이터 VHAL로 값이 바뀌는지 | 1.1.1 2~4순위 | `CarPropertyManager.getProperty`·`registerCallback` 로그 | 대기 |
 | V-16 | 시동 OFF→ON 뒤 앱 프로세스가 살아 있는지 / 부팅 후 서비스를 다시 띄울 수 있는지(Backend sdk-findings #4b) | 1.1.1 최후 규칙의 처리 시점 | 에뮬레이터 전원 OFF→ON | 대기 |
 | V-17 | 정차(PEEK, CarUxRestrictions 적용 중)에 Peek 경로 화살표의 반복 투명도 애니메이션이 Pleos 운전자 주의 분산 기준에 맞는지(안 되면 정차 중엔 정지 그림, `MotionTokens.ambient` 한 곳만 바꾸면 됨) | 7.0 | 맥 에뮬레이터 + Pleos 가이드 확인 | 대기 |
+| V-18 | 화면 전환·팝업·내용 교체 모션이 Pleos 에뮬레이터에서 매끄러운가(끊김 없이 60 fps 체감), 시스템 애니메이션 배율(`animator_duration_scale`)이 기본 1인가 — 0이면 앱은 모든 모션을 끈다(디자인 언어 8.5, 사용자 결정 "존중") | 디자인 언어 8장, 모션 계획(`docs/superpowers/plans/2026-11-10-motion.md`) | 맥 에뮬레이터: `adb shell settings get global animator_duration_scale` + 앞으로·뒤로·운행 결과·팝업·달 이동·정차 전환 직접 조작 | 대기 |
 
 
 ### 13.1 알고 받아들인 사각지대
@@ -1064,3 +1065,4 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 1.8 | 2026-11-10 | 7.3 운행 결과 버튼을 [저장하기] 하나로(예전 [저장]·[메인 화면으로 · n초]), 남은 시간은 분류 문구 뒤 "n초 후 자동 저장돼요.", 막대는 마감 순간 0(D-27·D-28·D-29 문구 갱신) |
 | 1.9 | 2026-11-10 | 운행 결과 [계속 기록하기] → [기록 이어가기](홈 [기록 시작]·[기록 종료]와 같은 말) |
 | 1.10 | 2026-11-10 | 7.3 저장 완료 화면(체크 애니메이션 · "운행 기록을 저장했어요" · [확인], 체크를 다 그린 뒤 1초 뒤 자동으로 닫힘) |
+| 1.11 | 2026-11-10 | 모션 다시 설계(디자인 언어 1.45~): 화면 전환 방향(앞으로·뒤로·띄우기·같은 자리, `navTransitionOf`), 팝업 닫힘(`ModalHost`), 화면 안 교체·펼침·선택, 정차·주차 전환 페이드. 모두 스프링. V-18 추가 |

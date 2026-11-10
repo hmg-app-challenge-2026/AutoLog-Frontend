@@ -3,6 +3,7 @@ package kr.autolog.vehicle.ui.settings
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -37,6 +38,8 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.NavRow
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
+import kr.autolog.vehicle.ui.design.motion.DirectionalContent
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.screenMargin
 import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.trips.tripWhenText
@@ -83,15 +86,29 @@ fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, m
                 val open = state.section ?: SettingsSection.entries.first()
                 Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     SectionList(state, onAction, Modifier.fillMaxWidth(MASTER_WIDTH).fillMaxHeight(), selected = open)
-                    ScrollColumn(Modifier.weight(1f).fillMaxHeight()) { SectionDetail(open, state, onAction) }
+                    // 왼쪽에서 다른 섹션을 고르면 오른쪽 상세가 그 자리에서 교체된다
+                    FadeThrough(open, Modifier.weight(1f).fillMaxHeight(), label = "settingsDetail") { section ->
+                        ScrollColumn(Modifier.fillMaxSize()) { SectionDetail(section, state, onAction) }
+                    }
                 }
             }
-            state.section == null -> SectionList(state, onAction, Modifier.weight(1f).fillMaxWidth(), selected = null)
-            else -> ScrollColumn(
-                Modifier.weight(
-                    1f,
-                ).widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally),
-            ) { SectionDetail(state.section, state, onAction) }
+            // 세로 창: 목록 → 상세는 앞으로(오른쪽에서), 상세 → 목록은 뒤로(왼쪽에서)
+            else -> DirectionalContent(
+                state.section,
+                direction = { _, to -> if (to != null) 1 else -1 },
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                label = "settingsTall",
+            ) { section ->
+                if (section == null) {
+                    SectionList(state, onAction, Modifier.fillMaxSize(), selected = null)
+                } else {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                        ScrollColumn(Modifier.widthIn(max = Size.sheetMaxWidth).fillMaxWidth()) {
+                            SectionDetail(section, state, onAction)
+                        }
+                    }
+                }
+            }
         }
     }
     SettingsDialogHost(state, onAction)

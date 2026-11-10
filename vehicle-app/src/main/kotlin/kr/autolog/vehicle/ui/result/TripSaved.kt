@@ -67,7 +67,7 @@ private fun SavedMessage() {
     LaunchedEffect(Unit) {
         if (motion.isStatic) return@LaunchedEffect
         delay((motion.successRingDelayMs + motion.successStrokeDelayMs).toLong())
-        shown.animateTo(1f, motion.fadeStandard())
+        shown.animateTo(1f, motion.smooth())
     }
     Text(
         stringResource(R.string.result_saved),

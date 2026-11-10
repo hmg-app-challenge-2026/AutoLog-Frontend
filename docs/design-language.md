@@ -328,7 +328,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 주 버튼은 스크롤 영역 밖 **하단 고정**. 스크롤해야 보이는 주 버튼을 만들지 않는다.
 - **오른쪽 위 운전자 배지는 Home "대기 중"에만**(D-30 — 기록 중 Home·Peek에도 없다). Home의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 배지 자리를 비운다 — 배지가 실제로 잰 폭이 들어온다(배지가 없는 화면은 0). 보조 화면은 그 자리까지 내용에 쓴다.
 - 스크롤 영역에 더 볼 내용이 있으면 그 가장자리를 `Modifier.verticalScrollFade(state, space.7)`로 흐린다. 잘린 글자가 "깨짐"이 아니라 "더 있음"으로 읽힌다.
-- 창 크기가 바뀔 때 레이아웃 전환: 주차 중 `motion.layout`, Peek에서는 즉시.
+- 창 크기가 바뀔 때 레이아웃 전환: 주차 중 `smooth`, Peek에서는 즉시.
 - 시스템 UI가 겹칠 수 있으므로 핵심 정보는 창 가장자리에서 24 dp 안쪽에 두지 않는다.
 
 ---
@@ -337,25 +337,46 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 
 ### 8.1 원칙
 
-- 모션은 **상태 변화를 설명**할 때만 쓴다: 어디서 왔고 어디로 갔는지, 무엇이 눌렸는지, 무엇이 바뀌었는지.
-- 위치·크기는 스프링, 투명도는 짧은 tween.
-- **무한 반복 애니메이션은 쓰지 않는다.** 예외: 주차 중 1초 이상 걸리는 로딩의 진행 표시.
+- 모션은 **상태 변화를 설명**할 때만 쓴다: 어디서 왔고 어디로 갔는지, 무엇이 눌렸는지, 무엇이 바뀌었는지(Pleos 가이드 — 애니메이션은 상태 설명용, 장식·반복 금지, 입력 후 0.25초 안에 반응).
+- **공간은 하나다.** 깊이 들어가면 오른쪽에서 들어오고 뒤로 가면 오른쪽으로 빠진다. 결과처럼 위에 얹히는 화면은 아래에서 떠오른다. 같은 자리에서 내용만 바뀌면 그 자리에서 교차한다. 방향이 곧 의미다.
+- **모든 움직임은 스프링**(iOS·Apple 방식, 2026-11-10 사용자 결정). 멈춘 상태에서 출발한 스프링은 속도 0에서 가속해 길게 감속한다 — "느리게 출발 → 빠르게 → 천천히 끝"이 물리로 들어 있고, 도중에 방향이 바뀌어도 속도를 이어받는다. 화면·팝업·내용은 **넘침 없는** 스프링, 손에 반응하는 작은 "톡"만 살짝 튄다. 예외: 남은 시간 막대는 흐르는 시간을 그대로 보여 주므로 직선.
+- **사라짐은 나타남보다 빨리** 끝난다(`quick`) — 새 내용에 시선이 간다.
+- **닫힘에도 모션이 있다.** 열릴 때만 움직이고 닫힐 때 툭 사라지는 곳을 만들지 않는다.
+- **새 화면은 첫 프레임부터 누를 수 있다**(0.25초 규칙). 나가는 화면은 누를 수 없다.
+- 움직이는 것은 이동·배율·투명도(`graphicsLayer`)만. 큰 면의 크기를 매 프레임 바꾸거나 그림자·블러를 움직이지 않는다.
+- **무한 반복 애니메이션은 쓰지 않는다.** 예외: 주차 중 1초 이상 걸리는 로딩의 진행 표시, 경로 화살표 흐름(8.4).
+- 하지 않는 것: 목록 줄줄이 떠오르기, 화면 들어올 때 내용 연출, 배경 패럴랙스, 반짝임.
 
 ### 8.2 토큰 (`AutoLogTheme.motion.*`)
 
+스프링 세 가지가 모든 움직임의 바탕이다. 화면 코드는 아래 이름만 쓰고 `spring(...)`·`tween(...)`을 직접 쓰지 않는다.
+
 | 토큰 | 정의 | 쓰임 |
 |---|---|---|
-| `spring.standard` | `spring(dampingRatio = 0.9f, stiffness = 400f)` | 일반 상태 변화(칩 등장, 펼침) |
-| `spring.gentle` | `spring(dampingRatio = 1.0f, stiffness = 200f)` | 화면 전환, 큰 면, 레이아웃 전환 |
-| `spring.snappy` | `spring(dampingRatio = 0.85f, stiffness = 700f)` | 눌림 복원, 토글, 선택 |
-| `fade.quick` | `tween(150, easing = LinearOutSlowInEasing)` | 숫자 교체, 작은 요소 |
-| `fade.standard` | `tween(220, easing = FastOutSlowInEasing)` | 시트·다이얼로그 등장 |
-| `press` | 누름: 0.97배, `tween(90)` / 뗌: `spring.snappy`로 1.0 | 모든 버튼·타일·카드 |
-| `motion.screen` | 들어옴: `fadeIn(fade.standard)` + 4% 거리 슬라이드 + 0.98→1 확대(`spring.gentle`) / 나감: `fadeOut(fade.quick)` | 화면 push·pop |
-| `motion.hero` | `SharedTransitionLayout` + `boundsTransform = spring.gentle` | 프로필 타일 → Home 칩 |
-| `motion.layout` | `animateContentSize`·`Modifier.animateBounds` + `spring.gentle` | WIDE↔NARROW 전환 |
-| `motion.loading` | 결정형 진행 막대 우선. 불확정이면 1200 ms 주기의 느린 밝기 변화(주차 전용) | 엑셀 생성, QR 발급 |
-| `motion.success` | 원 `spring(0.55, 320)`(한 번 넘쳤다 자리 잡음) → 160 ms 뒤 테두리 한 번 퍼짐 `tween(640, LinearOutSlowIn)` → 120 ms 뒤 체크 긋기 `tween(420, cubic(0.65,0,0.35,1))`(짧은 획 → 긴 획) → 톡 `tween(90)` 1.06배 · `spring(0.5, 600)` 복귀(진동 없음). 전체 약 1초, **한 번만** | 저장 완료(`SuccessCheck`) |
+| `smooth()` | `spring(dampingRatio = 1f, stiffness = 320f)` — 응답 ≈ 0.35 s, 넘침 없음(SwiftUI `.smooth`) | 화면 이동·띄우기·내용 교체·펼침·달 이동 |
+| `quick()` | `spring(1f, 700f)` — 응답 ≈ 0.24 s, 넘침 없음 | 사라짐·닫힘·투명도·색 |
+| `bouncy()` | `spring(0.55f, 600f)` — 살짝 튐 | 라디오 점·체크 표시의 "톡" |
+| `snappy()` | `spring(0.85f, 700f)` | 누름 복귀 |
+| 화면 앞으로 | 들어오는 화면: 오른쪽 **전체 폭** → 0(`smooth`). 뒤 화면: 0 → 왼쪽 폭의 `pushParallax`(30%) + `scrim` 색 덮개 0 → `pushBehindDim`(scrim의 60%) | Home → 주유·운행 기록·설정·운전자 선택, 운행 기록 → 내보내기·지난 운행 |
+| 화면 뒤로 | 앞으로의 반대 — 떠나는 화면이 위에서 오른쪽으로 빠진다 | < · 시스템 뒤로, 처음 화면으로 한꺼번에 돌아가기(주유 저장 → Home, 운전자 선택 → Home) |
+| 띄우기 · 내리기 | 들어옴: 아래 `space.9`(96 dp) → 0 + `presentScale`(0.96)→1(`smooth`) + 투명도(`quick`). 나감: 아래로 48 dp + 투명도(`quick`) | 운행 직후 운행 결과 카드 |
+| 같은 자리 교체 | 나가는 쪽 투명도 `swapOut`(spring(1, 1600) — 응답 ≈ 0.15 s), 들어오는 쪽 투명도 + `swapScale`(0.98)→1 + 8 dp 위로 `swapIn`(90 ms 늦게 시작하는 `smooth`, `DelayedSpec`) — 옛 내용이 먼저 사라진 뒤 새 내용이 떠올라 둘이 겹쳐 읽히지 않는다(Material fade-through 순서) | QR → 주유 입력 창, 첫 실행 운전자 선택 → Home, 화면 안 내용 교체(Home 상태, 설정 상세, 결과 → 저장 완료) |
+| 팝업 | 열림: scrim 투명도(`quick`) + 카드 `modalEnterScale`(0.92)→1 + 투명도(`smooth`). 닫힘: 카드 → `modalExitScale`(0.96) + 투명도, scrim(`quick`) | `ModalCard` 전부 |
+| 방향 교체 | 누른 쪽으로 48 dp 밀려나고 반대편에서 들어옴(`smooth`) + 투명도(`quick`) | 달 이동 ‹ › |
+| 펼침·접힘 | 크기(`smooth`) + 투명도(`quick`) | 안내 줄 생김·사라짐, 버튼 개수 변화, 운전자 지정 줄 |
+| 선택 | 색·테두리(`quick`), 점·체크 표시 0→1(`bouncy`) | `ChoiceRow`·`CheckRow`·강조 타일·`NavRow` 선택·버튼 활성 |
+| `pressScale` | 누름 0.97배 `tween(90)` → 뗌 `snappy` | 모든 버튼·타일·카드 |
+| hero | `SharedTransitionLayout` + `smooth` | 프로필 타일 → Home 배지 |
+| 정차·주차 전환 | 나가는 화면 `tierFadeOut`(spring 1600) → 90 ms 뒤 들어오는 화면 `tierFadeIn`(quick). 정차(Static)에서도 이 한 번은 움직임, `Still`이면 즉시. 주행으로는 바로 비움 | FULL ↔ PEEK |
+| `success*` | 원 `spring(0.55, 320)` → 테두리 퍼짐 → 체크 긋기 → 톡(약 1초, 한 번) | 저장 완료(`SuccessCheck`) |
+| 로딩 | 결정형 진행 막대 우선. 불확정이면 1200 ms 주기의 느린 밝기 변화(주차 전용) | 엑셀 생성, QR 발급 |
+
+- 정지형(`Static` — 정차 Peek, `Still` — 시스템 "애니메이션 줄이기"·스크린샷)이면 위 스프링이 모두 `snap()` — 즉시 끝난다.
+- 예전 `spring.standard`·`spring.gentle`·`fade.quick`·`fade.standard`·`motion.screen`(4% 슬라이드)은 이 표로 옮기며 없앴다(1.45).
+- **화면·컴포넌트는 도우미만 쓴다**(`ui/design/motion/`): 화면 전환은 `FullApp`이 알아서(`navTransitionOf`), 팝업은 `ModalHost`, 같은 자리 교체 `FadeThrough`, 방향 교체 `DirectionalContent`, 펼침·접힘 `ExpandVisibility`, 있다 없다 하는 한 줄 `ExpandSwap`, 점·체크 "톡" `PopVisibility`, 선택 색 `animateSelectColor`·`animateSelectDp`, 목록 줄 `Modifier.animateItem`(fadeIn `quick` · 자리 `smooth` · fadeOut `swapOut`). `AnimatedContent`·`animate*AsState`를 화면에서 직접 쓰지 않는다.
+- **`FadeThrough` 상자로 폭을 채우지 않는다** — 채우면 안쪽 `widthIn(max)` 상한이 무시된다(운행 결과 버튼이 전체 폭으로 늘어난 회귀, 1.46). 가운데 정렬은 바깥 `Box`가 맡는다.
+- 누름: `pressScale` 0.97 + `pressAlpha` 0.85(살짝 옅어짐 — 면 모양과 상관없어 둥근 모서리 밖으로 번지지 않는다).
+- 검토: WSL에서는 움직임을 못 보므로 `recordRoborazziDemoDebug`가 전환마다 0~600 ms 프레임을 이어 붙인 `src/test/screenshots/motion/*.png`를 남긴다. 느낌·성능은 맥 에뮬레이터(V-18).
 
 ### 8.3 눌림 피드백
 
@@ -372,8 +393,8 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 항목 | 주차 (FULL) | 정차 (PEEK) | 주행 (BACKGROUND) |
 |---|---|---|---|
 | 위치·크기 변화 | 스프링 | `snap()` (즉시) | 화면 없음 |
-| 투명도 변화 | `fade.*` | FULL→PEEK 전환 한 번만 `fade.quick` | 화면 없음 |
-| 화면 전환 | `motion.screen` | 없음(Peek 한 장) | 화면 없음 |
+| 투명도 변화 | `quick` | FULL→PEEK 전환 한 번만 `quick` | 화면 없음 |
+| 화면 전환 | 앞으로·뒤로·띄우기·같은 자리(8.2) | 없음(Peek 한 장) | 화면 없음 |
 | 숫자 갱신 | 크로스페이드 | 즉시 교체, 1초 스로틀 | 화면 없음 |
 | shared-element | `motion.hero` | 사용 안 함 | — |
 | 로딩 | `motion.loading` | 정적 문구 | — |
@@ -453,7 +474,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). `section` 38 sp(크기 모드는 하나 — 예전 `dense`는 1.33에서 삭제). `textSecondary`, 아래 `space.3`. 데이터 값과 카드 안 목록 항목은 소제목보다 클 수 있다 |
 | `Section` | `SectionHeader` + 내용 한 묶음. **같은 정보는 어느 화면·창 크기에서나 같은 소제목**(정보 종류마다 문구 하나): 주행 거리 · 운행 경로 · 누적 거리 · 이번 달 운행 정보 · 최근 운행 기록. Home(WIDE·NARROW·TALL)과 Peek이 함께 쓴다 |
 | `TripListRow` | 운행 한 건 목록 줄(Home 최근 운행 기록, 이력). `surface1`, `radius.md`, 위 경로(`label`, 한 줄) · 아래 날짜·거리·목적(`caption`, `textSecondary`). 목적이 없으면 끝이 "목적 미입력" — **색으로 재촉하지 않는다**(D-26). 줄 전체가 터치 대상, 끝에 ›  `extra` = 아래 줄 밑에 붙는 내용(운행 기록 조회의 "운전자 지정" 후보처럼 그 줄에서 바로 끝낼 일), 그 안의 버튼은 줄 탭과 따로 눌린다 |
-| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
+| `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 열림·닫힘: `ModalHost`로 감싸 scrim 투명도 + 카드 0.92→1(열림 `smooth`) / 1→0.96(닫힘 `quick`), 닫히는 동안 눌림 없음(8.2). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
 | `CloseButton` | 닫기 X. 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 영역 76 dp. 접근성 이름 "닫기" |
 | `BackButton` | 뒤로(<, `ArrowBackIosNew`) — `RoundIconButton`과 같은 모양. **보조 화면 머리 줄 왼쪽**(D-30). 팝업은 뒤로가 아니라 오른쪽 위 X(`CloseButton`)로 끝낸다 |
 | `RoundIconButton` | 아이콘 하나짜리 동그란 버튼 — `CloseButton`(X)·`BackButton`(<)이 쓰는 모양: 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 76 dp. 비활성이면 아이콘 `textTertiary`·안 눌림. `label`은 접근성 이름 |
@@ -505,7 +526,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - [ ] 주차(FULL) 전용 화면이다 — 정차면 Peek, 주행이면 화면 없음으로 바뀐다
 - [ ] 조작 예산 안이다(이 결정에 팔을 몇 번 드는지 셌다)
 - [ ] 자동 진행이 있으면 남은 시간과 1탭 취소가 보이고, 시간이 다 되면 저절로 눌릴 버튼이 주 버튼이다(D-28 원칙 변경)
-- [ ] 모션은 상태를 설명할 때만, 토큰으로만 썼다
+- [ ] 모션은 상태를 설명할 때만, 토큰으로만 썼다. 열릴 때뿐 아니라 닫힐 때도 움직이고, 방향이 의미와 맞다(앞으로 = 오른쪽에서, 뒤로 = 오른쪽으로, 얹힘 = 아래에서)
 - [ ] 문구가 해요체·결론 먼저·한두 줄이다. 오류 문구에 해결 방법이 있다
 - [ ] 모르는 값을 추정해 그리지 않았다
 - [ ] 아이콘 단독 버튼에 `contentDescription`이 있다
@@ -585,3 +606,5 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.42 | 2026-11-10 | Home 넓은 화면 소제목 32 → 64 dp 내림(사용자 지시) |
 | 1.43 | 2026-11-10 | Home 넓은 화면(사용자 지시): 소제목 64 → 96 dp 내림, 기록 중 출발지·목적지 `title` 44 → `display` 64 sp(`homeRoute`) |
 | 1.44 | 2026-11-10 | Home 기록 중 운행 경로 표시(○ · 갈매기 · ●)를 글자에 맞게 키움(`RouteFlow(markerScale)`, 넓은 화면 2배 · 분할 화면 1.6배). **운전자 배지는 Home "대기 중"에만** — 기록 중 Home·Peek에서 뺌(사용자 지시 "완전히 메인 화면일 때만") |
+| 1.45 | 2026-11-10 | **모션 다시 설계**(사용자 지시 "토스·iOS처럼 부드럽고 자연스럽게", 계획 `docs/superpowers/plans/2026-11-10-motion.md`): 모든 움직임을 스프링 세 가지(`smooth`·`quick`·`bouncy`)로, 화면 앞으로·뒤로 방향(iOS 패럴랙스)·띄우기·같은 자리 교체·팝업 닫힘·펼침·선택. 8.1·8.2 다시 씀 |
+| 1.46 | 2026-11-10 | 모션 구현 마무리: 같은 자리 교체를 fade-through 순서로(나가는 쪽 `swapOut` → 90 ms 뒤 `swapIn`, `DelayedSpec` — 프레임 검토에서 옛 숫자와 새 숫자가 포개져 보였다), 팝업 `ModalHost`(닫힘 포함), 선택·강조·누름(`pressAlpha`), Home·운행 결과·운행 기록·내보내기·설정 화면 안 교체, 정차·주차 전환 페이드. 도우미만 쓰는 규칙 |

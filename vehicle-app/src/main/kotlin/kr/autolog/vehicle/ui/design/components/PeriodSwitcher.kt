@@ -23,6 +23,7 @@ import kr.autolog.vehicle.R
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.motion.DirectionalContent
 import java.time.YearMonth
 
 /**
@@ -55,12 +56,15 @@ fun PeriodSwitcher(
             onPrev,
             enabled = true,
         )
-        Text(
-            stringResource(R.string.period_month, month.year, month.monthValue),
-            modifier = Modifier.padding(horizontal = Space.s2),
-            style = AutoLogTheme.windowType.periodTitle,
-            color = c.textPrimary,
-        )
+        // 누른 쪽으로 옛 달이 밀려나고 새 달이 반대편에서 들어온다(디자인 언어 8.2 방향 교체)
+        DirectionalContent(month, direction = { from, to -> to.compareTo(from) }, label = "month") {
+            Text(
+                stringResource(R.string.period_month, it.year, it.monthValue),
+                modifier = Modifier.padding(horizontal = Space.s2),
+                style = AutoLogTheme.windowType.periodTitle,
+                color = c.textPrimary,
+            )
+        }
         StepArrow(Icons.AutoMirrored.Rounded.KeyboardArrowRight, stringResource(R.string.month_next), onNext, canGoNext)
     }
 }

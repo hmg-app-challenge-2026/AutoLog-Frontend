@@ -34,6 +34,7 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.ActionTile
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalHost
 import kr.autolog.vehicle.ui.design.components.ProfileTile
 import kr.autolog.vehicle.ui.design.components.TertiaryButton
 import kr.autolog.vehicle.ui.design.twoColumns
@@ -90,8 +91,8 @@ fun ProfilePickerScreen(
             }
             TertiaryButton(stringResource(R.string.picker_later), onClick = { onAction(ProfilePickerAction.Later) })
         }
-        if (state.showAll) AllProfilesDialog(state.profiles, onAction)
-        state.addForm?.let { AddDriverDialog(it, onAction) }
+        ModalHost(visible = state.showAll) { AllProfilesDialog(state.profiles, onAction) }
+        ModalHost(state.addForm) { AddDriverDialog(it, onAction) }
     }
 }
 

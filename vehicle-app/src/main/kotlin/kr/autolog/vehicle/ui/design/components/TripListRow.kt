@@ -14,6 +14,10 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +26,7 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.motion.ExpandVisibility
 
 /**
  * 디자인 언어 11장 TripListRow — 운행 한 건 목록 줄(Home "최근 운행 기록", 이력). `surface1`, `radius.md`, 최소 높이 76 dp.
@@ -58,7 +63,10 @@ fun TripListRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            extra?.invoke(this)
+            // 그 줄에서 끝낼 일이 끝나면(운전자 지정) 접히며 사라진다
+            var lastExtra by remember { mutableStateOf(extra) }
+            if (extra != null) lastExtra = extra
+            ExpandVisibility(extra != null) { Column { lastExtra?.invoke(this) } }
         }
         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = c.textTertiary)
     }

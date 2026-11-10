@@ -15,6 +15,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,9 @@ import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
+import kr.autolog.vehicle.ui.design.motion.PopVisibility
+import kr.autolog.vehicle.ui.design.motion.animateSelectColor
 
 /** 모든 버튼의 공통 몸체. 잠금(LocalInputLocked)이면 스스로 비활성(디자인 언어 11장). */
 @Composable
@@ -49,15 +53,18 @@ private fun ButtonBody(
     // 잠금이면 눌리지 않을 뿐 아니라 비활성 색으로 보인다(누를 수 없음을 미리 알림)
     val active = enabled && !LocalInputLocked.current && !loading
     val shape = RoundedCornerShape(Radius.lg)
-    val face = if (active || loading) container else disabledContainer
+    // 활성·비활성·로딩이 바뀌면 바탕·글자 색이 교차한다(디자인 언어 8.2 선택)
+    val face by animateSelectColor(if (active || loading) container else disabledContainer)
     // 로딩 중에도 글자를 투명하게 남겨 버튼 폭이 흔들리지 않게 한다
-    val textColor = if (loading) {
-        Color.Transparent
-    } else if (active) {
-        content
-    } else {
-        colors.textTertiary
-    }
+    val textColor by animateSelectColor(
+        if (loading) {
+            Color.Transparent
+        } else if (active) {
+            content
+        } else {
+            colors.textTertiary
+        },
+    )
     Box(
         modifier =
         modifier
@@ -81,8 +88,11 @@ private fun ButtonLabel(
     style: TextStyle = AutoLogTheme.type.label,
 ) {
     Box(modifier, contentAlignment = Alignment.Center) {
-        Text(text = text, style = style, color = color, textAlign = TextAlign.Center)
-        if (loading) {
+        // 같은 버튼의 이름이 바뀌면([운행기록부 만들기] → [보내기 · 2명]) 그 자리에서 교체된다
+        FadeThrough(text, contentAlignment = Alignment.Center, label = "buttonLabel") {
+            Text(text = it, style = style, color = color, textAlign = TextAlign.Center)
+        }
+        PopVisibility(loading) {
             CircularProgressIndicator(color = spinner, strokeWidth = Space.s1, modifier = Modifier.size(Size.icon))
         }
     }
