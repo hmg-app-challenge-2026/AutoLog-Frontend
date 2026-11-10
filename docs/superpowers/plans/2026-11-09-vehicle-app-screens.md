@@ -144,6 +144,8 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 ## Task 8: 설정 (F-24, F-01, 8장)
 
+> 2026-11-10 구현(브랜치 `feat/settings`): 스펙 7.9가 지금 모습의 기준. 8개 섹션 모두, 키보드 규제 연결 포함.
+
 **Files:** Create `ui/settings/*`(섹션별 파일) · Test VM·screen·screenshot
 
 - 스펙 7.9 섹션 8개. WIDE: 좌 섹션 목록 / 우 상세. NARROW·TALL: 목록 → 상세(내부 상태로 전환, Route는 하나).
