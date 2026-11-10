@@ -15,9 +15,11 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -26,6 +28,8 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.motion.PopVisibility
+import kr.autolog.vehicle.ui.design.motion.animateSelectColor
 
 /**
  * 디자인 언어 11장 NavRow — 다른 화면·상세로 들어가는 목록 줄(설정의 섹션 목록). 왼쪽 아이콘(`icon` 36 dp, `accent`) ·
@@ -44,6 +48,8 @@ fun NavRow(
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
     val shape = RoundedCornerShape(Radius.md)
+    // 넓은 창에서 다른 섹션을 고르면 테두리가 교차하며 옮겨 간다
+    val edge by animateSelectColor(if (selected) c.accent else Color.Transparent)
     Row(
         modifier
             .fillMaxWidth()
@@ -52,7 +58,7 @@ fun NavRow(
             .tappable(onClick)
             .clip(shape)
             .background(c.surface1)
-            .then(if (selected) Modifier.border(Size.ring, c.accent, shape) else Modifier)
+            .border(Size.ring, edge, shape)
             .padding(horizontal = Space.s5, vertical = Space.s3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Space.s4),
@@ -64,7 +70,7 @@ fun NavRow(
                 Text(it, style = t.caption, color = c.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
-        if (!selected) {
+        PopVisibility(!selected) {
             Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = c.textTertiary)
         }
     }

@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -22,7 +23,11 @@ val MotionFrameTimes = listOf(0L, 16L, 50L, 100L, 150L, 200L, 250L, 300L, 400L, 
  * 호출 전 `compose.mainClock.autoAdvance = false`. 시트는 `recordRoborazziDemoDebug`로 돌릴 때만 생긴다.
  */
 fun ComposeContentTestRule.recordMotionFrames(name: String, scale: Int = 4, start: () -> Unit) {
-    runOnUiThread(start)
+    // 상태를 바꾼 뒤 바로 알린다 — 시계를 멈춘 테스트에서는 그래야 다음 프레임이 바뀐 값을 그린다
+    runOnUiThread {
+        start()
+        Snapshot.sendApplyNotifications()
+    }
     mainClock.advanceTimeByFrame() // 스택 변화가 구성에 반영된 첫 프레임 = 0 ms
     var at = 0L
     // captureToImage는 시계를 멈춘 상태에서 다시 그리기를 기다리다 멈춘다 — Roborazzi로 프레임마다 파일을 찍고 다시 읽는다

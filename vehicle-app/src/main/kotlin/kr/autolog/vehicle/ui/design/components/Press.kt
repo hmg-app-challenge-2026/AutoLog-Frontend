@@ -52,8 +52,14 @@ private fun Modifier.pressFeedback(interaction: MutableInteractionSource): Modif
         animationSpec = if (pressed) tween(90) else motion.snappy(),
         label = "press",
     )
+    val alpha by animateFloatAsState(
+        targetValue = if (pressed) motion.pressAlpha else 1f,
+        animationSpec = if (pressed) tween(90) else motion.quick(),
+        label = "pressAlpha",
+    )
     graphicsLayer {
         scaleX = scale
         scaleY = scale
+        this.alpha = alpha
     }
 }

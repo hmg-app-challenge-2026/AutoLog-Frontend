@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -47,7 +48,10 @@ class ModalHostTest {
         show()
         compose.waitForIdle()
         compose.mainClock.autoAdvance = false
-        compose.runOnUiThread { message = null }
+        compose.runOnUiThread {
+            message = null
+            Snapshot.sendApplyNotifications()
+        }
         compose.mainClock.advanceTimeBy(48)
         compose.onNodeWithText("놓친 운행").assertExists()
         compose.mainClock.advanceTimeBy(1_000)
@@ -59,7 +63,10 @@ class ModalHostTest {
         show()
         compose.waitForIdle()
         compose.mainClock.autoAdvance = false
-        compose.runOnUiThread { message = null }
+        compose.runOnUiThread {
+            message = null
+            Snapshot.sendApplyNotifications()
+        }
         compose.mainClock.advanceTimeBy(32)
         compose.onNodeWithText("추가").performClick()
         assertEquals(0, clicks)

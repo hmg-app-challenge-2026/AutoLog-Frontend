@@ -62,6 +62,9 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
 
     val pressScale: Float get() = if (isStatic) 1f else 0.97f
 
+    /** 누르는 동안 살짝 옅어진다(iOS·토스처럼 "눌렸다"가 바로 보인다). 면 모양과 상관없이 같은 방식이라 둥근 모서리 밖으로 번지지 않는다. */
+    val pressAlpha: Float get() = if (isStatic) 1f else 0.85f
+
     /** 흐름 표시(경로 화살표) 한 바퀴 시간. 급하지 않게 — 숨 쉬는 속도보다 조금 빠른 정도. */
     val flowPeriodMs: Int get() = 1_400
 
