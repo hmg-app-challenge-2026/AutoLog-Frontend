@@ -18,8 +18,11 @@ class WindowTypeTest {
     }
 
     @Test
-    fun `분할 화면 한 칸은 넓은 창과 같은 글자 — 실제 크기 1280×1268이라 줄일 이유가 없다`() {
-        assertEquals(windowTypeOf(WindowLayout.WIDE, t), windowTypeOf(WindowLayout.NARROW, t))
+    fun `분할 화면 한 칸은 넓은 창과 같은 글자 — Home 운행 경로만 한 단계 크게(headline)`() {
+        assertEquals(
+            windowTypeOf(WindowLayout.WIDE, t).copy(homeRoute = t.headline),
+            windowTypeOf(WindowLayout.NARROW, t),
+        )
     }
 
     @Test

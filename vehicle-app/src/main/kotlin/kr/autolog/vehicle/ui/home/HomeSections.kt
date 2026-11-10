@@ -46,10 +46,13 @@ internal fun homeSections(state: HomeUiState, onAction: (HomeAction) -> Unit): L
 @Composable
 private fun TripRoute(state: HomeUiState) {
     val c = AutoLogTheme.colors
+    // 분할 화면 한 칸은 소제목 바로 밑에 붙어 보여 소제목과 출발지 사이를 24 dp 더 띄운다(넓은 화면은 내용이 세로 가운데라 이미 떨어져 있다)
+    if (LocalWindowLayout.current == WindowLayout.NARROW) Spacer(Modifier.height(Space.s5))
     RouteFlow(
         origin = state.origin,
         destination = state.destination ?: stringResource(R.string.peek_no_destination),
         destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
+        textStyle = AutoLogTheme.windowType.homeRoute,
     )
 }
 

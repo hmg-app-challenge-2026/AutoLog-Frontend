@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -67,12 +68,13 @@ fun RouteFlow(
     modifier: Modifier = Modifier,
     destinationColor: Color = AutoLogTheme.colors.textPrimary,
     live: Boolean = true,
+    textStyle: TextStyle = AutoLogTheme.type.title,
 ) {
     val c = AutoLogTheme.colors
-    val t = AutoLogTheme.type
     val density = LocalDensity.current
-    val originStyle = t.title.copy(fontWeight = FontWeight.Normal)
-    val destinationStyle = t.title
+    // 출발지·목적지는 같은 크기 — 출발지는 보통 굵기·회색, 목적지는 굵게·기본색
+    val originStyle = textStyle.copy(fontWeight = FontWeight.Normal)
+    val destinationStyle = textStyle
     // 점을 그 줄 글자의 첫 줄 가운데에 맞추려고, 점 칸 높이를 글자 한 줄 높이로 둔다
     val originLine = with(density) { originStyle.lineHeight.toDp() }
     val destinationLine = with(density) { destinationStyle.lineHeight.toDp() }

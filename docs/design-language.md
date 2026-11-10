@@ -240,7 +240,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
-- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 창 크기마다 무엇이 달라지는지가 이 표 한 곳에 있다. Pleos 1:1 분할 한 칸(NARROW, 1280×1268 dp)은 넓은 화면과 **같은 글자**다(1.33) — 실제 크기에서 줄일 이유가 없었다.
+- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 창 크기마다 무엇이 달라지는지가 이 표 한 곳에 있다. Pleos 1:1 분할 한 칸(NARROW, 1280×1268 dp)은 넓은 화면과 **같은 글자**다(1.33) — 실제 크기에서 줄일 이유가 없었다. 예외는 Home 기록 중 운행 경로(`homeRoute`) 하나 — 두 섹션을 위아래로 쌓아 폭이 남으므로 한 단계 크게(1.40).
 
   | 역할 | WIDE · NARROW | TALL |
   |---|---|---|
@@ -252,6 +252,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
   | `dockLabel` 하단 타일 이름 | `label` | `label` |
   | `resultTitle` 운행 결과 제목 | `display` | `title` |
   | `resultClassification` 분류 문구 | `title` | `label` |
+  | `homeRoute` Home 기록 중 출발지·목적지 | `title`(NARROW만 `headline`) | `title` |
   | `periodTitle` 달 이동 "2026년 11월" | `title` | `title` |
   | `headerTitle` 보조 화면 머리 줄 제목 | `title` | `title` |
 
@@ -470,7 +471,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `TopLine` · `ScrollColumn` | 전체 화면 공용 뼈대. `TopLine` = 맨 위 76 dp 줄(상태 줄·화면 제목), 오른쪽은 운전자 배지 자리로 비운다. `ScrollColumn` = 위쪽 정렬 + 넘치면 스크롤 + 가장자리 흐림 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusLine`: 초록 점 + `기록 중`, 터치 불가. 운전자는 오른쪽 위 `DriverBadge`) ② 섹션 "주행 거리"(`HeroMetric`, `heroSmall`) ③ 섹션 "운행 경로"(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) — 소제목·모양은 Home과 같은 `Section` ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
-| `RouteFlow` | 출발 ○ → 갈매기 화살표(기록 중) 또는 정지 연결선(완료) → 도착 ●를 왼쪽에, 장소 이름을 오른쪽에 둔다. 출발지 `title` 44 sp 보통·회색, 목적지 `title` 44 sp 굵게·기본색. 목적지는 두 줄까지 표시한다. 크기 모드는 하나뿐(예전 좁은 칸용 `dense` 모드는 쓰는 곳이 없어져 삭제) |
+| `RouteFlow` | 출발 ○ → 갈매기 화살표(기록 중) 또는 정지 연결선(완료) → 도착 ●를 왼쪽에, 장소 이름을 오른쪽에 둔다. 출발지 보통·회색, 목적지 굵게·기본색 — 둘 다 같은 크기(`textStyle`, 기본 `title` 44 sp. Home 분할 화면은 `windowType.homeRoute`). 목적지는 두 줄까지 표시한다. 크기 모드는 하나뿐(예전 좁은 칸용 `dense` 모드는 쓰는 곳이 없어져 삭제) |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
 
@@ -579,3 +580,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.37 | 2026-11-10 | 운행 결과 [계속 기록하기] → **[기록 이어가기]**(사용자 결정 — 홈 [기록 시작]·[기록 종료]와 같은 말, 새 기록이 아니라 같은 운행을 잇는다는 뜻이 분명) |
 | 1.38 | 2026-11-10 | **저장 완료 화면**(사용자 지시 — 토스 송금 완료·Face ID처럼): 5초가 다 되거나 [저장하기]로 저장을 마치면 결과 카드가 크로스페이드로 바뀌어 가운데 `SuccessCheck`(새 컴포넌트, `motion.success`) + "운행 기록을 저장했어요"(`screenTitle`, 체크를 긋기 시작할 때 아래에서 떠오름) + 맨 아래 [확인](방금 누른 [저장하기] 자리). **체크를 다 그린 뒤** 1초가 지나면 저절로 들어온 화면으로(화면이 뜬 때 기준 아님), [확인]은 바로. `size.successBadge` 200 dp |
 | 1.39 | 2026-11-10 | `SuccessCheck` 진동 삭제(사용자 결정 — 차량 디스플레이엔 진동 장치가 없는 경우가 많고, 있어도 완료 알림엔 필요 없다). 버튼 눌림 햅틱(8.3)은 그대로(V-07) |
+| 1.40 | 2026-11-10 | Home 기록 중 **분할 화면(NARROW)만**: 출발지·목적지 `title` 44 → `headline` 52 sp(글자 역할 `homeRoute`, `RouteFlow(textStyle)`), "운행 경로" 소제목과 출발지 사이 +24 dp(소제목이 12 dp 내려앉아 붙어 보였다). 넓은 화면은 그대로(사용자 지시) |

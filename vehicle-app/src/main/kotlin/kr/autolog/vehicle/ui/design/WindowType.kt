@@ -26,6 +26,9 @@ data class WindowType(
     val dockLabel: TextStyle,
     /** 운행 결과 맨 위 제목("운행 기록을 완료했어요") — 넓은·분할 화면은 화면 제목과 같은 `display`(2026-11-10 사용자 지시), 세로 창은 폭이 좁아 `title`. */
     val resultTitle: TextStyle,
+    /** Home 기록 중 "운행 경로"의 출발지·목적지 — 분할 화면 한 칸은 두 섹션을 위아래로 쌓아 폭이 남으므로 한 단계 크게(2026-11-10 사용자 지시). */
+    val homeRoute: TextStyle,
+
     /** 운행 결과 분류 문구("일반 업무용 거리 48.2 km로 분류돼요. 3초 후 자동 저장돼요."). */
     val resultClassification: TextStyle,
     /** 기간 이동 가운데 글자("2026년 11월" — 운행 기록 조회·운행기록부). */
@@ -46,6 +49,7 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         dockLabel = t.label,
         resultTitle = t.display,
         resultClassification = t.title,
+        homeRoute = if (layout == WindowLayout.NARROW) t.headline else t.title,
         periodTitle = t.title,
         headerTitle = t.title,
     )
@@ -58,6 +62,7 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         dockLabel = t.label,
         resultTitle = t.title,
         resultClassification = t.label,
+        homeRoute = t.title,
         periodTitle = t.title,
         headerTitle = t.title,
     )
