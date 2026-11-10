@@ -97,10 +97,17 @@ fun FuelEntryScreen(state: FuelEntryUiState, onAction: (FuelEntryAction) -> Unit
                     }
                 }
             }
+            // 한 칸 배치면 [추가하기]도 칸과 같은 폭으로 가운데(넓은 화면에서 버튼만 화면 끝까지 퍼지지 않게)
+            val twoColumns = LocalWindowLayout.current == WindowLayout.WIDE && state.receipt != null
             PrimaryButton(
                 stringResource(R.string.fuel_add_confirm),
                 onClick = { onAction(FuelEntryAction.Add) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                if (twoColumns) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier.widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally)
+                },
                 enabled = state.canAdd,
                 loading = state.saving,
             )

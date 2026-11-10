@@ -60,7 +60,7 @@ fun ReportScreen(state: ReportUiState, onAction: (ReportAction) -> Unit, modifie
     ) {
         ScreenHeader(stringResource(R.string.report_title)) { onAction(ReportAction.Back) }
         Column(
-            Modifier.weight(1f).fillMaxWidth().widthIn(max = Size.sheetMaxWidth).align(Alignment.CenterHorizontally),
+            Modifier.weight(1f).widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(Space.s4),
         ) {
             ScrollColumn(Modifier.weight(1f).fillMaxWidth()) {

@@ -3,6 +3,8 @@ package kr.autolog.vehicle.ui.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -48,25 +50,27 @@ internal fun SettingsDialogHost(state: SettingsUiState, onAction: (SettingsActio
                 )
             },
         ) {
-            InputField(
-                stringResource(R.string.settings_server_url),
-                d.serverUrl,
-                { onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, it)) },
-                keyboardType = KeyboardType.Uri,
-            )
-            Text(
-                stringResource(R.string.settings_register_code),
-                style = AutoLogTheme.type.caption,
-                color = AutoLogTheme.colors.textSecondary,
-            )
-            CodeBoxes(d.code)
-            NumericKeypad(
-                onDigit = { onAction(SettingsAction.RegisterKey(it)) },
-                onDelete = { onAction(SettingsAction.RegisterDelete) },
-                allowDecimal = false,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-            DialogError(state, SettingsTask.REGISTER)
+            DialogBody {
+                InputField(
+                    stringResource(R.string.settings_server_url),
+                    d.serverUrl,
+                    { onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, it)) },
+                    keyboardType = KeyboardType.Uri,
+                )
+                Text(
+                    stringResource(R.string.settings_register_code),
+                    style = AutoLogTheme.type.caption,
+                    color = AutoLogTheme.colors.textSecondary,
+                )
+                CodeBoxes(d.code)
+                NumericKeypad(
+                    onDigit = { onAction(SettingsAction.RegisterKey(it)) },
+                    onDelete = { onAction(SettingsAction.RegisterDelete) },
+                    allowDecimal = false,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+                DialogError(state, SettingsTask.REGISTER)
+            }
         }
         is SettingsDialog.AddRecipient -> ModalCard(
             title = stringResource(R.string.settings_add_recipient),
@@ -81,20 +85,22 @@ internal fun SettingsDialogHost(state: SettingsUiState, onAction: (SettingsActio
                 )
             },
         ) {
-            InputField(
-                stringResource(R.string.settings_email),
-                d.email,
-                { onAction(SettingsAction.EditDialog(DialogField.EMAIL, it)) },
-                keyboardType = KeyboardType.Email,
-                placeholder = stringResource(R.string.settings_email_hint),
-            )
-            InputField(
-                stringResource(R.string.settings_name_optional),
-                d.name,
-                { onAction(SettingsAction.EditDialog(DialogField.NAME, it)) },
-                placeholder = stringResource(R.string.settings_recipient_name_hint),
-            )
-            DialogError(state, SettingsTask.ADD_RECIPIENT)
+            DialogBody {
+                InputField(
+                    stringResource(R.string.settings_email),
+                    d.email,
+                    { onAction(SettingsAction.EditDialog(DialogField.EMAIL, it)) },
+                    keyboardType = KeyboardType.Email,
+                    placeholder = stringResource(R.string.settings_email_hint),
+                )
+                InputField(
+                    stringResource(R.string.settings_name_optional),
+                    d.name,
+                    { onAction(SettingsAction.EditDialog(DialogField.NAME, it)) },
+                    placeholder = stringResource(R.string.settings_recipient_name_hint),
+                )
+                DialogError(state, SettingsTask.ADD_RECIPIENT)
+            }
         }
         is SettingsDialog.AddStaff -> ModalCard(
             title = stringResource(R.string.settings_add_staff),
@@ -109,26 +115,28 @@ internal fun SettingsDialogHost(state: SettingsUiState, onAction: (SettingsActio
                 )
             },
         ) {
-            InputField(
-                stringResource(R.string.settings_name),
-                d.name,
-                { onAction(SettingsAction.EditDialog(DialogField.NAME, it)) },
-                placeholder = stringResource(R.string.picker_add_name_hint),
-            )
-            InputField(
-                stringResource(R.string.settings_dept_optional),
-                d.dept,
-                { onAction(SettingsAction.EditDialog(DialogField.DEPT, it)) },
-                placeholder = stringResource(R.string.picker_add_dept_hint),
-            )
-            InputField(
-                stringResource(R.string.settings_email_optional),
-                d.email,
-                { onAction(SettingsAction.EditDialog(DialogField.EMAIL, it)) },
-                keyboardType = KeyboardType.Email,
-                placeholder = stringResource(R.string.settings_email_hint),
-            )
-            DialogError(state, SettingsTask.ADD_STAFF)
+            DialogBody {
+                InputField(
+                    stringResource(R.string.settings_name),
+                    d.name,
+                    { onAction(SettingsAction.EditDialog(DialogField.NAME, it)) },
+                    placeholder = stringResource(R.string.picker_add_name_hint),
+                )
+                InputField(
+                    stringResource(R.string.settings_dept_optional),
+                    d.dept,
+                    { onAction(SettingsAction.EditDialog(DialogField.DEPT, it)) },
+                    placeholder = stringResource(R.string.picker_add_dept_hint),
+                )
+                InputField(
+                    stringResource(R.string.settings_email_optional),
+                    d.email,
+                    { onAction(SettingsAction.EditDialog(DialogField.EMAIL, it)) },
+                    keyboardType = KeyboardType.Email,
+                    placeholder = stringResource(R.string.settings_email_hint),
+                )
+                DialogError(state, SettingsTask.ADD_STAFF)
+            }
         }
         is SettingsDialog.RemoveRecipient -> ModalCard(
             title = stringResource(R.string.settings_remove_recipient_title),
@@ -141,15 +149,23 @@ internal fun SettingsDialogHost(state: SettingsUiState, onAction: (SettingsActio
                 )
             },
         ) {
-            ModalText(
-                stringResource(
-                    R.string.settings_remove_recipient_body,
-                    d.name?.let { stringResource(R.string.settings_name_with_email, it, d.email) } ?: d.email,
-                ),
-            )
-            DialogError(state, SettingsTask.REMOVE_RECIPIENT)
+            DialogBody {
+                ModalText(
+                    stringResource(
+                        R.string.settings_remove_recipient_body,
+                        d.name?.let { stringResource(R.string.settings_name_with_email, it, d.email) } ?: d.email,
+                    ),
+                )
+                DialogError(state, SettingsTask.REMOVE_RECIPIENT)
+            }
         }
     }
+}
+
+/** 팝업 내용 묶음 — 칸·글자 사이 16 dp(`ModalCard` 내용 영역은 간격을 주지 않는다). */
+@Composable
+private fun DialogBody(content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s4), content = content)
 }
 
 /** 연결 코드 6칸 — 입력한 숫자는 칸에, 다음 칸은 accent 테두리 없이 비어 있다. */

@@ -89,7 +89,7 @@ fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, m
             else -> ScrollColumn(
                 Modifier.weight(
                     1f,
-                ).fillMaxWidth().widthIn(max = Size.sheetMaxWidth).align(Alignment.CenterHorizontally),
+                ).widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally),
             ) { SectionDetail(state.section, state, onAction) }
         }
     }

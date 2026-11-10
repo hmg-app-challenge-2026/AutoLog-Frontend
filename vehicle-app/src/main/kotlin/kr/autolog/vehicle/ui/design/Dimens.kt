@@ -39,7 +39,7 @@ object Size {
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp
     val profileTileCompact = 128.dp
-    val peekMaxWidth = 560.dp
+    val peekMaxWidth = 960.dp // Peek 내용 최대 폭 — 2560 dp 차량 화면 가운데에서 목적지·상황 줄이 꺾이지 않게(560이면 "물어볼/게요")
     val sheetMaxWidth = 960.dp
     val dialogMaxWidth = 640.dp // ModalCard 기본 최대 폭
 

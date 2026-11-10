@@ -60,7 +60,7 @@ fun HistoryScreen(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modi
     ) {
         ScreenHeader(stringResource(R.string.history_title)) { onAction(HistoryAction.Back) }
         Column(
-            Modifier.weight(1f).fillMaxWidth().widthIn(max = Size.sheetMaxWidth).align(Alignment.CenterHorizontally),
+            Modifier.weight(1f).widthIn(max = Size.sheetMaxWidth).fillMaxWidth().align(Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(Space.s4),
         ) {
             Toolbar(state, onAction)

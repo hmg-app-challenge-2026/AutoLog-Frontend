@@ -124,7 +124,17 @@ private fun HomeStatus(state: HomeUiState) {
         StatusLine(
             text = stringResource(R.string.status_recording),
             dot = c.success,
-            detail = stringResource(R.string.home_status_elapsed, state.elapsedMin ?: 0),
+            // 좁은 창은 오른쪽 배지 때문에 폭이 모자라 "35분"만(넓은·세로 창은 "35분 경과")
+            detail = stringResource(
+                if (LocalWindowLayout.current ==
+                    WindowLayout.NARROW
+                ) {
+                    R.string.home_status_elapsed_short
+                } else {
+                    R.string.home_status_elapsed
+                },
+                state.elapsedMin ?: 0,
+            ),
         )
     } else {
         StatusLine(text = stringResource(R.string.status_ready), dot = c.textTertiary)
