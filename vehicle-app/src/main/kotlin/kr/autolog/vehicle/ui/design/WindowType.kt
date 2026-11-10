@@ -31,6 +31,8 @@ data class WindowType(
     val resultHomeButton: TextStyle,
     /** 기간 이동 가운데 글자("2026년 11월" — 운행 기록 조회·운행기록부). */
     val periodTitle: TextStyle,
+    /** 보조 화면 머리 줄 제목(`ScreenHeader` — "운행 기록", "운행기록부 내보내기"). */
+    val headerTitle: TextStyle,
 )
 
 /** [layout]에 맞는 역할별 글자. 순수 함수 — `WindowTypeTest`가 표를 고정한다. */
@@ -46,6 +48,7 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultClassification = t.title,
         resultHomeButton = t.caption,
         periodTitle = t.title,
+        headerTitle = t.title,
     )
     WindowLayout.TALL -> WindowType(
         screenTitle = t.display,
@@ -58,6 +61,7 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultClassification = t.label,
         resultHomeButton = t.label,
         periodTitle = t.title,
+        headerTitle = t.title,
     )
     // 분할 화면 한 칸: 한 단계씩 작게
     WindowLayout.NARROW -> WindowType(
@@ -71,5 +75,6 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultClassification = t.label,
         resultHomeButton = t.label,
         periodTitle = t.label,
+        headerTitle = t.label,
     )
 }

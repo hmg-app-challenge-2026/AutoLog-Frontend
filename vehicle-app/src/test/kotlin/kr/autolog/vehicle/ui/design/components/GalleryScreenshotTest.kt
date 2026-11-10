@@ -29,6 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.time.YearMonth
 
 /**
  * 디자인 언어 11장 컴포넌트 갤러리. 컴포넌트를 추가·변경하면 여기도 같이 고친다 — 갤러리가 지금 컴포넌트 목록과 같아야 한다.
@@ -99,6 +100,9 @@ class GalleryScreenshotTest {
     @Test
     fun forms() = captureAll("components_forms", tall) {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
+            CheckRow("회계팀", checked = true, onClick = {}, detail = "회사 지정 · accounting@example.com")
+            CheckRow("나", checked = false, onClick = {}, detail = "me@example.com")
+            PeriodSwitcher(YearMonth.of(2026, 11), canGoNext = false, onPrev = {}, onNext = {})
             InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
             InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
             ChoiceRow("일반 업무", selected = true, onClick = {})

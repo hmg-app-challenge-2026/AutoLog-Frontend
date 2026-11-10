@@ -256,6 +256,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
   | `resultClassification` 분류 문구 | `title` | `label` | `label` |
   | `resultHomeButton` [메인 화면으로 · n초] | `caption` | `label` | `label` |
   | `periodTitle` 달 이동 "2026년 11월" | `title` | `title` | `label` |
+  | `headerTitle` 보조 화면 머리 줄 제목 | `title` | `title` | `label` |
 
 - `fine`(22 sp)보다 작은 글자를 만들지 않는다. `fine`은 좁은 창의 dense 버튼처럼 공간이 정말 모자란 곳에만.
 - **기준 화면**: Pleos Connect v2.1.0 에뮬레이터(API 34) 기본 디스플레이는 **2560×1440 px, 밀도 1.0(160 dpi)** — 캡처에서 넓은 화면 여백 48 dp가 48 px, 하단 타일 네모 112 dp가 112 px로 찍힌다. 위 상태 표시줄 76 px·아래 하단 바 96 px를 빼면 **앱 영역 ≈ 2560×1268 dp**(WIDE). 2026-11-10 사용자가 이 에뮬레이터에서 지금 글자 크기·위치(PR #4)를 보고 괜찮다고 확인 — 글자·간격을 바꿀 때 기준은 이 화면이다. Roborazzi 스크린샷(1024×640 등)은 이 화면보다 훨씬 작아서 글자가 더 커 보이고 넘칠 수 있다 — 넘침 판단은 에뮬레이터 캡처로 한다.
@@ -320,6 +321,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | **Picker** (ProfilePicker) | 타일 한 줄 가운데(200 dp), 끝에 `[+ 새 운전자 추가]` | 3열(128 dp), 제목은 어절 단위 두 줄 | 3열(160 dp) |
 | **Media + Form** (FuelEntry — 영수증에서 왔을 때) | 좌 이미지 / 우 필드 | 이미지 상단 1/3 + 필드 | NARROW와 같음 |
 | **List** (운행 기록 조회, 스펙 7.8) | 머리 줄 → 툴바 한 줄(◀ 달 ▶ · 오른쪽 끝 [운행기록부 내보내기]) → 합계 → 목록. 내용은 `sheetMaxWidth`(960 dp) 폭으로 가운데 | 머리 줄(배지 아래) → 달 이동 / 합계 / 버튼(전폭) → 목록 | NARROW와 같음 |
+| **Form + Action** (운행기록부 내보내기, 스펙 7.7) | 머리 줄 → ◀ 달 ▶ → 요약 카드(네 칸 한 줄) → 받는 사람 체크 → 사내 서버 한 줄, 맨 아래 단계 한 줄 + 주 버튼 하나(고정). 내용은 `sheetMaxWidth` 폭으로 가운데 | 머리 줄(배지 아래) → 같은 순서, 요약 카드 2×2 | NARROW와 같음 |
 | **Master–Detail** (Settings) | 좌 목록 / 우 상세 | 목록 → 상세 push | NARROW와 같음 |
 | **Result** (운행 결과, D-27·D-28) | 콘텐츠 폭 반반: 운행 거리·시간과 운행 목적 소제목을 같은 높이에서 시작하고, 두 칸 전체를 세로 가운데보다 32 dp 위에 둔다. 각 소제목 아래 내용 여백은 공통 12 dp에 16 dp를 더한다. 거리·시간과 경로 사이 간격은 높이가 넉넉한 차량 화면에서 112 dp, 작은 창에서 48 dp. 분류 결과는 두 칸 아래 가운데에 큰 글씨로 표시하고, 그 아래 버튼 3개([계속 기록하기] · [수정하기] · [메인 화면으로 · n초])가 콘텐츠 폭 전체를 쓴다. 맨 위 가장자리 남은 시간 막대 | 운행 거리·시간과 경로를 48 dp 간격으로 전폭에 쌓고, 운행 목적은 스크롤 영역에 표시. 분류 결과는 아래 가운데, 버튼은 한 줄 고정 | 넓은 창 순서를 세로 한 칸에 표시하고(두 섹션 사이 48 dp) 분류 결과 아래 버튼 두 줄 |
 
@@ -453,11 +455,14 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
 | `CloseButton` | 닫기 X. 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 영역 76 dp. 접근성 이름 "닫기" |
 | `RoundIconButton` | 아이콘 하나짜리 동그란 버튼 — `CloseButton`(X)과 같은 모양: 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 76 dp. 달 이동 ◀ ▶. 비활성이면 아이콘 `textTertiary`·안 눌림. `label`은 접근성 이름 |
+| `PeriodSwitcher` | 달 이동 **◀ 2026년 11월 ▶** — `RoundIconButton` 둘 + 가운데 `periodTitle`. 미래 달이면 ▶ 비활성. 운행 기록 조회·운행기록부 내보내기가 같이 쓴다 |
+| `ScreenHeader` | 보조 화면 맨 위 머리 줄: 가운데 제목(`headerTitle`, 두 줄까지) + 왼쪽 X. 넓은 창은 배지와 같은 줄 — 제목 양옆을 배지 폭만큼 똑같이 비워 가운데를 지키며 겹치지 않는다. 좁은·세로 창은 배지 아래 줄로 내리고 양옆은 X 폭만 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
 | `ConfidenceRow` | 영수증 필드 한 줄: 라벨 · 값 · 신뢰도 점(초록/노랑/빨강) + 노랑·빨강이면 "확인 필요" 글자와 `warning`/`danger` 테두리 |
 | `ChoiceRow` | 여러 개 중 하나를 고르는 **선택형 행**(운행 결과의 운행 목적). 같은 폭 행을 8 dp 간격으로 쌓아 한 묶음으로 읽히게: `surface1` 면 · `radius.md` · 76 dp, 왼쪽 원 28 dp + 글자 `body`, 행 전체 터치. 선택 = `accent` 테두리 3 dp + 원 가운데 점, 고르지 않은 행 = `outline` 1 dp 테두리(바탕에 묻히지 않게). `onClick = null`이면 보기 전용(누를 수 없을 뿐 글자는 같은 색) `dense`(좁은 창): 보이는 면 56 dp · 글자 `caption` 22 sp, 터치 76 dp 그대로 — 간격 없이 쌓아도 면 사이 20 dp 틈 |
+| `CheckRow` | 여러 개를 함께 고르는 체크 행(운행기록부 받는 사람). `ChoiceRow`와 같은 틀(면·테두리·76 dp) — 표시만 네모: 고름 = `accentFill` 네모 + 흰 ✓, 안 고름 = `textTertiary` 테두리. `detail` = 이름 아래 보조 줄(`caption`, `textSecondary`) |
 | `EdgeCountdownBar` | 화면 맨 위 가장자리에 붙는 가는 남은 시간 막대(4 dp, `accent`, 바탕 줄 없음). 남은 비율만큼 왼쪽부터 채워 있고 오른쪽 끝이 왼쪽으로 줄어든다. 1초마다 바뀌는 값을 1초 동안 선형으로(정지형이면 바로). 운행 결과에서 주 버튼 글자 "메인 화면으로 · 3초"와 함께 쓴다 |
 | `TopLine` · `ScrollColumn` | 전체 화면 공용 뼈대. `TopLine` = 맨 위 76 dp 줄(상태 줄·화면 제목), 오른쪽은 운전자 배지 자리로 비운다. `ScrollColumn` = 위쪽 정렬 + 넘치면 스크롤 + 가장자리 흐림 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
@@ -558,3 +563,4 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.24 | 2026-11-09 | **실제 에뮬레이터(Pleos Connect v2.1.0, 2560×1440 px · 160 dpi)에서 글자 크기·위치 재조정**(PR #4 `fix/font-size`): `title` 36→44 · `body`·`label` 28→34 · `caption` 22→28 · `section` 22→38 · `fine` 20→22(글자 하한) · `sectionFine` 20→30 · `heroSmall` 96→112 · `heroCompact` 72→80 · `display` 56→64 · `headline` 44→52, 운행 결과 값 `resultDistance` 64 · `resultTime` 56 추가. 하단 타일 네모 창 크기별 112/96/88 dp, 좁은 창 타일 이름은 두 줄 짧은 이름. 운행 결과 좁은 창은 거리·시간과 경로를 전폭으로 쌓고 분류 문구를 버튼 위 가운데로. 2026-11-10 사용자가 에뮬레이터에서 확인 — 이후 글자·간격의 기준 화면 |
 | 1.25 | 2026-11-10 | 코드 품질 정리(동작·모양 같음 — 스크린샷 130장 중 124장 바이트 동일, 나머지는 QR): 창 크기별 글자 분기 7곳을 `AutoLogTheme.windowType` 역할 표 한 곳으로, 운행 결과 섹션 공통 규칙(넓은 창 소제목 아래 +16 dp)을 `ResultSection` 하나로, 리터럴 `800.dp` → `Size.spaciousHeight`. `RouteFlow`의 쓰지 않는 `dense` 모드 삭제. 주유 QR이 자체 비트맵 대신 공용 `QrImage`(오류 정정 M · 둥근 모서리) |
 | 1.26 | 2026-11-10 | 운행 기록 조회(스펙 7.8) **List** 배치 추가. `RoundIconButton`(CloseButton이 같은 것을 씀)·`TripListRow`의 `extra` 칸·`ScreenHeader`(보조 화면 머리 줄 공용)·글자 역할 `periodTitle`. 운행 결과 카드 사후 확인 모드(D-29): 카운트다운 막대 없음, 제목 "11월 7일 19:34 운행", 오른쪽 버튼 [닫기] |
+| 1.27 | 2026-11-10 | 운행기록부 내보내기(스펙 7.7) **Form + Action** 배치. `PeriodSwitcher`(운행 기록 조회와 공용)·`CheckRow`(`ChoiceRow`와 같은 틀)·글자 역할 `headerTitle`. `ScreenHeader`: 긴 제목이 X·배지와 겹치던 문제 — 넓은 창은 양옆 대칭 여백, 세로 창도 배지 아래 줄로 |

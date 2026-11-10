@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,7 +29,7 @@ import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.Avatar
-import kr.autolog.vehicle.ui.design.components.RoundIconButton
+import kr.autolog.vehicle.ui.design.components.PeriodSwitcher
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.components.TripListRow
@@ -111,26 +108,12 @@ private fun Toolbar(state: HistoryUiState, onAction: (HistoryAction) -> Unit) {
 }
 
 @Composable
-private fun MonthSwitcher(state: HistoryUiState, onAction: (HistoryAction) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        RoundIconButton(
-            Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
-            stringResource(R.string.month_prev),
-            onClick = { onAction(HistoryAction.PrevMonth) },
-        )
-        Text(
-            stringResource(R.string.history_month, state.month.year, state.month.monthValue),
-            style = AutoLogTheme.windowType.periodTitle,
-            color = AutoLogTheme.colors.textPrimary,
-        )
-        RoundIconButton(
-            Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-            stringResource(R.string.month_next),
-            onClick = { onAction(HistoryAction.NextMonth) },
-            enabled = state.canGoNext,
-        )
-    }
-}
+private fun MonthSwitcher(state: HistoryUiState, onAction: (HistoryAction) -> Unit) = PeriodSwitcher(
+    state.month,
+    state.canGoNext,
+    onPrev = { onAction(HistoryAction.PrevMonth) },
+    onNext = { onAction(HistoryAction.NextMonth) },
+)
 
 @Composable
 private fun Summary(state: HistoryUiState) {
