@@ -13,6 +13,7 @@ import kr.autolog.vehicle.R
 import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.components.CodeField
 import kr.autolog.vehicle.ui.design.components.DangerButton
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.ModalCard
@@ -60,15 +61,13 @@ private fun SettingsDialogCard(
                     { onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, it)) },
                     keyboardType = KeyboardType.Uri,
                 )
-                // 서버 주소와 같은 키보드 입력. 서버 코드는 글자와 숫자가 섞인다(2~9, A~Z 중 I·O 제외) — 소문자로 쳐도
+                // 6칸으로 보여 주고 키보드로 받는다. 서버 코드는 글자와 숫자가 섞인다(2~9, A~Z 중 I·O 제외) — 소문자로 쳐도
                 // 대문자로 들어가고 0·1·I·O·기호는 들어가지 않는다(ViewModel → ConnectCode.normalize, G-01)
-                InputField(
+                CodeField(
                     stringResource(R.string.settings_register_code),
                     d.code,
+                    ConnectCode.LENGTH,
                     { onAction(SettingsAction.EditDialog(DialogField.CONNECT_CODE, it)) },
-                    keyboardType = KeyboardType.Ascii,
-                    placeholder = stringResource(R.string.settings_register_code_hint),
-                    code = true,
                 )
                 DialogError(state, SettingsTask.REGISTER)
             }

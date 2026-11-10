@@ -191,7 +191,6 @@
     <string name="settings_register_again">다시 연결</string>
     <string name="settings_register_title">차량 연결</string>
     <string name="settings_register_code">연결 코드 6자리</string>
-    <string name="settings_register_code_hint">예: 7KQ3MZ</string>
     <string name="settings_register_submit">연결</string>
     <string name="settings_upload_pending">전송 대기 %1$d건</string>
     <string name="settings_server_url">서버 주소</string>

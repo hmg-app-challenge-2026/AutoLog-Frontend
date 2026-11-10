@@ -63,7 +63,7 @@
 - **결정:** 처음엔 ① 글자+숫자 키패드(`CodeKeypad`)로 구현했다가, 같은 날 **② 키보드 입력**으로 바꿨다(사용자 지시 "키보드로 바꿔줘, 소문자도 대문자로"). 이유: 같은 팝업의 서버 주소가 이미 시스템 키보드라 입력 방식이 둘이 되고, 연결 코드는 차 한 대에 한 번 넣는 값이라 전용 키패드를 둘 만큼 자주 쓰지 않는다. 주행 중 키보드 잠금(`LocalKeyboardLocked`)은 입력 칸에 이미 있다. ③(서버에 숫자 코드 요청)은 백엔드 변경이라 기각.
 - **바꾼 것:**
   - `data/repository/ConnectCode.kt` — 서버와 같은 규칙 한곳(길이 6, 글자표 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`). `normalize`: 소문자 → 대문자, 표에 없는 글자(0·1·I·O·공백·기호·한글)는 버리고 6자에서 자름 — 붙여 넣은 "7kq3-mz"도 "7KQ3MZ". ViewModel·데모 가짜가 함께 쓴다.
-  - 설정 팝업: 연결 코드 = `InputField(code = true)` — 대문자 키보드(`KeyboardCapitalization.Characters`)·자동 수정 끔·`KeyboardType.Ascii`. 대문자로 바꾸는 일은 키보드마다 다르므로 `normalize`가 책임진다.
+  - 설정 팝업: 연결 코드 = `CodeField` — 보이는 모양은 처음의 6칸 상자 그대로(사용자 지시), 칸을 누르면 대문자 키보드(`KeyboardCapitalization.Characters`)·자동 수정 끔·`KeyboardType.Ascii`. 대문자로 바꾸는 일은 키보드마다 다르므로 `normalize`가 책임진다.
   - 데모 가짜 `FakeDeviceApi`는 숫자 6자리 대신 같은 규칙으로 검사한다.
   - (키패드 단계에서 바꾼 숫자판 키 바탕 `surface3`은 유지 — 주유 입력 시트에서도 어두운 면 위에 키가 보이게.)
 - **남은 확인:** 맥 에뮬레이터에서 ① Pleos 키보드가 대문자로 뜨는지(안 떠도 값은 대문자로 들어감) ② 키보드가 올라올 때 팝업이 가려지지 않는지 ③ relay가 발급한 실제 코드로 등록(5.3 A 스크립트와 함께).

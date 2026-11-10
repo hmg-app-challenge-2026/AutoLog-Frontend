@@ -111,7 +111,7 @@ class GalleryScreenshotTest {
             PeriodSwitcher(YearMonth.of(2026, 11), canGoNext = false, onPrev = {}, onNext = {})
             InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
             InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
-            InputField(label = "연결 코드 6자리", value = "7KQ3", onValueChange = {}, code = true)
+            CodeField(label = "연결 코드 6자리", value = "7KQ3", length = 6, onValueChange = {})
             ChoiceRow("일반 업무", selected = true, onClick = {})
             ChoiceRow("출퇴근", selected = false, onClick = {})
             ChoiceRow("개인 용무", selected = false, onClick = null) // 보기 전용
@@ -122,7 +122,7 @@ class GalleryScreenshotTest {
         }
     }
 
-    /** 숫자판(금액·리터) — 3×4 키가 커서 forms 캡처와 따로 찍는다. 차량 연결 코드는 키보드(InputField)로 넣는다. */
+    /** 숫자판(금액·리터) — 3×4 키가 커서 forms 캡처와 따로 찍는다. 차량 연결 코드는 키보드로 넣는다(CodeField — forms). */
     @Test
     fun keypads() = captureAll("components_keypads", gallerySize) {
         Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s6)) {
