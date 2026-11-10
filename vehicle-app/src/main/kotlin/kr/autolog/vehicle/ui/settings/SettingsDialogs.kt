@@ -24,6 +24,7 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.DangerButton
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalHost
 import kr.autolog.vehicle.ui.design.components.ModalText
 import kr.autolog.vehicle.ui.design.components.NumericKeypad
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
@@ -36,7 +37,18 @@ import kr.autolog.vehicle.ui.design.components.PrimaryButton
 internal fun SettingsDialogHost(state: SettingsUiState, onAction: (SettingsAction) -> Unit) {
     val dismiss = { onAction(SettingsAction.DismissDialog) }
     val submit = { onAction(SettingsAction.SubmitDialog) }
-    when (val d = state.dialog ?: return) {
+    ModalHost(state.dialog) { d -> SettingsDialogCard(d, state, onAction, dismiss, submit) }
+}
+
+@Composable
+private fun SettingsDialogCard(
+    d: SettingsDialog,
+    state: SettingsUiState,
+    onAction: (SettingsAction) -> Unit,
+    dismiss: () -> Unit,
+    submit: () -> Unit,
+) {
+    when (d) {
         is SettingsDialog.Register -> ModalCard(
             title = stringResource(R.string.settings_register_title),
             onClose = dismiss,

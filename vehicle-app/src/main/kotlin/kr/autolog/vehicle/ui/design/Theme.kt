@@ -21,6 +21,12 @@ val LocalMotion = staticCompositionLocalOf { MotionTokens.Standard }
 val LocalInputLocked = compositionLocalOf { false }
 
 /**
+ * 사라지는 중인 화면·팝업 안인가(디자인 언어 8.1 — 나가는 화면은 누를 수 없다). [LocalInputLocked]와 달리 모양은 그대로 두고
+ * 눌림만 막는다 — 버튼이 사라지는 동안 비활성 색으로 깜빡이지 않게. `tappable`이 읽는다.
+ */
+val LocalLeaving = compositionLocalOf { false }
+
+/**
  * 플랫폼 키보드 규제(`CarUxRestrictions.UX_RESTRICTIONS_NO_KEYBOARD`, `VehicleUsageRepository.noKeyboard`). 켜지면 글자 입력 칸만
  * 비활성 + "지금은 입력할 수 없어요"(스펙 7.9) — 버튼·탭은 그대로 쓴다([LocalInputLocked]와 다른 점).
  */

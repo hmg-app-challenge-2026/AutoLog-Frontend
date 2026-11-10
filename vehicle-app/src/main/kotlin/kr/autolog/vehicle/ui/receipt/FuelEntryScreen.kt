@@ -36,6 +36,7 @@ import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.components.ModalCard
+import kr.autolog.vehicle.ui.design.components.ModalHost
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
@@ -112,8 +113,8 @@ fun FuelEntryScreen(state: FuelEntryUiState, onAction: (FuelEntryAction) -> Unit
                 loading = state.saving,
             )
         }
-        state.editing?.let { FieldEditor(it, state, onAction) }
-        if (imageExpanded) {
+        ModalHost(state.editing) { FieldEditor(it, state, onAction) }
+        ModalHost(visible = imageExpanded) {
             ModalCard(title = stringResource(R.string.fuel_receipt_image), onClose = { imageExpanded = false }) {
                 ReceiptImage(state, Modifier.fillMaxWidth().height(availableHeight * EXPANDED_IMAGE_HEIGHT)) {
                     imageExpanded = false

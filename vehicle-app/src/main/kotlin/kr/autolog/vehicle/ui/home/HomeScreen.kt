@@ -24,6 +24,7 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.ModalHost
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusLine
@@ -106,11 +107,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 HomeDock(state, onAction)
             }
         }
-        if (state.phase == HomePhase.NEEDS_RECOVERY) {
+        ModalHost(visible = state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
         }
-        val missedKm = state.missedKm
-        if (state.phase == HomePhase.READY && missedKm != null) {
+        ModalHost(state.missedKm?.takeIf { state.phase == HomePhase.READY }) { missedKm ->
             MissedTripDialog(
                 missedKm,
                 onAdd = { onAction(HomeAction.AcceptMissedTrip) },

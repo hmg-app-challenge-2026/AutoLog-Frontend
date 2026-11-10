@@ -9,7 +9,6 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -19,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -27,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.di.AppGraph
 import kr.autolog.vehicle.nav.Route
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalLeaving
 import kr.autolog.vehicle.ui.design.LocalNavAnimatedScope
 import kr.autolog.vehicle.ui.design.LocalSharedTransitionScope
 import kr.autolog.vehicle.ui.design.Space
@@ -84,6 +83,8 @@ fun FullApp(graph: AppGraph) {
                 LocalNavAnimatedScope provides this,
                 // 화면마다 자기 ViewModel 저장소 — 화면의 viewModel {}은 이 화면이 스택에 있는 동안만 산다
                 LocalViewModelStoreOwner provides remember(route) { stores.ownerFor(route) },
+                // 나가는 화면은 누를 수 없다(전환 중 두 번 눌러 화면이 두 번 열리지 않게). 새 화면은 첫 프레임부터 누를 수 있다
+                LocalLeaving provides leaving,
             ) {
                 Box(Modifier.fillMaxSize().background(c.bg)) {
                     if (route == Route.Home) {
@@ -102,8 +103,6 @@ fun FullApp(graph: AppGraph) {
                             }.background(c.scrim),
                         )
                     }
-                    // 나가는 화면은 누를 수 없다(전환 중 두 번 눌러 화면이 두 번 열리지 않게). 새 화면은 첫 프레임부터 누를 수 있다
-                    if (leaving) Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { } })
                 }
             }
         }
