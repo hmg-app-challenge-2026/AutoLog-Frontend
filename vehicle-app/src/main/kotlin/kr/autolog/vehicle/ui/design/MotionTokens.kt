@@ -17,6 +17,48 @@ import androidx.compose.runtime.Immutable
  */
 @Immutable
 class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boolean) {
+    // ── 스프링 세 가지(디자인 언어 8.2, 2026-11-10 사용자 결정 — iOS·Apple 방식) ──
+    // 멈춘 상태에서 출발하는 스프링은 속도 0에서 가속해 정점을 찍고 길게 감속한다("느리게 출발 → 빠르게 → 천천히 끝").
+    // 전환 도중 방향이 바뀌어도 지금 속도를 이어받아 자연스럽게 되돌아간다. 모든 움직임은 이 셋 중 하나다.
+
+    /** 넘침 없음, 응답 ≈ 0.35 s(SwiftUI `.smooth`) — 화면 이동·띄우기·내용 교체·펼침·달 이동. */
+    fun <T> smooth(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else spring(dampingRatio = 1f, stiffness = SMOOTH_STIFFNESS, visibilityThreshold)
+
+    /** 넘침 없음, 응답 ≈ 0.24 s — 사라짐·닫힘·투명도·색. 나타나는 쪽보다 빨리 끝나 새 내용에 시선이 간다. */
+    fun <T> quick(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else spring(dampingRatio = 1f, stiffness = QUICK_STIFFNESS, visibilityThreshold)
+
+    /** 살짝 튐 — 손에 바로 반응하는 작은 "톡"(라디오 점·체크 표시)에만. 큰 면에는 쓰지 않는다. */
+    fun <T> bouncy(visibilityThreshold: T? = null): FiniteAnimationSpec<T> = if (isStatic) {
+        snap()
+    } else {
+        spring(
+            dampingRatio = BOUNCY_DAMPING,
+            stiffness = BOUNCY_STIFFNESS,
+            visibilityThreshold,
+        )
+    }
+
+    // ── 모양(배율·비율) — 이동 거리 dp는 Space 토큰, 여기는 단위 없는 값만 ──
+
+    /** 화면 앞으로 갈 때 뒤 화면이 왼쪽으로 밀리는 비율(폭 대비, iOS 패럴랙스). */
+    val pushParallax: Float get() = 0.3f
+
+    /** 밀린 뒤 화면 위 덮개의 최대 투명도(`scrim` 색). */
+    val pushBehindDim: Float get() = 0.35f
+
+    /** 팝업 카드가 열릴 때 시작 배율 · 닫힐 때 끝 배율. */
+    val modalEnterScale: Float get() = 0.92f
+    val modalExitScale: Float get() = 0.96f
+
+    /** 띄우는 화면(운행 결과)이 아래에서 떠오를 때 시작 배율. */
+    val presentScale: Float get() = 0.96f
+
+    /** 같은 자리 교체(fade-through)에서 들어오는 쪽 시작 배율 · 나가는 쪽이 거의 사라진 뒤 보이게 하는 지연. */
+    val swapScale: Float get() = 0.98f
+    val swapDelayMs: Int get() = 90
+
     fun <T> standard(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.9f, stiffness = 400f)
 
     fun <T> gentle(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 1.0f, stiffness = 200f)
@@ -57,6 +99,11 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
     fun <T> successPopBack(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.5f, stiffness = 600f)
 
     companion object {
+        private const val SMOOTH_STIFFNESS = 320f
+        private const val QUICK_STIFFNESS = 700f
+        private const val BOUNCY_DAMPING = 0.55f
+        private const val BOUNCY_STIFFNESS = 600f
+
         val Standard = MotionTokens(isStatic = false, ambient = true)
         val Static = MotionTokens(isStatic = true, ambient = true)
 
