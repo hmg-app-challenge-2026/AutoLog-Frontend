@@ -58,6 +58,8 @@ class GalleryScreenshotTest {
                 CloseButton(onClick = {})
                 RoundIconButton(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, "이전 달", onClick = {})
                 RoundIconButton(Icons.AutoMirrored.Rounded.KeyboardArrowRight, "다음 달", onClick = {}, enabled = false)
+                // 완료 표시 — 갤러리에선 작게(실제 200 dp). 스크린샷은 정지형이라 다 그려진 모양
+                SuccessCheck(onDrawn = {}, size = Size.iconButton)
             }
             // 줄 안에서 바로 끝낼 일(extra) — 운행 기록 조회의 운전자 지정
             TripListRow("본사 → 강남 고객사", "11월 7일 14:05 · 운전자 미확정 · 8.6 km", onClick = {}) {

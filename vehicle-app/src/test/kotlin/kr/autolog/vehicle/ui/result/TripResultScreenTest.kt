@@ -63,6 +63,18 @@ class TripResultScreenTest {
     }
 
     @Test
+    fun `저장 완료 — 문구와 확인, 체크를 다 그리면 알리고 확인은 닫기`() {
+        val actions = mutableListOf<TripResultAction>()
+        show(ended.copy(saved = true), actions)
+
+        compose.onNodeWithText("운행 기록을 저장했어요").assertIsDisplayed()
+        compose.onNodeWithText("저장하기").assertDoesNotExist()
+        compose.onNodeWithText("확인").performClick()
+
+        assertEquals(listOf(TripResultAction.CheckDrawn, TripResultAction.Close), actions)
+    }
+
+    @Test
     fun `이미 끝난 운행엔 기록 이어가기가 없다`() {
         show(ended, mutableListOf())
 
@@ -87,6 +99,10 @@ class TripResultScreenTest {
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34])
 class TripResultScreenshotTest {
+    /** 저장 완료 — 체크 · "운행 기록을 저장했어요" · [확인](스크린샷은 정지형이라 체크가 다 그려진 모양). */
+    @Test
+    fun saved() = captureAll("trip_result_saved") { TripResultScreen(ended.copy(saved = true), onAction = {}) }
+
     // 실제 앱처럼 운전자 배지 없이(FullApp.showsDriverBadge)
     @Test
     fun viewing() = captureAll("trip_result") { TripResultScreen(viewing, onAction = {}) }

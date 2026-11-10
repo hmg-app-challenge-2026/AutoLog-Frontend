@@ -7,6 +7,9 @@ import kr.autolog.vehicle.ui.trips.TripWhen
 const val AUTO_CLOSE_SEC = 5
 const val AUTO_CLOSE_MS = AUTO_CLOSE_SEC * 1_000L
 
+/** 저장 완료 화면: 체크를 **다 그린 뒤** 이만큼 보여 주고 저절로 닫는다(화면이 뜬 때부터가 아니다 — 2026-11-10 사용자 결정). */
+const val SAVED_HOLD_MS = 1_000L
+
 /** 고를 수 있는 분류(위에서부터): 일반 업무 · 출퇴근 · 개인 용무. "미확정"은 고르는 값이 아니다. */
 val PURPOSE_CHOICES: List<PurposeCategory> =
     listOf(PurposeCategory.BUSINESS, PurposeCategory.COMMUTE, PurposeCategory.NON_BUSINESS)
@@ -29,6 +32,8 @@ data class TripResultUiState(
     /** 카운트다운 전체 길이(ms) — 맨 위 막대의 비율 분모. */
     val autoCloseTotalMs: Long = AUTO_CLOSE_MS,
     val saving: Boolean = false,
+    /** 저장을 마쳤다 — 결과 카드 대신 저장 완료 화면(체크 + "운행 기록을 저장했어요" + [확인]). */
+    val saved: Boolean = false,
     /** 종료 조건은 됐지만 아직 끝나기 전 — [기록 이어가기]로 되돌릴 수 있다(D-28). */
     val canContinue: Boolean = false,
     /** 운행 기록 조회에서 연 사후 확인(D-29) — 카운트다운 없음, 제목은 운행 시각, 오른쪽 버튼은 [닫기]. */
@@ -50,6 +55,7 @@ data class TripResultInteraction(
     /** 카운트다운 전체 길이: 끝난 운행 = 5초, 종료 대기 = 카드가 처음 열릴 때 종료 시각까지 남은 시간. */
     val autoCloseTotalMs: Long = AUTO_CLOSE_MS,
     val saving: Boolean = false,
+    val saved: Boolean = false,
 )
 
 sealed interface TripResultAction {
@@ -68,6 +74,9 @@ sealed interface TripResultAction {
      */
     data object Save : TripResultAction
 
-    /** 저장하지 않고 들어온 화면으로 — 사후 확인의 [닫기], 운행을 찾지 못했을 때의 [메인 화면으로]. */
+    /** 지금 저장하지 않고 들어온 화면으로 — 사후 확인의 [닫기], 운행을 찾지 못했을 때의 [메인 화면으로], 저장 완료 화면의 [확인]. */
     data object Close : TripResultAction
+
+    /** 저장 완료 화면의 체크를 다 그렸다(정지형이면 화면이 뜨자마자) — 이때부터 [SAVED_HOLD_MS] 뒤 저절로 닫는다. */
+    data object CheckDrawn : TripResultAction
 }

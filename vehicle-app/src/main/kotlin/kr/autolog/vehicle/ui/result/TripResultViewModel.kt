@@ -26,6 +26,8 @@ import kr.autolog.vehicle.nav.TripResultMode
  * 1. **종료 대기**(종료 조건은 됐지만 앱 A가 아직 끝내기 전): 남은 시간 = 앱 A 종료 시각. [기록 이어가기]로 되돌릴 수 있다.
  *    시간이 다 되면(또는 [메인 화면으로]) 운행이 끝나고 → 지금 선택으로 저장 → 들어온 화면으로.
  * 2. **끝난 운행**(직접 [기록 종료]·시동 끔·알림·이력에서 연 경우): 자체 5초 카운트다운 → 저장 → 돌아간다.
+ * 저장을 마치면 곧바로 돌아가지 않고 **저장 완료 화면**(`saved`)을 보인다 — 체크를 다 그린 뒤([TripResultAction.CheckDrawn])
+ * [SAVED_HOLD_MS]가 지나거나 [확인]을 누르면 들어온 화면으로. [기록 이어가기]·주행 시작으로 떠날 때는 보이지 않는다.
  * [수정하기] 중엔 돌아가지 않는다(운행 자체는 앱 A 시각에 끝나고, 고른 목적은 그때·[저장하기] 때 저장). [저장하기]는 보기·수정 어느 쪽이든
  * 지금 선택으로 저장하고 돌아간다 — 시간이 다 됐을 때 저절로 일어나는 일과 같다.
  * 저장하지 않고 화면이 닫히면(주행 시작 등) 그 운행은 "목적 미입력"으로 남는다.
@@ -47,6 +49,7 @@ class TripResultViewModel(
     private val loaded = MutableStateFlow<Loaded>(Loaded.NotYet)
     private var current: TripResult? = null
     private var countdown: Job? = null
+    private var hold: Job? = null
     private var finishing = false
     private var left = false
 
@@ -90,6 +93,7 @@ class TripResultViewModel(
             // [저장하기] = 남은 시간이 다 됐을 때와 같은 끝내기. 사후 확인은 고친 목적만 저장하고 목록으로
             TripResultAction.Save -> if (review) saveReview() else finish()
             TripResultAction.Close -> leave()
+            TripResultAction.CheckDrawn -> holdThenLeave()
         }
     }
 
@@ -108,7 +112,7 @@ class TripResultViewModel(
         }
         viewModelScope.launch {
             results.classify(tripId, selectedNow())
-            if (finishing || !interaction.value.editing) leave()
+            if (finishing || !interaction.value.editing) showSaved()
         }
     }
 
@@ -125,18 +129,34 @@ class TripResultViewModel(
             }
     }
 
-    /** 사후 확인(D-29)의 [저장하기] — 고친 목적을 저장하고 목록으로. */
+    /** 사후 확인(D-29)의 [저장하기] — 고친 목적을 저장하고 저장 완료 화면 → 목록으로. */
     private fun saveReview() {
         val now = interaction.value
         if (!now.editing || now.saving) return
         interaction.update { it.copy(saving = true) }
         viewModelScope.launch {
             results.classify(tripId, selectedNow())
+            showSaved()
+        }
+    }
+
+    /** 저장을 마쳤다 — 저장 완료 화면으로. 이미 떠났으면(기록 이어가기·주행 시작) 보여 줄 것 없음. */
+    private fun showSaved() {
+        if (left) return
+        countdown?.cancel()
+        interaction.update { it.copy(saved = true, saving = false, editing = false, autoCloseAt = null) }
+    }
+
+    /** 체크를 다 그린 뒤 [SAVED_HOLD_MS] 보여 주고 들어온 화면으로. 한 번만. */
+    private fun holdThenLeave() {
+        if (!interaction.value.saved || hold != null) return
+        hold = viewModelScope.launch {
+            delay(SAVED_HOLD_MS)
             leave()
         }
     }
 
-    /** 지금 선택으로 저장하고 들어온 화면으로. 종료 대기 중이면 먼저 바로 끝낸다(저장은 onEnded가). */
+    /** 지금 선택으로 저장하고 저장 완료 화면으로(→ 들어온 화면). 종료 대기 중이면 먼저 바로 끝낸다(저장은 onEnded가). */
     private fun finish() {
         if (finishing) return
         finishing = true
@@ -147,7 +167,7 @@ class TripResultViewModel(
                 session.endNow()
             } else {
                 results.classify(tripId, selectedNow())
-                leave()
+                showSaved()
             }
         }
     }

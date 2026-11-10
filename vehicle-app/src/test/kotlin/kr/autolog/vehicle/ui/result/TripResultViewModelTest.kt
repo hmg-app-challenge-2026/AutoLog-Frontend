@@ -63,6 +63,7 @@ class TripResultViewModelTest {
         vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
         vm.onAction(TripResultAction.Save)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.History, g.navigator.current)
         assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
     }
@@ -97,6 +98,7 @@ class TripResultViewModelTest {
         assertNull(purposeOf(g))
         advanceTimeBy(200)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, purposeOf(g)!!.category)
     }
@@ -113,6 +115,7 @@ class TripResultViewModelTest {
         vm.onAction(TripResultAction.Save)
         runCurrent()
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.NON_BUSINESS, purposeOf(g)!!.category)
     }
@@ -126,6 +129,7 @@ class TripResultViewModelTest {
         assertEquals(PurposeCategory.BUSINESS, vm.uiState.first().selected)
         vm.onAction(TripResultAction.Save)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, purposeOf(g)!!.category)
     }
@@ -138,6 +142,7 @@ class TripResultViewModelTest {
         advanceTimeBy(4_999)
         assertEquals(Route.TripResult("t-s1"), g.navigator.current)
         advanceTimeBy(2)
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
     }
 
@@ -151,7 +156,50 @@ class TripResultViewModelTest {
         vm.onAction(TripResultAction.Save)
 
         assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
+        acknowledgeSaved(g, vm)
         assertTrue(g.navigator.current == Route.Home)
+    }
+
+    /**
+     * 저장 뒤엔 바로 떠나지 않고 저장 완료 화면 — 체크를 다 그렸다는 신호 뒤 1초가 지나야 들어온 화면으로 간다.
+     * 저장 완료 화면이 보이는지, 1초가 되기 전엔 그대로인지까지 확인한다.
+     */
+    private suspend fun TestScope.acknowledgeSaved(g: TestAppGraph, vm: TripResultViewModel) {
+        runCurrent()
+        val here = g.navigator.current
+        vm.uiState.first { it.saved } // 저장 완료 화면
+        assertTrue(here is Route.TripResult)
+        vm.onAction(TripResultAction.CheckDrawn)
+        advanceTimeBy(SAVED_HOLD_MS - 1)
+        assertEquals(here, g.navigator.current)
+        advanceTimeBy(2)
+    }
+
+    @Test
+    fun `저장 완료 화면 — 체크를 다 그리기 전엔 기다려도 닫히지 않고, 확인은 바로 닫는다`() = runTest {
+        val (g, vm) = open()
+        vm.uiState.first { !it.loading }
+        vm.onAction(TripResultAction.Save)
+        runCurrent()
+        assertNull(vm.uiState.first { it.saved }.autoCloseSec) // 저장 완료 화면엔 남은 시간이 없다
+
+        advanceTimeBy(10_000) // 화면이 뜬 때부터 세지 않는다
+        assertEquals(Route.TripResult("t-s1"), g.navigator.current)
+        vm.onAction(TripResultAction.Close)
+
+        assertEquals(Route.Home, g.navigator.current)
+        assertEquals(PurposeCategory.BUSINESS, purposeOf(g)!!.category)
+    }
+
+    @Test
+    fun `종료 대기 — 기록 이어가기로 떠나면 저장 완료 화면은 없다`() = runTest {
+        val (_, vm) = ending()
+        vm.uiState.first { !it.loading }
+
+        vm.onAction(TripResultAction.Continue)
+        runCurrent()
+
+        assertTrue(!vm.uiState.first().saved)
     }
 
     /** 기록 중 → 기어 P(종료 대기, 5초 뒤 종료) → Home 위 운행 결과 카드. */
@@ -191,6 +239,7 @@ class TripResultViewModelTest {
 
         advanceTimeBy(5_100)
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, g.store.trip(tripId)!!.purpose!!.category)
     }
@@ -203,6 +252,7 @@ class TripResultViewModelTest {
         vm.onAction(TripResultAction.Save)
         runCurrent()
 
+        acknowledgeSaved(g, vm)
         assertEquals(Route.Home, g.navigator.current)
         assertEquals(PurposeCategory.BUSINESS, g.store.trip(tripId)!!.purpose!!.category)
     }

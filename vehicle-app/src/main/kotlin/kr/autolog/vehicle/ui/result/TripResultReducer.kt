@@ -30,11 +30,12 @@ internal fun reduceTripResult(
         selected = interaction.selected ?: result.category,
         editing = interaction.editing,
         autoCloseRemainingMs = when {
-            interaction.editing -> null
+            interaction.editing || interaction.saved -> null
             else -> (result.endsAt ?: interaction.autoCloseAt)?.let { (it - now).coerceAtLeast(0) }
         },
         autoCloseTotalMs = interaction.autoCloseTotalMs,
         saving = interaction.saving,
+        saved = interaction.saved,
         canContinue = result.endsAt != null && !review,
         review = review,
         startedAt = if (review) tripWhenOf(result.startTime, now) else null,

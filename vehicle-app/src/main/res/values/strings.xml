@@ -17,6 +17,7 @@
     <string name="picker_empty">아직 등록된 직원이 없어요</string>
     <string name="action_close">닫기</string>
     <string name="action_back">뒤로</string>
+    <string name="action_confirm">확인</string>
     <string name="home_end">기록 종료</string>
     <string name="home_start_manual">기록 시작</string>
     <string name="status_ready">대기 중</string>
@@ -95,6 +96,7 @@
     <string name="result_continue">기록 이어가기</string>
     <string name="result_edit">수정하기</string>
     <string name="result_save">저장하기</string>
+    <string name="result_saved">운행 기록을 저장했어요</string>
     <string name="result_home">메인 화면으로</string>
     <string name="result_not_found">운행을 찾지 못했어요</string>
     <string name="trip_minutes">%1$d분</string>

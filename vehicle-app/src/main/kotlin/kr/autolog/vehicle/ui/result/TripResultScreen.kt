@@ -1,6 +1,7 @@
 package kr.autolog.vehicle.ui.result
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -71,16 +72,29 @@ fun TripResultRoute(tripId: String, mode: TripResultMode = TripResultMode.AFTER_
  * - 두 칸 아래 가운데 = "일반 업무용 거리 48.2 km로 분류돼요. 3초 후 자동 저장돼요."(선택의 결과 + 남은 시간), 버튼과 40 dp 위.
  * - 아래 행동 줄: [기록 이어가기](종료 대기 중에만) · [수정하기](보기 모드에서만) · [저장하기](주)를 같은 폭으로 가운데에.
  *   남은 시간은 분류 문구 뒤 한 문장 + 맨 위 가장자리 막대 — 막대가 다 사라지는 순간 [저장하기]가 저절로 눌린다.
+ * - 저장을 마치면 저장 완료 화면([TripSaved]: 체크 애니메이션 + "운행 기록을 저장했어요" + [확인])으로 바뀐다.
  * 넓은 창과 Pleos 1:1 분할 한 칸(≈1280×1268)은 같은 두 칸 배치·같은 글자. 세로로 긴 창(TALL)만 세로 한 칸(넘치면 그 칸만 스크롤) + 분류 문구 + 버튼 두 줄.
  */
 @Composable
 fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    Box(modifier.fillMaxSize()) {
-        ResultBody(state, onAction, layout)
-        // 맨 위 가장자리에 붙는 남은 시간 막대 — 오른쪽 끝이 왼쪽으로 줄어든다(수정 중엔 없다)
-        state.autoCloseRemainingMs?.let {
-            EdgeCountdownBar(it, state.autoCloseTotalMs, Modifier.align(Alignment.TopStart))
+    // 저장을 마치면 결과 카드가 사라지고 저장 완료 화면(TripSaved)이 같은 자리에 — 짧은 크로스페이드
+    Crossfade(
+        state.saved,
+        modifier.fillMaxSize(),
+        animationSpec = AutoLogTheme.motion.fadeStandard(),
+        label = "saved",
+    ) { saved ->
+        if (saved) {
+            TripSaved(onAction)
+        } else {
+            Box(Modifier.fillMaxSize()) {
+                ResultBody(state, onAction, layout)
+                // 맨 위 가장자리에 붙는 남은 시간 막대 — 오른쪽 끝이 왼쪽으로 줄어든다(수정 중엔 없다)
+                state.autoCloseRemainingMs?.let {
+                    EdgeCountdownBar(it, state.autoCloseTotalMs, Modifier.align(Alignment.TopStart))
+                }
+            }
         }
     }
 }
