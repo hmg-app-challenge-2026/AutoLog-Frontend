@@ -29,6 +29,8 @@ data class WindowType(
     val resultClassification: TextStyle,
     /** 운행 결과 [메인 화면으로 · n초] 글자 — 넓은 창은 남은 시간까지 한 줄에 들어가게 한 단계 작게. */
     val resultHomeButton: TextStyle,
+    /** 기간 이동 가운데 글자("2026년 11월" — 운행 기록 조회·운행기록부). */
+    val periodTitle: TextStyle,
 )
 
 /** [layout]에 맞는 역할별 글자. 순수 함수 — `WindowTypeTest`가 표를 고정한다. */
@@ -43,6 +45,7 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultTitle = t.title,
         resultClassification = t.title,
         resultHomeButton = t.caption,
+        periodTitle = t.title,
     )
     WindowLayout.TALL -> WindowType(
         screenTitle = t.display,
@@ -54,6 +57,7 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultTitle = t.title,
         resultClassification = t.label,
         resultHomeButton = t.label,
+        periodTitle = t.title,
     )
     // 분할 화면 한 칸: 한 단계씩 작게
     WindowLayout.NARROW -> WindowType(
@@ -66,5 +70,6 @@ fun windowTypeOf(layout: WindowLayout, t: AutoLogType): WindowType = when (layou
         resultTitle = t.label,
         resultClassification = t.label,
         resultHomeButton = t.label,
+        periodTitle = t.label,
     )
 }

@@ -38,6 +38,7 @@ import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
 import kr.autolog.vehicle.ui.design.components.ModalCard
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
+import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.tappable
 import kr.autolog.vehicle.ui.design.screenMargin
@@ -69,7 +70,7 @@ fun FuelEntryScreen(state: FuelEntryUiState, onAction: (FuelEntryAction) -> Unit
     BoxWithConstraints(modifier.fillMaxSize().padding(screenMargin())) {
         val availableHeight = maxHeight
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(Space.s4)) {
-            FuelScreenHeader(stringResource(R.string.fuel_entry_title)) { onAction(FuelEntryAction.Back) }
+            ScreenHeader(stringResource(R.string.fuel_entry_title)) { onAction(FuelEntryAction.Back) }
             if (LocalWindowLayout.current == WindowLayout.WIDE && state.receipt != null) {
                 Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s7)) {
                     ReceiptImage(state, Modifier.weight(1f).height(availableHeight * WIDE_IMAGE_HEIGHT)) {

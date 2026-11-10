@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -168,20 +169,33 @@ fun CloseButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     label: String = stringResource(R.string.action_close),
+) = RoundIconButton(Icons.Rounded.Close, label, onClick, modifier)
+
+/**
+ * 아이콘 하나짜리 동그란 버튼(닫기 X, 달 이동 ◀ ▶). 보이는 원 `iconLg`(48 dp, `surface3`), 터치 영역 `touchMin`(76 dp).
+ * [label]은 접근성 이름(화면에 보이지 않음). 비활성이면 아이콘이 `textTertiary`로 흐려지고 눌리지 않는다.
+ */
+@Composable
+fun RoundIconButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val c = AutoLogTheme.colors
     Box(
         modifier
             .size(Size.touchMin)
-            .tappable(onClick)
+            .tappable(onClick, enabled = enabled)
             .clip(CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Box(Modifier.size(Size.iconLg).clip(CircleShape).background(c.surface3), contentAlignment = Alignment.Center) {
             Icon(
-                Icons.Rounded.Close,
+                icon,
                 contentDescription = label,
-                tint = c.textSecondary,
+                tint = if (enabled) c.textSecondary else c.textTertiary,
                 modifier = Modifier.size(Size.iconSm),
             )
         }

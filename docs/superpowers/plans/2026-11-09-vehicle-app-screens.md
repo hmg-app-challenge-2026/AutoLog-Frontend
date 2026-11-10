@@ -132,6 +132,8 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 ## Task 7: 이력 (F-12)
 
+> 2026-11-10 구현(브랜치 `feat/history`): 스펙 7.8이 지금 모습의 기준. 줄 탭은 운행 결과 카드 **사후 확인 모드**(카운트다운 없음, D-29), 기록부 버튼 이름은 [운행기록부 내보내기].
+
 **Files:** Create `ui/history/*` · Test reducer·screen·screenshot
 
 - 스펙 7.8. Home 독 [운행 기록]으로 들어온다(D-23). 맨 위 **[운행기록부 만들기·보내기]** → Task 6 Report. 월 이동 · 상단 합계(건수·km, 거리 미확정 제외) · 행: 날짜·시각 · 운전자 · 출발 → 도착 · 거리 · 목적 · 상태 배지 · 사내 서버 전송 배지(전송 켜졌을 때만). 확인 필요 행 탭 → ReviewTrip.

@@ -19,6 +19,7 @@ import kr.autolog.vehicle.data.repository.TripResult
 import kr.autolog.vehicle.data.repository.TripResultRepository
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
+import kr.autolog.vehicle.nav.TripResultMode
 import kr.autolog.vehicle.ui.design.remainingSeconds
 
 /**
@@ -28,6 +29,9 @@ import kr.autolog.vehicle.ui.design.remainingSeconds
  * 2. **끝난 운행**(직접 [기록 종료]·시동 끔·알림·이력에서 연 경우): 자체 5초 카운트다운 → 저장 → 돌아간다.
  * [수정하기] 중엔 돌아가지 않는다(운행 자체는 앱 A 시각에 끝나고, 고른 목적은 그때·[저장] 때 저장).
  * 저장하지 않고 화면이 닫히면(주행 시작 등) 그 운행은 "목적 미입력"으로 남는다.
+ *
+ * [mode] = REVIEW(운행 기록 조회에서 연 사후 확인, D-29): 카운트다운도 자동 저장도 없다. 목적 미입력 운행은 수정 모드로 열리고,
+ * [저장]을 눌러야만 저장한 뒤 목록으로 돌아간다. [닫기]는 저장하지 않고 돌아간다.
  */
 class TripResultViewModel(
     private val tripId: String,
@@ -35,8 +39,10 @@ class TripResultViewModel(
     private val session: SessionRepository,
     private val navigator: Navigator,
     private val clock: AppClock,
+    private val mode: TripResultMode = TripResultMode.AFTER_TRIP,
     ticker: Flow<Long> = tickerFlow(clock),
 ) : ViewModel() {
+    private val review = mode == TripResultMode.REVIEW
     private val interaction = MutableStateFlow(TripResultInteraction())
     private val loaded = MutableStateFlow<Loaded>(Loaded.NotYet)
     private var current: TripResult? = null
@@ -46,7 +52,7 @@ class TripResultViewModel(
 
     val uiState: StateFlow<TripResultUiState> =
         combine(loaded, interaction, ticker) { l, i, now ->
-            reduceTripResult((l as? Loaded.Value)?.result, l is Loaded.Value, i, now)
+            reduceTripResult((l as? Loaded.Value)?.result, l is Loaded.Value, i, now, mode)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TripResultUiState())
 
     init {
@@ -57,6 +63,8 @@ class TripResultViewModel(
                 current = r
                 loaded.value = Loaded.Value(r)
                 when {
+                    // 사후 확인 — 시계 없음. 목적을 아직 안 정한 운행은 바로 고를 수 있게 수정 모드로
+                    first && review -> if (r != null && !r.classified) interaction.update { it.copy(editing = true) }
                     // 종료 대기로 열렸다 — 막대 전체 길이 = 지금부터 종료 시각까지
                     first && r?.endsAt != null ->
                         interaction.update { it.copy(autoCloseTotalSec = remainingSeconds(r.endsAt, clock.nowMs())) }
@@ -79,7 +87,8 @@ class TripResultViewModel(
                 interaction.update { it.copy(editing = true, autoCloseSec = null) }
             }
             TripResultAction.Save -> save()
-            TripResultAction.GoHome -> finish()
+            // 사후 확인의 [닫기]는 저장하지 않고 돌아간다
+            TripResultAction.GoHome -> if (review) leave() else finish()
         }
     }
 
@@ -126,8 +135,12 @@ class TripResultViewModel(
         interaction.update { it.copy(saving = true) }
         viewModelScope.launch {
             results.classify(tripId, selectedNow())
-            interaction.update { it.copy(editing = false, saving = false) }
-            startCountdown()
+            if (review) {
+                leave() // 사후 확인: 저장했으면 목록으로
+            } else {
+                interaction.update { it.copy(editing = false, saving = false) }
+                startCountdown()
+            }
         }
     }
 

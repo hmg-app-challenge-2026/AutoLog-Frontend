@@ -6,6 +6,7 @@ import kr.autolog.vehicle.data.repository.AutoEndReason
 import kr.autolog.vehicle.data.repository.HistoryItem
 import kr.autolog.vehicle.data.repository.MonthSummary
 import kr.autolog.vehicle.data.repository.TripSession
+import kr.autolog.vehicle.ui.trips.TripDay
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

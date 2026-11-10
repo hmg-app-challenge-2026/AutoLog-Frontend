@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.di.LocalAppGraph
+import kr.autolog.vehicle.nav.TripResultMode
 import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
@@ -45,11 +46,15 @@ import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.TopLine
 import kr.autolog.vehicle.ui.design.durationText
 import kr.autolog.vehicle.ui.design.screenMargin
+import kr.autolog.vehicle.ui.trips.tripWhenText
 
 @Composable
-fun TripResultRoute(tripId: String) {
+fun TripResultRoute(tripId: String, mode: TripResultMode = TripResultMode.AFTER_TRIP) {
     val graph = LocalAppGraph.current
-    val vm = viewModel { TripResultViewModel(tripId, graph.tripResults, graph.session, graph.navigator, graph.clock) }
+    val vm =
+        viewModel {
+            TripResultViewModel(tripId, graph.tripResults, graph.session, graph.navigator, graph.clock, mode)
+        }
     val state by vm.uiState.collectAsStateWithLifecycle()
     TripResultScreen(state, vm::onAction)
 }
@@ -96,7 +101,7 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
     ) {
         TopLine {
             Text(
-                stringResource(R.string.result_title),
+                resultTitle(state),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 style = AutoLogTheme.windowType.resultTitle,
@@ -374,10 +379,10 @@ private fun Home(
 ) {
     val sec = state.autoCloseSec
     val home =
-        if (countdownInLabel && sec != null) {
-            stringResource(R.string.result_home_in, durationText(sec))
-        } else {
-            stringResource(R.string.result_home)
+        when {
+            state.review -> stringResource(R.string.result_close)
+            countdownInLabel && sec != null -> stringResource(R.string.result_home_in, durationText(sec))
+            else -> stringResource(R.string.result_home)
         }
     if (state.editing) {
         SecondaryButton(home, onClick = { onAction(TripResultAction.GoHome) }, modifier = modifier)
@@ -392,6 +397,12 @@ private fun Home(
         )
     }
 }
+
+/** "운행 기록을 완료했어요", 사후 확인이면 "11월 7일 19:34 운행"(D-29). */
+@Composable
+private fun resultTitle(state: TripResultUiState): String =
+    state.startedAt?.let { stringResource(R.string.result_review_title, tripWhenText(it)) }
+        ?: stringResource(R.string.result_title)
 
 @Composable
 private fun minutesText(minutes: Int): String = if (minutes < MINUTES_PER_HOUR) {

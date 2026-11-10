@@ -1,6 +1,7 @@
 package kr.autolog.vehicle.ui.result
 
 import kr.autolog.vehicle.core.PurposeCategory
+import kr.autolog.vehicle.ui.trips.TripWhen
 
 /** 이미 끝난 운행을 보여 줄 때, 이 시간이 지나면 지금 선택으로 저장하고 메인 화면으로(D-27). 종료 대기 중이면 앱 A의 종료 시각을 따른다(D-28). */
 const val AUTO_CLOSE_SEC = 5
@@ -29,6 +30,10 @@ data class TripResultUiState(
     val saving: Boolean = false,
     /** 종료 조건은 됐지만 아직 끝나기 전 — [계속 기록하기]로 되돌릴 수 있다(D-28). */
     val canContinue: Boolean = false,
+    /** 운행 기록 조회에서 연 사후 확인(D-29) — 카운트다운 없음, 제목은 운행 시각, 오른쪽 버튼은 [닫기]. */
+    val review: Boolean = false,
+    /** 사후 확인 제목에 쓸 운행 시작 시각("11월 7일 19:34 운행"). [review]일 때만. */
+    val startedAt: TripWhen? = null,
 ) {
     val autoCloseProgress: Float get() = (autoCloseSec ?: 0) / autoCloseTotalSec.coerceAtLeast(1).toFloat()
 }

@@ -1,13 +1,11 @@
 package kr.autolog.vehicle.ui.home
 
-import kr.autolog.vehicle.common.AppZone
 import kr.autolog.vehicle.data.repository.ActiveTrip
 import kr.autolog.vehicle.data.repository.HistoryItem
 import kr.autolog.vehicle.data.repository.MonthSummary
 import kr.autolog.vehicle.data.repository.TripSession
 import kr.autolog.vehicle.ui.design.formatKm
-import java.time.Instant
-import java.time.format.DateTimeFormatter
+import kr.autolog.vehicle.ui.trips.toTripRowUi
 
 /**
  * Home 상태 계산(순수 함수, HomeReducerTest 대상). 입력은 Repository 값 타입만 — 앱 A 계약이 바뀌어도 이 파일은 그대로다.
@@ -30,7 +28,7 @@ internal fun reduceHome(
             },
             destination = destination,
             missedKm = if (idle) formatKm(missedKm) else null,
-            recentTrips = recent.take(RECENT_TRIPS).map { it.toRecentUi(now) },
+            recentTrips = recent.take(RECENT_TRIPS).map { it.toTripRowUi(now) },
         )
     return when (session) {
         TripSession.Idle, is TripSession.PendingReview -> base
@@ -49,28 +47,3 @@ private fun HomeUiState.withTrip(phase: HomePhase, trip: ActiveTrip, liveKm: Dou
     origin = trip.origin,
     elapsedMin = ((now - trip.startTime) / 60_000).toInt().coerceAtLeast(0),
 )
-
-private val TIME = DateTimeFormatter.ofPattern("HH:mm")
-
-/** [AppZone] 기준으로 오늘·어제·그 전을 가른다. 문구는 화면이 strings.xml로 만든다. */
-private fun HistoryItem.toRecentUi(now: Long): RecentTripUi {
-    val start = Instant.ofEpochMilli(startTime).atZone(AppZone)
-    val today = Instant.ofEpochMilli(now).atZone(AppZone).toLocalDate()
-    val day =
-        when (start.toLocalDate()) {
-            today -> TripDay.TODAY
-            today.minusDays(1) -> TripDay.YESTERDAY
-            else -> TripDay.EARLIER
-        }
-    return RecentTripUi(
-        tripId = tripId,
-        origin = origin,
-        destination = destination,
-        km = formatKm(distanceKm),
-        day = day,
-        month = start.monthValue,
-        dayOfMonth = start.dayOfMonth,
-        time = start.format(TIME),
-        purpose = purpose?.labelKo,
-    )
-}

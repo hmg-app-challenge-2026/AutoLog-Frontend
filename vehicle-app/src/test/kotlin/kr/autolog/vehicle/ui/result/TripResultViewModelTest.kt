@@ -17,6 +17,7 @@ import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.data.interim.SessionState
 import kr.autolog.vehicle.data.interim.VehicleMotion
 import kr.autolog.vehicle.nav.Route
+import kr.autolog.vehicle.nav.TripResultMode
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -29,6 +30,53 @@ class TripResultViewModelTest {
     @Before fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
 
     @After fun tearDown() = Dispatchers.resetMain()
+
+    /** 운행 기록 조회 → 지난 운행([tripId])을 사후 확인으로 연 상태(D-29). */
+    private fun TestScope.review(tripId: String): Pair<TestAppGraph, TripResultViewModel> {
+        val g = TestAppGraph(backgroundScope, AppClock { testScheduler.currentTime }, start = Route.Home)
+        g.navigator.push(Route.History)
+        g.navigator.push(Route.TripResult(tripId, TripResultMode.REVIEW))
+        return g to TripResultViewModel(tripId, g.tripResults, g.session, g.navigator, g.clock, TripResultMode.REVIEW)
+    }
+
+    @Test
+    fun `사후 확인 — 카운트다운이 없어 기다려도 그대로, 닫기는 저장하지 않고 목록으로`() = runTest {
+        val (g, vm) = review("t-s2") // 이미 분류된 운행(지점 이동)
+        val state = vm.uiState.first { !it.loading }
+        assertNull(state.autoCloseSec)
+        assertTrue(state.review)
+        val before = purposeOf(g, "t-s2")
+
+        advanceTimeBy(30_000)
+        assertEquals(Route.TripResult("t-s2", TripResultMode.REVIEW), g.navigator.current)
+        vm.onAction(TripResultAction.GoHome)
+
+        assertEquals(Route.History, g.navigator.current)
+        assertEquals(before, purposeOf(g, "t-s2"))
+    }
+
+    @Test
+    fun `사후 확인 — 목적 미입력 운행은 수정 모드로 열리고 저장하면 목록으로`() = runTest {
+        val (g, vm) = review("t-s1")
+        assertTrue(vm.uiState.first { !it.loading }.editing)
+
+        vm.onAction(TripResultAction.Select(PurposeCategory.COMMUTE))
+        vm.onAction(TripResultAction.Save)
+
+        assertEquals(Route.History, g.navigator.current)
+        assertEquals(PurposeCategory.COMMUTE, purposeOf(g)!!.category)
+    }
+
+    @Test
+    fun `사후 확인 — 목적 미입력 운행을 닫으면 미입력 그대로`() = runTest {
+        val (g, vm) = review("t-s1")
+        vm.uiState.first { !it.loading }
+
+        vm.onAction(TripResultAction.GoHome)
+
+        assertEquals(Route.History, g.navigator.current)
+        assertNull(purposeOf(g))
+    }
 
     /** Home → 운행 결과(t-s1: 목적 없는 운행)로 들어온 상태. */
     private fun TestScope.open(tripId: String = "t-s1"): Pair<TestAppGraph, TripResultViewModel> {
