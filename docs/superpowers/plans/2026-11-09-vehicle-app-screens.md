@@ -120,6 +120,8 @@ sealed interface Route { …ProfilePicker; Home; data class ReviewTrip(val tripI
 
 ## Task 6: 운행기록부·보내기 (F-21, F-22)
 
+> 2026-11-10 구현(브랜치 `feat/report`): 스펙 7.7이 지금 모습의 기준. 화면 이름 "운행기록부 내보내기". 남은 것: 검토 필요 → History 필터, 오프라인 대기열(계약에 없음).
+
 > 2026-11-09(D-23): Home에는 기록부 버튼이 없다. History(Task 7) 맨 위 [운행기록부 만들기·보내기]로 들어온다.
 
 **Files:** Create `ui/report/ReportUiState.kt`, `ReportViewModel.kt`, `ReportScreen.kt` · Test reducer·VM·screen(조작 예산 2탭)·screenshot
