@@ -31,6 +31,7 @@ import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.motion.PopVisibility
 import kr.autolog.vehicle.ui.design.motion.animateSelectColor
 
@@ -87,7 +88,10 @@ private fun ButtonLabel(
     style: TextStyle = AutoLogTheme.type.label,
 ) {
     Box(modifier, contentAlignment = Alignment.Center) {
-        Text(text = text, style = style, color = color, textAlign = TextAlign.Center)
+        // 같은 버튼의 이름이 바뀌면([운행기록부 만들기] → [보내기 · 2명]) 그 자리에서 교체된다
+        FadeThrough(text, contentAlignment = Alignment.Center, label = "buttonLabel") {
+            Text(text = it, style = style, color = color, textAlign = TextAlign.Center)
+        }
         PopVisibility(loading) {
             CircularProgressIndicator(color = spinner, strokeWidth = Space.s1, modifier = Modifier.size(Size.icon))
         }

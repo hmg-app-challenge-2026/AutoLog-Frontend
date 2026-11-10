@@ -33,6 +33,7 @@ import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.RoundIconButton
 import kr.autolog.vehicle.ui.design.components.SecondaryButton
+import kr.autolog.vehicle.ui.design.motion.ExpandSwap
 import kr.autolog.vehicle.ui.mail.mailErrorText
 import kr.autolog.vehicle.ui.trips.tripWhenText
 
@@ -381,12 +382,14 @@ private fun PersonRow(primary: String, secondary: String?, locked: Boolean, onRe
 @Composable
 internal fun ResultLine(state: SettingsUiState, task: SettingsTask) {
     val c = AutoLogTheme.colors
-    val (text, color) = when (val r = state.results[task] ?: return) {
+    val line = when (val r = state.results[task]) {
+        null -> null
         TaskResult.Done -> stringResource(doneText(task)) to c.success
         is TaskResult.Failed -> r.reason to c.danger
         is TaskResult.MailFailed -> stringResource(mailErrorText(r.error)) to c.danger
     }
-    Text(text, style = AutoLogTheme.type.body, color = color)
+    // 결과가 생기면 펼쳐지고, 바뀌면 그 자리에서 교체되고, 사라지면 접힌다
+    ExpandSwap(line) { (text, color) -> Text(text, style = AutoLogTheme.type.body, color = color) }
 }
 
 private fun doneText(task: SettingsTask): Int = when (task) {

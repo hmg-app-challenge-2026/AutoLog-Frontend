@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,6 +34,8 @@ import kr.autolog.vehicle.ui.design.components.PrimaryButton
 import kr.autolog.vehicle.ui.design.components.ScreenHeader
 import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.Section
+import kr.autolog.vehicle.ui.design.motion.ExpandSwap
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.screenMargin
 import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.mail.mailErrorText
@@ -72,7 +75,10 @@ fun ReportScreen(state: ReportUiState, onAction: (ReportAction) -> Unit, modifie
                     onNext = { onAction(ReportAction.NextMonth) },
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
-                state.summary?.let { SummaryCard(it) }
+                // 달이 바뀌면 요약이 그 자리에서 교체된다
+                FadeThrough(state, contentKey = { it.month }, label = "reportSummary") { shown ->
+                    shown.summary?.let { SummaryCard(it) }
+                }
                 Recipients(state, onAction)
                 state.serverUpload?.let { ServerLine(it) }
             }
@@ -156,23 +162,28 @@ private fun ServerLine(upload: ServerUploadUi) {
 /** 지금 단계 한 줄(버튼 바로 위). 할 말이 없으면 그리지 않는다. */
 @Composable
 private fun StepMessage(state: ReportUiState) {
+    // 단계가 바뀌면 한 줄이 펼쳐지거나 그 자리에서 바뀌거나 접힌다
+    ExpandSwap(stepMessage(state)) { (text, color) -> Text(text, style = AutoLogTheme.type.body, color = color) }
+}
+
+@Composable
+private fun stepMessage(state: ReportUiState): Pair<String, Color>? {
     val c = AutoLogTheme.colors
-    val (text, color) = when (val step = state.step) {
+    return when (val step = state.step) {
         ReportStep.Ready ->
-            if (state.summary?.tripCount == 0) stringResource(R.string.report_no_trips) to c.textTertiary else return
+            if (state.summary?.tripCount == 0) stringResource(R.string.report_no_trips) to c.textTertiary else null
         is ReportStep.BuildFailed -> step.reason to c.danger
         // 만든 뒤엔 버튼([보내기 · N명])이 다음 할 일을 말한다 — 메일 계정이 없을 때만 이유 한 줄
         ReportStep.Built -> if (state.smtpConfigured) {
-            return
+            null
         } else {
             stringResource(R.string.mail_not_configured) to
                 c.warning
         }
         is ReportStep.Sent -> stringResource(R.string.report_sent, step.count) to c.success
         is ReportStep.SendFailed -> stringResource(mailErrorText(step.error)) to c.danger
-        ReportStep.Building, ReportStep.Sending -> return
+        ReportStep.Building, ReportStep.Sending -> null
     }
-    Text(text, style = AutoLogTheme.type.body, color = color)
 }
 
 @Composable

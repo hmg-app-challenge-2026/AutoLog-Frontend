@@ -19,6 +19,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -37,6 +41,8 @@ import kr.autolog.vehicle.ui.design.Space
  * **같은 자리 교체**: [target]이 바뀌면 옛 내용은 아주 빨리 사라지고(`swapOut`) 새 내용은 90 ms 뒤 0.98→1 + 8 dp 아래에서
  * 떠오르며(`swapIn`) 나타난다 — 둘이 겹쳐 읽히지 않는다.
  * 크기가 다르면 크기도 `smooth`로 맞춘다. [contentKey]가 같으면(같은 종류의 내용) 움직이지 않는다.
+ * 주의: [modifier]로 폭·높이를 채우면 안쪽 내용의 최대 크기 제한(`widthIn(max)`)이 무시된다(최소 크기가 함께 내려가서) —
+ * 가운데 정렬이 필요하면 바깥 `Box`가 맡고 이 상자는 내용 크기로 둔다.
  */
 @Composable
 fun <S> FadeThrough(
@@ -108,6 +114,19 @@ fun ExpandVisibility(visible: Boolean, modifier: Modifier = Modifier, content: @
         enter = expandVertically(motion.smooth(IntSize.VisibilityThreshold)) + fadeIn(motion.quick()),
         exit = shrinkVertically(motion.smooth(IntSize.VisibilityThreshold)) + fadeOut(motion.quick()),
     ) { content() }
+}
+
+/**
+ * **안내 한 줄**: [value]가 생기면 펼쳐지고, 바뀌면 그 자리에서 교체되고, null이 되면 마지막 내용으로 접힌다
+ * (결과 한 줄 · 단계 안내처럼 있다 없다 하는 문장).
+ */
+@Composable
+fun <T : Any> ExpandSwap(value: T?, modifier: Modifier = Modifier, content: @Composable (T) -> Unit) {
+    var last by remember { mutableStateOf(value) }
+    if (value != null) last = value
+    ExpandVisibility(value != null, modifier) {
+        last?.let { shown -> FadeThrough(shown, label = "expandSwap") { content(it) } }
+    }
 }
 
 /** **선택 표시의 "톡"**: 라디오 점·체크가 나타날 때 0→1(`bouncy`), 사라질 때는 줄며(`quick`). */

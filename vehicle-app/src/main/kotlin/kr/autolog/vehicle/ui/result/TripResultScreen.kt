@@ -147,14 +147,15 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                 // 분류 문구는 버튼에서 40 dp(줄 간격 8 + 32) 띄워 위로 — 버튼 글자와 붙어 한 덩어리로 읽히지 않게(2026-11-10 사용자 지시)
                 ClassificationSummary(state, Modifier.padding(bottom = CLASSIFICATION_GAP))
                 // 행동 줄: 같은 폭 버튼을 가운데에 모은다(분류 문구와 같은 가운데 축). 남은 시간은 주 버튼 안에
-                // 수정에 들어가거나 나오면 버튼 줄이 그 자리에서 바뀐다(버튼 개수·강조가 달라진다)
-                FadeThrough(
-                    state,
-                    Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                    contentKey = { resultButtons(it) },
-                    label = "actions",
-                ) { WideActions(it, onAction) }
+                // 수정에 들어가거나 나오면 버튼 줄이 그 자리에서 바뀐다(버튼 개수·강조가 달라진다).
+                // 교체 상자는 폭을 채우지 않는다 — 채우면 버튼 줄의 최대 폭(480 dp × n)이 무시된다
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    FadeThrough(state, contentAlignment = Alignment.Center, contentKey = {
+                        resultButtons(it)
+                    }, label = "actions") {
+                        WideActions(it, onAction)
+                    }
+                }
             }
             else -> {
                 // 세로로 긴 창: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행).
