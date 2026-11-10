@@ -34,20 +34,6 @@ class FuelScreensScreenshotTest {
     @Test
     fun ocr() = captureAll("fuel_ocr", driver = SampleDriver) {
         val receipt = FakeReceiptApi.SAMPLE_RECEIPT.copy(thumbUrl = "")
-        val fields = receipt.fields
-        FuelEntryScreen(
-            FuelEntryUiState(
-                receipt = receipt,
-                amount = fields.amountWon.toString(),
-                liters = fields.liters.toString(),
-                unitPrice = fields.unitPrice.toString(),
-                merchant = fields.merchant.orEmpty(),
-                datetime = fields.datetime.orEmpty(),
-                fuelType = fields.fuelType.orEmpty(),
-                cardLast4 = fields.cardLast4.orEmpty(),
-                candidates = FakeReceiptApi.SAMPLE_CANDIDATES,
-            ),
-            onAction = {},
-        )
+        FuelEntryScreen(reduceReceiptEntry(receipt, FakeReceiptApi.SAMPLE_CANDIDATES), onAction = {})
     }
 }

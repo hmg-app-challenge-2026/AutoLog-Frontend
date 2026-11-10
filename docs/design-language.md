@@ -242,7 +242,22 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 - 숫자(거리·금액·시각)는 **고정폭 숫자** `fontFeatureSettings = "tnum"`. 숫자가 바뀔 때 폭이 흔들리지 않아야 한다. Asta Sans가 tnum을 지원하지 않으면(V-05) 숫자 영역의 너비를 최대 자릿수 기준으로 고정한다.
 - 단위는 숫자보다 작고 옅게: `23.4` (`hero`, `textPrimary`) + `km` (`headline`, `textTertiary`), 기준선 정렬.
 - 한 줄 최대 80자(영문 기준, 한글은 약 40자), 한 덩어리 최대 3줄. 넘치면 문장을 줄인다(말줄임표로 자르는 것은 최후의 수단).
-- `caption`보다 작은 글자를 만들지 않는다.
+- **창 크기에 따라 달라지는 글자는 역할로**(`AutoLogTheme.windowType`, `ui/design/WindowType.kt`). 화면·컴포넌트가 `LocalWindowLayout`으로 글자를 직접 고르지 않는다 — 좁은 창에서 무엇이 한 단계 작아지는지가 이 표 한 곳에 있다.
+
+  | 역할 | WIDE | TALL | NARROW |
+  |---|---|---|---|
+  | `screenTitle` 전체 화면 제목 | `display` | `display` | `headline` |
+  | `modalTitle` 팝업 제목 | `headline` | `headline` | `label` |
+  | `tileName` 운전자 타일 이름 | `title` | `title` | `label` |
+  | `tileAction` 동작 타일 이름 | `label` | `label` | `caption` |
+  | `tileCaption` 타일 부서 | `caption` | `caption` | `fine` |
+  | `dockLabel` 하단 타일 이름 | `label` | `label` | `caption` |
+  | `resultTitle` 운행 결과 제목 | `title` | `title` | `label` |
+  | `resultClassification` 분류 문구 | `title` | `label` | `label` |
+  | `resultHomeButton` [메인 화면으로 · n초] | `caption` | `label` | `label` |
+
+- `fine`(22 sp)보다 작은 글자를 만들지 않는다. `fine`은 좁은 창의 dense 버튼처럼 공간이 정말 모자란 곳에만.
+- **기준 화면**: Pleos Connect v2.1.0 에뮬레이터(API 34) 기본 디스플레이는 **2560×1440 px, 밀도 1.0(160 dpi)** — 캡처에서 넓은 화면 여백 48 dp가 48 px, 하단 타일 네모 112 dp가 112 px로 찍힌다. 위 상태 표시줄 76 px·아래 하단 바 96 px를 빼면 **앱 영역 ≈ 2560×1268 dp**(WIDE). 2026-11-10 사용자가 이 에뮬레이터에서 지금 글자 크기·위치(PR #4)를 보고 괜찮다고 확인 — 글자·간격을 바꿀 때 기준은 이 화면이다. Roborazzi 스크린샷(1024×640 등)은 이 화면보다 훨씬 작아서 글자가 더 커 보이고 넘칠 수 있다 — 넘침 판단은 에뮬레이터 캡처로 한다.
 - 모든 글자 스타일은 한국어를 어절 중간에서 자르지 않는 줄바꿈(`LineBreak.WordBreak.Phrase`, Android 13+)을 쓴다. 단, Robolectric 스크린샷에서는 적용되지 않아(2026-11-09 확인) 끊김 위험이 있는 곳은 문장을 나눠 설계한다(예: 자동 종료 시트의 거리·목적지 두 줄).
 
 ### 6.3 운전자 쪽 (`driverSide`)
@@ -444,7 +459,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `TopLine` · `ScrollColumn` | 전체 화면 공용 뼈대. `TopLine` = 맨 위 76 dp 줄(상태 줄·화면 제목), 오른쪽은 운전자 배지 자리로 비운다. `ScrollColumn` = 위쪽 정렬 + 넘치면 스크롤 + 가장자리 흐림 |
 | `EmptyState` | 아이콘(`iconLg`, `textTertiary`) + 문장(`body`) + 선택 버튼 1개 |
 | `PeekPanel` | 정차 전용 읽기 패널. `bg` 위 가운데 세로 스택, 최대 폭 560 dp. ① 상태 줄(`StatusLine`: 초록 점 + `기록 중`, 터치 불가. 운전자는 오른쪽 위 `DriverBadge`) ② 섹션 "주행 거리"(`HeroMetric`, `heroSmall`) ③ 섹션 "운행 경로"(`RouteFlow`: 출발지 → 흐르는 화살표 → 목적지) — 소제목·모양은 Home과 같은 `Section` ④ 비워 둠(결정 대기) ⑤ 상황 줄(있을 때만, `body`, `warning`). **클릭 가능한 요소 0개**, 모션은 경로 화살표 흐름만 |
-| `RouteFlow` | 출발 ○ → 갈매기 화살표(기록 중) 또는 정지 연결선(완료) → 도착 ●를 왼쪽에, 장소 이름을 오른쪽에 둔다. 출발지 `title` 44 sp 보통·회색, 목적지 `title` 44 sp 굵게·기본색. 목적지는 두 줄까지 표시한다. 좁은 반쪽 칸에 직접 쓰는 `dense` 모드는 출발지 `caption` 28 sp, 목적지 `label` 34 sp |
+| `RouteFlow` | 출발 ○ → 갈매기 화살표(기록 중) 또는 정지 연결선(완료) → 도착 ●를 왼쪽에, 장소 이름을 오른쪽에 둔다. 출발지 `title` 44 sp 보통·회색, 목적지 `title` 44 sp 굵게·기본색. 목적지는 두 줄까지 표시한다. 크기 모드는 하나뿐(예전 좁은 칸용 `dense` 모드는 쓰는 곳이 없어져 삭제) |
 
 새 컴포넌트가 필요하면 이 표에 먼저 추가하는 PR을 올린다.
 
@@ -537,3 +552,5 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.21 | 2026-11-09 | 좁은 창 운행 결과: 거리·시간 같은 28 sp(거리 `label` 굵게 · 시간 `body` 보통), 출발지·목적지 같은 22 sp(`RouteFlow(dense)` — 목적지 굵게), 둘 다 같은 글자색 — 크기 대신 굵기로 구분 |
 | 1.22 | 2026-11-09 | **글자 하한 22 → 20 sp**(사용자 결정, Pleos 확인: 보조 텍스트 3 mm ≈ 19 sp, 22 sp는 우리 결정이었음). `fine`(20 sp 500)·`sectionFine`(20 sp 700) 추가. `dense` 버튼 글자 `fine` + 좌우 여백 12 dp → 좁은 창 운행 결과 버튼이 원래 이름 [계속 기록하기] · [수정하기] · [메인 화면으로 · 3초]로 한 줄에 들어간다(짧은 이름 문자열 삭제). `SectionHeader(dense)`·`Section(dense)` = `sectionFine` — 좁은 창 운행 결과 소제목 셋(운행 거리 · 시간 / 운행 경로 / 운행 목적) |
 | 1.23 | 2026-11-09 | 좁은 창 운행 결과 "운행 경로" 칸: 같은 폭 두 칸 + 사이 간격 여백 하나(32 dp, 기존 4:6) — 왼쪽 칸은 아래 운행 목적·버튼과 같은 왼쪽 선, 오른쪽 칸은 가운데 선 바로 옆(+16 dp). 가운데 선에서 여백만큼 띄우는 안(사이 64 dp)은 가운데가 너무 비어 버렸다. 좁아진 칸에 맞춰 `RouteFlow(dense)` 글자 `fine` 20 sp · 표시 칸과 글자 사이 8 dp("서울 강남구 역삼동"이 한 줄, 운행 목적 세 행이 첫 화면에) |
+| 1.24 | 2026-11-09 | **실제 에뮬레이터(Pleos Connect v2.1.0, 2560×1440 px · 160 dpi)에서 글자 크기·위치 재조정**(PR #4 `fix/font-size`): `title` 36→44 · `body`·`label` 28→34 · `caption` 22→28 · `section` 22→38 · `fine` 20→22(글자 하한) · `sectionFine` 20→30 · `heroSmall` 96→112 · `heroCompact` 72→80 · `display` 56→64 · `headline` 44→52, 운행 결과 값 `resultDistance` 64 · `resultTime` 56 추가. 하단 타일 네모 창 크기별 112/96/88 dp, 좁은 창 타일 이름은 두 줄 짧은 이름. 운행 결과 좁은 창은 거리·시간과 경로를 전폭으로 쌓고 분류 문구를 버튼 위 가운데로. 2026-11-10 사용자가 에뮬레이터에서 확인 — 이후 글자·간격의 기준 화면 |
+| 1.25 | 2026-11-10 | 코드 품질 정리(동작·모양 같음 — 스크린샷 130장 중 124장 바이트 동일, 나머지는 QR): 창 크기별 글자 분기 7곳을 `AutoLogTheme.windowType` 역할 표 한 곳으로, 운행 결과 섹션 공통 규칙(넓은 창 소제목 아래 +16 dp)을 `ResultSection` 하나로, 리터럴 `800.dp` → `Size.spaciousHeight`. `RouteFlow`의 쓰지 않는 `dense` 모드 삭제. 주유 QR이 자체 비트맵 대신 공용 `QrImage`(오류 정정 M · 둥근 모서리) |

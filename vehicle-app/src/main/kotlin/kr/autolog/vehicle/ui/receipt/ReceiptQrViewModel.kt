@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
@@ -14,26 +15,13 @@ import kr.autolog.vehicle.data.repository.ReceiptRepository
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
 
-data class ReceiptQrUiState(
-    val loading: Boolean = true,
-    val url: String? = null,
-    val expiresAt: Long = 0,
-    val now: Long = 0,
-    val failed: Boolean = false,
-) {
-    val expired: Boolean get() = url != null && now >= expiresAt
-    val remainingText: String get() {
-        val seconds = ((expiresAt - now).coerceAtLeast(0) + 999) / 1_000
-        return "%d:%02d".format(seconds / 60, seconds % 60)
-    }
-}
+/** 가짜 서버(데모)의 무기한 QR은 남은 시간을 보여 줄 수 없어 이 길이로 그린다. */
+internal const val DEMO_QR_LIFETIME_MS = 10 * 60_000L
 
-sealed interface ReceiptQrAction {
-    data object Retry : ReceiptQrAction
-    data object ManualEntry : ReceiptQrAction
-    data object Back : ReceiptQrAction
-}
-
+/**
+ * 영수증 QR(스펙 7.4). 들어오자마자 inbox를 본다 — 아직 확정하지 않은 영수증이 있으면 QR 없이 곧바로 입력 창으로,
+ * 없으면 QR을 발급하고 기다리다가 영수증이 도착하면 입력 창으로 바꾼다(같은 경로 하나, 맨 위 화면만 교체).
+ */
 class ReceiptQrViewModel(
     private val receipts: ReceiptRepository,
     private val navigator: Navigator,
@@ -41,36 +29,38 @@ class ReceiptQrViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ReceiptQrUiState(now = clock.nowMs()))
     val uiState: StateFlow<ReceiptQrUiState> = _uiState.asStateFlow()
+
+    /** QR을 한 번 발급했는지 — inbox가 다시 비어도 새로 발급하지 않는다. */
     private var issued = false
+
+    /** 이 화면을 떠났는지 — 떠난 뒤의 inbox 변화에는 반응하지 않는다. */
     private var left = false
 
     init {
         viewModelScope.launch {
             receipts.inbox.collect { inbox ->
                 if (left) return@collect
-                val latest = inbox.maxByOrNull { it.takenAt ?: "" }
-                if (latest != null) {
-                    left = navigator.replaceTop(Route.FuelEntry(latest.receiptId))
-                } else if (!issued) {
-                    issued = true
-                    issue()
+                val latest = inbox.maxByOrNull { it.takenAt.orEmpty() }
+                when {
+                    latest != null -> left = navigator.replaceTop(Route.FuelEntry(latest.receiptId))
+                    !issued -> {
+                        issued = true
+                        issue()
+                    }
                 }
             }
         }
         viewModelScope.launch {
-            tickerFlow(clock).collect { now -> _uiState.update { it.copy(now = now) } }
+            // 남은 시간은 이 화면에 있는 동안만 센다 — 떠나면(입력 창으로 바뀜·직접 입력·닫기) 1초 타이머를 멈춘다
+            tickerFlow(clock).takeWhile { !left }.collect { now -> _uiState.update { it.copy(now = now) } }
         }
     }
 
     fun onAction(action: ReceiptQrAction) {
         when (action) {
             ReceiptQrAction.Retry -> viewModelScope.launch { issue() }
-            ReceiptQrAction.ManualEntry -> {
-                left = navigator.push(Route.FuelEntry())
-            }
-            ReceiptQrAction.Back -> {
-                left = navigator.pop()
-            }
+            ReceiptQrAction.ManualEntry -> left = navigator.push(Route.FuelEntry())
+            ReceiptQrAction.Back -> left = navigator.pop()
         }
     }
 
@@ -78,9 +68,9 @@ class ReceiptQrViewModel(
         _uiState.update { it.copy(loading = true, failed = false, url = null) }
         when (val result = receipts.issueQr()) {
             is QrResult.Issued -> {
-                // 가짜 서버의 무기한 QR은 화면 시연을 위해 10분으로 표시한다.
-                val expiry = if (result.expiresAt == Long.MAX_VALUE) clock.nowMs() + 600_000 else result.expiresAt
-                _uiState.update { it.copy(loading = false, url = result.url, expiresAt = expiry, now = clock.nowMs()) }
+                val now = clock.nowMs()
+                val expiresAt = if (result.expiresAt == Long.MAX_VALUE) now + DEMO_QR_LIFETIME_MS else result.expiresAt
+                _uiState.update { it.copy(loading = false, url = result.url, expiresAt = expiresAt, now = now) }
             }
             is QrResult.Failed -> _uiState.update { it.copy(loading = false, failed = true) }
         }
