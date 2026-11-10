@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -67,7 +68,7 @@ fun TripResultRoute(tripId: String, mode: TripResultMode = TripResultMode.AFTER_
  * - 오른쪽 칸 = 운행 목적: 같은 폭 선택형 행 3개(8 dp 간격).
  * - 두 칸 아래 가운데 = "일반 업무용 거리 48.2 km로 분류돼요"(선택의 결과), 행동 버튼 바로 위.
  * - 아래 행동 줄: [계속 기록하기](종료 대기 중에만) · [수정하기]/[저장] · [메인 화면으로 · 3초]를
- *   콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 자동으로 눌릴 주 버튼 글자 + 맨 위 가장자리 막대.
+ *   같은 폭(하나당 최대 480 dp)으로 가운데에 모은다 — 분류 문구와 같은 가운데 축. 남은 시간은 자동으로 눌릴 주 버튼 글자 + 맨 위 가장자리 막대.
  * 넓은 창과 Pleos 1:1 분할 한 칸(≈1280×1268)은 같은 두 칸 배치·같은 글자. 세로로 긴 창(TALL)만 세로 한 칸(넘치면 그 칸만 스크롤) + 분류 문구 + 버튼 두 줄.
  */
 @Composable
@@ -131,8 +132,8 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                     }
                 }
                 ClassificationSummary(state)
-                // 행동 줄: 버튼 3개를 콘텐츠 폭 전체에 같은 폭으로(위 두 칸과 같은 좌우 끝선). 남은 시간은 주 버튼 안에
-                WideActions(state, onAction)
+                // 행동 줄: 같은 폭 버튼을 가운데에 모은다(분류 문구와 같은 가운데 축). 남은 시간은 주 버튼 안에
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { WideActions(state, onAction) }
             }
             else -> {
                 // 세로로 긴 창: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행).
@@ -254,7 +255,14 @@ private fun ClassificationSummary(state: TripResultUiState) {
  */
 @Composable
 private fun WideActions(state: TripResultUiState, onAction: (TripResultAction) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
+    // 버튼은 같은 폭, 하나당 최대 480 dp — 줄 전체를 가운데에 모은다(넓은 화면에서 끝에서 끝까지 늘어나지 않게).
+    // 분할 화면 한 칸(1280 dp)은 이 폭보다 좁아 콘텐츠 폭을 그대로 나눠 쓴다
+    val count = if (state.canContinue) 3 else 2
+    val gap = Space.s4
+    Row(
+        Modifier.widthIn(max = Size.actionButtonMaxWidth * count + gap * (count - 1)).fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(gap),
+    ) {
         if (state.canContinue) {
             SecondaryButton(
                 stringResource(R.string.result_continue),
