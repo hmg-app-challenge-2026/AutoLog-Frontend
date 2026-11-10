@@ -13,12 +13,13 @@ class TripResultReducerTest {
 
     @Test
     fun `거리·시간·경로와 기본 분류(일반 업무)`() {
-        val s = reduceTripResult(trip, loaded = true, TripResultInteraction(autoCloseSec = 5), now = 0)
+        val s = reduceTripResult(trip, loaded = true, TripResultInteraction(autoCloseAt = 5_000), now = 0)
 
         assertEquals("48.2", s.km)
         assertEquals(52, s.minutes)
         assertEquals(PurposeCategory.BUSINESS, s.selected)
-        assertEquals(1f, s.autoCloseProgress)
+        assertEquals(5_000L, s.autoCloseRemainingMs)
+        assertEquals(5, s.autoCloseSec)
     }
 
     @Test
@@ -45,11 +46,21 @@ class TripResultReducerTest {
     fun `종료 대기 중이면 남은 시간은 종료 시각까지, 계속 기록 가능 — 수정 중엔 남은 시간 없음`() {
         val ending = trip.copy(endsAt = 5_000)
 
-        val viewing = reduceTripResult(ending, loaded = true, TripResultInteraction(autoCloseSec = 99), now = 2_000)
+        val viewing = reduceTripResult(ending, loaded = true, TripResultInteraction(autoCloseAt = 99_000), now = 2_000)
         val editing = reduceTripResult(ending, loaded = true, TripResultInteraction(editing = true), now = 2_000)
 
         assertEquals(3, viewing.autoCloseSec)
+        assertEquals(3_000L, viewing.autoCloseRemainingMs)
         assertTrue(viewing.canContinue)
         assertNull(editing.autoCloseSec)
+    }
+
+    @Test
+    fun `남은 시간은 마감까지 ms — 300ms 남으면 글자는 1초, 마감이 지나면 0`() {
+        val at = TripResultInteraction(autoCloseAt = 5_000)
+
+        assertEquals(1, reduceTripResult(trip, loaded = true, at, now = 4_700).autoCloseSec)
+        assertEquals(300L, reduceTripResult(trip, loaded = true, at, now = 4_700).autoCloseRemainingMs)
+        assertEquals(0L, reduceTripResult(trip, loaded = true, at, now = 6_000).autoCloseRemainingMs)
     }
 }

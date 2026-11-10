@@ -8,12 +8,13 @@ class WindowTypeTest {
     private val t = autoLogType()
 
     @Test
-    fun `넓은 창 — 화면 제목 display, 팝업 제목 headline, 결과 메인 화면 버튼은 caption`() {
+    fun `넓은 창 — 화면 제목·운행 결과 제목 display, 팝업 제목 headline, 분류 문구 title`() {
         val w = windowTypeOf(WindowLayout.WIDE, t)
         assertEquals(t.display, w.screenTitle)
         assertEquals(t.headline, w.modalTitle)
+        assertEquals(t.display, w.resultTitle)
         assertEquals(t.title, w.resultClassification)
-        assertEquals(t.caption, w.resultHomeButton)
+        assertEquals(t.title, w.resultClassification)
     }
 
     @Test
@@ -22,9 +23,9 @@ class WindowTypeTest {
     }
 
     @Test
-    fun `세로 창 — 글자는 넓은 창과 같고 결과 분류·버튼만 label`() {
+    fun `세로 창 — 글자는 넓은 창과 같고 결과 제목은 title, 분류 문구는 label`() {
         val w = windowTypeOf(WindowLayout.WIDE, t)
         val tall = windowTypeOf(WindowLayout.TALL, t)
-        assertEquals(w.copy(resultClassification = t.label, resultHomeButton = t.label), tall)
+        assertEquals(w.copy(resultTitle = t.title, resultClassification = t.label), tall)
     }
 }

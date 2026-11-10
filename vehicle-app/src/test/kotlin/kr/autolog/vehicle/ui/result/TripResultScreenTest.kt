@@ -26,7 +26,7 @@ private val viewing =
         minutes = 52,
         origin = "판교 테크노밸리",
         destination = "서울 강남구 역삼동",
-        autoCloseSec = 3,
+        autoCloseRemainingMs = 3_000,
         canContinue = true,
     )
 
@@ -34,7 +34,7 @@ private val viewing =
 private val ended = viewing.copy(canContinue = false)
 
 /** [수정하기] 뒤 — 카운트다운 멈춤, 출퇴근을 고름. */
-private val editing = viewing.copy(editing = true, autoCloseSec = null, selected = PurposeCategory.COMMUTE)
+private val editing = viewing.copy(editing = true, autoCloseRemainingMs = null, selected = PurposeCategory.COMMUTE)
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -47,19 +47,19 @@ class TripResultScreenTest {
     }
 
     @Test
-    fun `보기 모드 — 결과와 분류 한 줄, 라디오는 눌러도 아무 일 없고 수정하기·메인 화면으로`() {
+    fun `보기 모드 — 분류와 자동 저장 안내, 라디오는 눌러도 아무 일 없고 계속 기록하기·수정하기·저장하기`() {
         val actions = mutableListOf<TripResultAction>()
         show(viewing, actions)
 
         compose.onNodeWithText("운행 기록을 완료했어요").assertIsDisplayed()
-        compose.onNodeWithText("일반 업무용 거리 48.2 km로 분류돼요").assertIsDisplayed()
-        compose.onNodeWithText("메인 화면으로 · 3초").assertIsDisplayed() // 넓은 창: 남은 시간은 주 버튼 글자에
+        compose.onNodeWithText("일반 업무용 거리 48.2 km로 분류돼요.").assertIsDisplayed()
+        compose.onNodeWithText("3초 후 자동 저장돼요.").assertIsDisplayed() // 남은 시간은 분류 문구 뒤 한 문장(버튼 글자엔 없다)
         compose.onNodeWithText("출퇴근").performClick()
         compose.onNodeWithText("계속 기록하기").performClick()
         compose.onNodeWithText("수정하기").performClick()
-        compose.onNodeWithText("메인 화면으로 · 3초").performClick()
+        compose.onNodeWithText("저장하기").performClick()
 
-        assertEquals(listOf(TripResultAction.Continue, TripResultAction.Edit, TripResultAction.GoHome), actions)
+        assertEquals(listOf(TripResultAction.Continue, TripResultAction.Edit, TripResultAction.Save), actions)
     }
 
     @Test
@@ -70,12 +70,14 @@ class TripResultScreenTest {
     }
 
     @Test
-    fun `수정 모드 — 라디오로 고르고 저장`() {
+    fun `수정 모드 — 수정하기가 빠져 버튼 둘, 라디오로 고르고 저장하기`() {
         val actions = mutableListOf<TripResultAction>()
         show(editing, actions)
 
+        compose.onNodeWithText("수정하기").assertDoesNotExist()
+        compose.onNodeWithText("3초 후 자동 저장돼요.").assertDoesNotExist() // 수정 중엔 시간이 멈춘다
         compose.onNodeWithText("개인 용무").performClick()
-        compose.onNodeWithText("저장").performClick()
+        compose.onNodeWithText("저장하기").performClick()
 
         assertEquals(listOf(TripResultAction.Select(PurposeCategory.NON_BUSINESS), TripResultAction.Save), actions)
     }
@@ -101,7 +103,11 @@ class TripResultScreenshotTest {
     @Test
     fun review() = captureAll("trip_result_review") {
         TripResultScreen(
-            ended.copy(review = true, startedAt = TripWhen(TripDay.EARLIER, 11, 7, "19:34"), autoCloseSec = null),
+            ended.copy(
+                review = true,
+                startedAt = TripWhen(TripDay.EARLIER, 11, 7, "19:34"),
+                autoCloseRemainingMs = null,
+            ),
             onAction = {},
         )
     }
