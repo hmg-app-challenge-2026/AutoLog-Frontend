@@ -39,7 +39,7 @@ class SettingsViewModelTest {
         val (_, vm) = open()
         vm.onAction(SettingsAction.StartRegister)
         vm.onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, "https://new.example"))
-        "7kq3mzW".forEach { vm.onAction(SettingsAction.RegisterKey(it)) } // 소문자는 대문자로, 7번째는 무시
+        vm.onAction(SettingsAction.EditDialog(DialogField.CONNECT_CODE, "7kq3mzW")) // 소문자는 대문자로, 7번째는 무시
 
         val dialog = vm.uiState.first { (it.dialog as? SettingsDialog.Register)?.code?.length == 6 }.dialog
         assertEquals("7KQ3MZ", (dialog as SettingsDialog.Register).code)
@@ -62,7 +62,7 @@ class SettingsViewModelTest {
     fun `연결 코드 — 서버가 쓰지 않는 0·1·I·O와 기호는 들어가지 않는다`() = runTest {
         val (_, vm) = open()
         vm.onAction(SettingsAction.StartRegister)
-        "01IO-#A2".forEach { vm.onAction(SettingsAction.RegisterKey(it)) }
+        vm.onAction(SettingsAction.EditDialog(DialogField.CONNECT_CODE, "01IO-#A2"))
 
         val dialog = vm.uiState.first { (it.dialog as? SettingsDialog.Register)?.code?.length == 2 }.dialog
         assertEquals("A2", (dialog as SettingsDialog.Register).code)
@@ -73,7 +73,7 @@ class SettingsViewModelTest {
         val (_, vm) = open()
         vm.onAction(SettingsAction.StartRegister)
         vm.onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, "ftp://x"))
-        "7KQ3MZ".forEach { vm.onAction(SettingsAction.RegisterKey(it)) }
+        vm.onAction(SettingsAction.EditDialog(DialogField.CONNECT_CODE, "7KQ3MZ"))
         vm.onAction(SettingsAction.SubmitDialog)
         advanceUntilIdle()
 

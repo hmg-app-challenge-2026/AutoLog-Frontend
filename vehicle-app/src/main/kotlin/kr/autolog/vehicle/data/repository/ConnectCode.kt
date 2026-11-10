@@ -13,9 +13,11 @@ object ConnectCode {
     /** 입력할 수 있는 글자인가(소문자는 대문자로 본다). */
     fun accepts(key: Char): Boolean = key.uppercaseChar() in ALPHABET
 
-    /** 키 하나를 반영한 새 코드. 쓸 수 없는 글자이거나 이미 [LENGTH]자면 그대로. */
-    fun append(current: String, key: Char): String =
-        if (current.length >= LENGTH || !accepts(key)) current else current + key.uppercaseChar()
+    /**
+     * 키보드로 친 글자를 코드로 — 소문자는 대문자로 바꾸고, 쓸 수 없는 글자(0·1·I·O·공백·기호·한글)는 버리고,
+     * [LENGTH]자에서 자른다. 붙여 넣은 "7kq3-mz"도 "7KQ3MZ"가 된다.
+     */
+    fun normalize(input: String): String = input.uppercase().filter { it in ALPHABET }.take(LENGTH)
 
     fun isComplete(code: String): Boolean = code.length == LENGTH && code.all(::accepts)
 }

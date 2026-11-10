@@ -56,17 +56,17 @@
 
 **결정이 필요한 순서로 정렬했다.** "바꾼 것"이 있으면 그 칸에 적었다.
 
-> 2026-11-10 사용자 결정: G-01 = ①(글자+숫자 키패드, 해결), G-02 = R-10 요청, G-03~G-08 = 보류(기록만 유지).
+> 2026-11-10 사용자 결정: G-01 = 해결(①키패드 → 같은 날 ②키보드 입력으로 변경), G-02 = R-10 요청, G-03~G-08 = 보류(기록만 유지).
 
-### G-01 차량 연결 코드 형식이 다르다 — ✅ 해결 (2026-11-10 사용자 결정 ①)
+### G-01 차량 연결 코드 형식이 다르다 — ✅ 해결 (2026-11-10, 키보드 입력)
 - **현상(이전):** 서버 연결 코드는 대문자·숫자 6자리(0·1·I·O 제외, `[2-9A-HJ-NP-Z]{6}` — `DeviceRepository.CODE`, relay `Tokens.newConnectCode`, DB 스키마 2.4). 프론트 설정의 연결 코드 팝업은 숫자판(0~9)만 받아서 실제 앱에서 차량 등록(F-01)을 할 수 없었다(등록이 전제인 영수증 QR F-30·inbox F-11·직원·수신자 배포도 막힘).
-- **결정:** ① 글자+숫자 키패드. 키보드 없이, 차 화면에 맞는 큰 키. ②(텍스트 키보드)·③(서버에 숫자 코드 요청)은 기각 — ②는 주차 중 시스템 키보드가 화면 절반을 가리고 0/O·1/I를 그대로 받게 되며, ③은 백엔드 변경이다.
+- **결정:** 처음엔 ① 글자+숫자 키패드(`CodeKeypad`)로 구현했다가, 같은 날 **② 키보드 입력**으로 바꿨다(사용자 지시 "키보드로 바꿔줘, 소문자도 대문자로"). 이유: 같은 팝업의 서버 주소가 이미 시스템 키보드라 입력 방식이 둘이 되고, 연결 코드는 차 한 대에 한 번 넣는 값이라 전용 키패드를 둘 만큼 자주 쓰지 않는다. 주행 중 키보드 잠금(`LocalKeyboardLocked`)은 입력 칸에 이미 있다. ③(서버에 숫자 코드 요청)은 백엔드 변경이라 기각.
 - **바꾼 것:**
-  - `data/repository/ConnectCode.kt` — 서버와 같은 규칙 한곳(길이 6, 글자표 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`, 소문자는 대문자로, 표에 없는 글자·7번째 글자는 무시). ViewModel·데모 가짜가 함께 쓴다.
-  - `ui/design/components/CodeKeypad.kt` — 8열 × 4줄(2~9 / A~H / J~R / S~Z) + 마지막 줄 오른쪽 지우기(2칸 폭). 키 모양·지우기 글리프는 `NumericKeypad`와 공유(`KeypadKey`·`DeleteGlyph`).
-  - 키 바탕을 `surface2` → `surface3`으로 — 어두운 팝업(`surface2`) 위에서 키가 안 보였다(숫자판도 같이).
+  - `data/repository/ConnectCode.kt` — 서버와 같은 규칙 한곳(길이 6, 글자표 `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`). `normalize`: 소문자 → 대문자, 표에 없는 글자(0·1·I·O·공백·기호·한글)는 버리고 6자에서 자름 — 붙여 넣은 "7kq3-mz"도 "7KQ3MZ". ViewModel·데모 가짜가 함께 쓴다.
+  - 설정 팝업: 연결 코드 = `InputField(code = true)` — 대문자 키보드(`KeyboardCapitalization.Characters`)·자동 수정 끔·`KeyboardType.Ascii`. 대문자로 바꾸는 일은 키보드마다 다르므로 `normalize`가 책임진다.
   - 데모 가짜 `FakeDeviceApi`는 숫자 6자리 대신 같은 규칙으로 검사한다.
-- **남은 확인:** 맥 에뮬레이터에서 relay가 발급한 실제 코드로 등록(5.3 A 스크립트와 함께).
+  - (키패드 단계에서 바꾼 숫자판 키 바탕 `surface3`은 유지 — 주유 입력 시트에서도 어두운 면 위에 키가 보이게.)
+- **남은 확인:** 맥 에뮬레이터에서 ① Pleos 키보드가 대문자로 뜨는지(안 떠도 값은 대문자로 들어감) ② 키보드가 올라올 때 팝업이 가려지지 않는지 ③ relay가 발급한 실제 코드로 등록(5.3 A 스크립트와 함께).
 
 ### G-02 차량 id를 계약으로 받을 수 없다 — 📨 R-10 요청함 (2026-11-10)
 - **현상:** `PurposeEngine.orderedUsers(vehicleId, now)`·`suggest(TripFacts(vehicleId=…))`·`unassignedTrips(vehicleId, …)`는 차량 id가 필요한데, 화면이 받는 `DeviceApi`·`ConnectionState`에는 번호판 라벨(`vehicleLabel`)만 있다. 실제 id는 `DeviceRepository.vehicleId`(data 패키지 — 화면 import 금지)에만 있다.

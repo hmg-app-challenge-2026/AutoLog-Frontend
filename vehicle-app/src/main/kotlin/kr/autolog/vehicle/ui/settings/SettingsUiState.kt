@@ -1,7 +1,6 @@
 package kr.autolog.vehicle.ui.settings
 
 import kr.autolog.vehicle.core.MailError
-import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.ui.trips.TripWhen
 
 /** 설정 섹션(스펙 7.9) — 선언 순서 = 목록 순서. 이름·아이콘·요약 문구는 화면이 정한다. */
@@ -96,7 +95,7 @@ sealed interface SettingsDialog {
 }
 
 /** 팝업 입력 칸 이름 — 칸 하나를 바꾸는 액션을 하나로 쓰기 위해. */
-enum class DialogField { SERVER_URL, EMAIL, NAME, DEPT }
+enum class DialogField { SERVER_URL, CONNECT_CODE, EMAIL, NAME, DEPT }
 
 enum class MailField { HOST, PORT, USERNAME, PASSWORD }
 
@@ -110,11 +109,6 @@ sealed interface SettingsAction {
     data object Back : SettingsAction
 
     data object StartRegister : SettingsAction
-
-    /** 연결 코드 키 하나(2~9, A~Z 중 I·O 제외 — [ConnectCode]). */
-    data class RegisterKey(val key: Char) : SettingsAction
-
-    data object RegisterDelete : SettingsAction
 
     data object UploadNow : SettingsAction
 

@@ -20,10 +20,17 @@ class ConnectCodeTest {
 
     @Test
     fun `소문자는 대문자로, 6자리가 차면 더 받지 않는다`() {
-        val code = "7kq3mzW".fold("") { acc, c -> ConnectCode.append(acc, c) }
+        val code = ConnectCode.normalize("7kq3mzW")
         assertEquals("7KQ3MZ", code)
         assertTrue(ConnectCode.isComplete(code))
         assertTrue(server.matches(code))
+    }
+
+    @Test
+    fun `키보드로 친 0·1·I·O·공백·기호·한글은 버린다 — 붙여 넣은 코드도 정리된다`() {
+        assertEquals("A2", ConnectCode.normalize("01IO-#A2"))
+        assertEquals("7KQ3MZ", ConnectCode.normalize(" 7kq3-mz "))
+        assertEquals("", ConnectCode.normalize("가나"))
     }
 
     @Test

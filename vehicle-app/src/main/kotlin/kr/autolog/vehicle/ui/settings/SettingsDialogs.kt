@@ -1,28 +1,18 @@
 package kr.autolog.vehicle.ui.settings
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.ui.design.AutoLogTheme
-import kr.autolog.vehicle.ui.design.Radius
-import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
-import kr.autolog.vehicle.ui.design.components.CodeKeypad
 import kr.autolog.vehicle.ui.design.components.DangerButton
 import kr.autolog.vehicle.ui.design.components.InputField
 import kr.autolog.vehicle.ui.design.components.ModalCard
@@ -50,9 +40,7 @@ private fun SettingsDialogCard(
     submit: () -> Unit,
 ) {
     when (d) {
-        // 코드 키패드(8칸 × 4줄)가 차 화면에서 누르기 쉬운 크기가 되게 팝업을 넓게(키 하나 ≈ 100 dp)
         is SettingsDialog.Register -> ModalCard(
-            maxWidth = Size.sheetMaxWidth,
             title = stringResource(R.string.settings_register_title),
             onClose = dismiss,
             footer = {
@@ -72,17 +60,15 @@ private fun SettingsDialogCard(
                     { onAction(SettingsAction.EditDialog(DialogField.SERVER_URL, it)) },
                     keyboardType = KeyboardType.Uri,
                 )
-                Text(
+                // 서버 주소와 같은 키보드 입력. 서버 코드는 글자와 숫자가 섞인다(2~9, A~Z 중 I·O 제외) — 소문자로 쳐도
+                // 대문자로 들어가고 0·1·I·O·기호는 들어가지 않는다(ViewModel → ConnectCode.normalize, G-01)
+                InputField(
                     stringResource(R.string.settings_register_code),
-                    style = AutoLogTheme.type.caption,
-                    color = AutoLogTheme.colors.textSecondary,
-                )
-                CodeBoxes(d.code)
-                // 서버가 만드는 코드는 글자와 숫자가 섞인다(2~9, A~Z 중 I·O 제외) — 숫자판으로는 넣을 수 없다(G-01)
-                CodeKeypad(
-                    ConnectCode.ALPHABET,
-                    onKey = { onAction(SettingsAction.RegisterKey(it)) },
-                    onDelete = { onAction(SettingsAction.RegisterDelete) },
+                    d.code,
+                    { onAction(SettingsAction.EditDialog(DialogField.CONNECT_CODE, it)) },
+                    keyboardType = KeyboardType.Ascii,
+                    placeholder = stringResource(R.string.settings_register_code_hint),
+                    code = true,
                 )
                 DialogError(state, SettingsTask.REGISTER)
             }
@@ -181,25 +167,6 @@ private fun SettingsDialogCard(
 @Composable
 private fun DialogBody(content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.s4), content = content)
-}
-
-/** 연결 코드 6칸(76 dp — 숫자판 키와 같은 무게로 읽히게) — 입력한 숫자는 칸에, 남은 칸은 비어 있다. */
-@Composable
-private fun CodeBoxes(code: String) {
-    val c = AutoLogTheme.colors
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Space.s2, Alignment.CenterHorizontally),
-    ) {
-        repeat(ConnectCode.LENGTH) { i ->
-            Box(
-                Modifier.size(Size.touchMin).clip(RoundedCornerShape(Radius.sm)).background(c.surface3),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(code.getOrNull(i)?.toString().orEmpty(), style = AutoLogTheme.type.title, color = c.textPrimary)
-            }
-        }
-    }
 }
 
 /** 팝업 안 실패 한 줄(성공이면 팝업이 닫히므로 실패만). */

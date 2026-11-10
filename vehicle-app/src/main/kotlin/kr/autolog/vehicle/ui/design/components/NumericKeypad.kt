@@ -26,7 +26,7 @@ import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 
-/** 디자인 언어 11장 NumericKeypad: 3×4, 키 96 dp, 간격 16 dp. 키보드 대신 숫자를 넣는다(금액·리터). 글자가 섞인 차량 연결 코드는 [CodeKeypad]. */
+/** 디자인 언어 11장 NumericKeypad: 3×4, 키 96 dp, 간격 16 dp. 키보드 대신 숫자를 넣는다(금액·리터). */
 @Composable
 fun NumericKeypad(
     onDigit: (Char) -> Unit,
@@ -54,17 +54,17 @@ fun NumericKeypad(
     }
 }
 
-/** 키 글자 — 숫자판·코드 키패드 공용. */
+/** 키 글자. */
 @Composable
-internal fun KeyText(text: String) =
+private fun KeyText(text: String) =
     Text(text, style = AutoLogTheme.type.headline, color = AutoLogTheme.colors.textPrimary)
 
 /**
- * 키 하나(높이 `iconButton` 96 dp, `radius.lg`, `surface3`) — 숫자판·코드 키패드 공용. 폭은 [modifier]가 정한다.
+ * 키 하나(높이 `iconButton` 96 dp, `radius.lg`, `surface3`). 폭은 [modifier]가 정한다.
  * 키패드는 팝업 안에 놓이므로 팝업 면(`surfaceRaised` — 다크는 `surface2`)보다 한 단계 밝은 `surface3` — 같은 색이면 다크에서 키 경계가 사라진다.
  */
 @Composable
-internal fun KeypadKey(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun KeypadKey(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
         modifier
             .height(Size.iconButton)
@@ -77,7 +77,7 @@ internal fun KeypadKey(onClick: () -> Unit, modifier: Modifier = Modifier, conte
 
 /** 지우기 키 안의 ⌫ 아이콘. */
 @Composable
-internal fun DeleteGlyph() {
+private fun DeleteGlyph() {
     Icon(
         Icons.AutoMirrored.Rounded.Backspace,
         contentDescription = stringResource(R.string.keypad_delete),

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -36,6 +37,8 @@ import kr.autolog.vehicle.ui.design.Space
 /**
  * 디자인 언어 11장 InputField(채움형). 텍스트 입력은 최후의 수단(프리셋 → 최근값 → 음성 → 키보드).
  * 잠금이거나 [enabled]가 false면 비활성 + "지금은 입력할 수 없어요". [secret]이면 항상 가린다(앱 비밀번호).
+ * [code]면 코드 입력용 키보드 — 대문자로 시작하고 자동 수정·추천을 끈다(차량 연결 코드). 대문자로 바꾸는 일 자체는
+ * 키보드마다 다르므로 값 규칙(예: `ConnectCode.normalize`)이 책임진다.
  */
 @Composable
 fun InputField(
@@ -47,6 +50,7 @@ fun InputField(
     secret: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     placeholder: String? = null,
+    code: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
     val t = AutoLogTheme.type
@@ -66,7 +70,11 @@ fun InputField(
             textStyle = t.body.copy(color = if (locked) c.textTertiary else c.textPrimary),
             cursorBrush = SolidColor(c.accent),
             visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = if (secret) KeyboardType.Password else keyboardType),
+            keyboardOptions = KeyboardOptions(
+                capitalization = if (code) KeyboardCapitalization.Characters else KeyboardCapitalization.None,
+                autoCorrectEnabled = !code,
+                keyboardType = if (secret) KeyboardType.Password else keyboardType,
+            ),
             interactionSource = interaction,
             modifier = Modifier.fillMaxWidth(),
             decorationBox = { inner ->
