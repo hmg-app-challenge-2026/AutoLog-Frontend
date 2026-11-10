@@ -360,7 +360,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 화면 앞으로 | 들어오는 화면: 오른쪽 **전체 폭** → 0(`smooth`). 뒤 화면: 0 → 왼쪽 폭의 `pushParallax`(30%) + `scrim` 색 덮개 0 → `pushBehindDim`(scrim의 60%) | Home → 주유·운행 기록·설정·운전자 선택, 운행 기록 → 내보내기·지난 운행 |
 | 화면 뒤로 | 앞으로의 반대 — 떠나는 화면이 위에서 오른쪽으로 빠진다 | < · 시스템 뒤로, 처음 화면으로 한꺼번에 돌아가기(주유 저장 → Home, 운전자 선택 → Home) |
 | 띄우기 · 내리기 | 들어옴: 아래 `space.9`(96 dp) → 0 + `presentScale`(0.96)→1(`smooth`) + 투명도(`quick`). 나감: 아래로 48 dp + 투명도(`quick`) | 운행 직후 운행 결과 카드 |
-| 같은 자리 교체 | 나가는 쪽 투명도(`quick`), 들어오는 쪽 투명도 + `swapScale`(0.98)→1(`smooth`) — 나가는 쪽이 `quick`이라 먼저 사라진다 | QR → 주유 입력 창, 첫 실행 운전자 선택 → Home, 화면 안 내용 교체(Home 상태, 설정 상세, 결과 → 저장 완료) |
+| 같은 자리 교체 | 나가는 쪽 투명도 `swapOut`(spring(1, 1600) — 응답 ≈ 0.15 s), 들어오는 쪽 투명도 + `swapScale`(0.98)→1 + 8 dp 위로 `swapIn`(90 ms 늦게 시작하는 `smooth`, `DelayedSpec`) — 옛 내용이 먼저 사라진 뒤 새 내용이 떠올라 둘이 겹쳐 읽히지 않는다(Material fade-through 순서) | QR → 주유 입력 창, 첫 실행 운전자 선택 → Home, 화면 안 내용 교체(Home 상태, 설정 상세, 결과 → 저장 완료) |
 | 팝업 | 열림: scrim 투명도(`quick`) + 카드 `modalEnterScale`(0.92)→1 + 투명도(`smooth`). 닫힘: 카드 → `modalExitScale`(0.96) + 투명도, scrim(`quick`) | `ModalCard` 전부 |
 | 방향 교체 | 누른 쪽으로 48 dp 밀려나고 반대편에서 들어옴(`smooth`) + 투명도(`quick`) | 달 이동 ‹ › |
 | 펼침·접힘 | 크기(`smooth`) + 투명도(`quick`) | 안내 줄 생김·사라짐, 버튼 개수 변화, 운전자 지정 줄 |

@@ -1,7 +1,6 @@
 package kr.autolog.vehicle.ui.result
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -49,6 +48,7 @@ import kr.autolog.vehicle.ui.design.components.SecondaryButton
 import kr.autolog.vehicle.ui.design.components.Section
 import kr.autolog.vehicle.ui.design.components.TopLine
 import kr.autolog.vehicle.ui.design.durationText
+import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.screenMargin
 import kr.autolog.vehicle.ui.design.twoColumns
 import kr.autolog.vehicle.ui.trips.tripWhenText
@@ -78,21 +78,16 @@ fun TripResultRoute(tripId: String, mode: TripResultMode = TripResultMode.AFTER_
 @Composable
 fun TripResultScreen(state: TripResultUiState, onAction: (TripResultAction) -> Unit, modifier: Modifier = Modifier) {
     val layout = LocalWindowLayout.current
-    // 저장을 마치면 결과 카드가 사라지고 저장 완료 화면(TripSaved)이 같은 자리에 — 짧은 크로스페이드
-    Crossfade(
-        state.saved,
-        modifier.fillMaxSize(),
-        animationSpec = AutoLogTheme.motion.smooth(),
-        label = "saved",
-    ) { saved ->
-        if (saved) {
+    // 저장을 마치면 결과 카드가 사라지고 저장 완료 화면(TripSaved)이 같은 자리에서 떠오른다(디자인 언어 8.2 같은 자리 교체)
+    FadeThrough(state, modifier.fillMaxSize(), contentKey = { it.saved }, label = "saved") { shown ->
+        if (shown.saved) {
             TripSaved(onAction)
         } else {
             Box(Modifier.fillMaxSize()) {
-                ResultBody(state, onAction, layout)
+                ResultBody(shown, onAction, layout)
                 // 맨 위 가장자리에 붙는 남은 시간 막대 — 오른쪽 끝이 왼쪽으로 줄어든다(수정 중엔 없다)
-                state.autoCloseRemainingMs?.let {
-                    EdgeCountdownBar(it, state.autoCloseTotalMs, Modifier.align(Alignment.TopStart))
+                shown.autoCloseRemainingMs?.let {
+                    EdgeCountdownBar(it, shown.autoCloseTotalMs, Modifier.align(Alignment.TopStart))
                 }
             }
         }
@@ -152,7 +147,14 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                 // 분류 문구는 버튼에서 40 dp(줄 간격 8 + 32) 띄워 위로 — 버튼 글자와 붙어 한 덩어리로 읽히지 않게(2026-11-10 사용자 지시)
                 ClassificationSummary(state, Modifier.padding(bottom = CLASSIFICATION_GAP))
                 // 행동 줄: 같은 폭 버튼을 가운데에 모은다(분류 문구와 같은 가운데 축). 남은 시간은 주 버튼 안에
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { WideActions(state, onAction) }
+                // 수정에 들어가거나 나오면 버튼 줄이 그 자리에서 바뀐다(버튼 개수·강조가 달라진다)
+                FadeThrough(
+                    state,
+                    Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                    contentKey = { resultButtons(it) },
+                    label = "actions",
+                ) { WideActions(it, onAction) }
             }
             else -> {
                 // 세로로 긴 창: 넓은 창과 같은 순서 — 운행 거리 · 시간 → 운행 경로 → 운행 목적(세로 선택형 행).
@@ -166,7 +168,9 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
                     Purpose(state, onAction)
                 }
                 ClassificationSummary(state)
-                CompactActions(state, onAction)
+                FadeThrough(state, Modifier.fillMaxWidth(), contentKey = { resultButtons(it) }, label = "actions") {
+                    CompactActions(it, onAction)
+                }
             }
         }
     }
@@ -256,15 +260,27 @@ private fun Purpose(state: TripResultUiState, onAction: (TripResultAction) -> Un
 }
 
 /** 선택한 운행 목적의 분류 결과를 하단 행동 버튼 바로 위, 화면 가운데에 표시한다. */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ClassificationSummary(state: TripResultUiState, modifier: Modifier = Modifier) {
+    // 목적을 바꾸거나 수정에 들어가 "n초 후 자동 저장돼요."가 빠지면 문구가 그 자리에서 바뀐다. 초가 줄어드는 건 교체가 아니다
+    FadeThrough(
+        state,
+        modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopCenter,
+        contentKey = { Triple(it.selected, it.km, it.autoCloseSec != null) },
+        label = "classification",
+    ) { ClassificationText(it) }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ClassificationText(state: TripResultUiState) {
     val c = AutoLogTheme.colors
     val style = AutoLogTheme.windowType.resultClassification
     val kind = stringResource(classLabel(state.selected))
     // 분류 결과 + (남은 시간이 돌 때) "3초 후 자동 저장돼요" — 넓은 화면은 한 줄, 폭이 모자라면 문장 단위로 다음 줄에
     FlowRow(
-        modifier.fillMaxWidth(),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Space.s3, Alignment.CenterHorizontally),
     ) {
         Text(

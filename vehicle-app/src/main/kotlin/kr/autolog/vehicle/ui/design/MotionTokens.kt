@@ -8,6 +8,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Immutable
+import kr.autolog.vehicle.ui.design.motion.DelayedSpec
 
 /**
  * 디자인 언어 8.2·8.4. [isStatic]은 tier != FULL(정차 Peek) 또는 시스템 "애니메이션 줄이기"일 때 — 화면 전환·등장 모션이 멈춘다.
@@ -55,8 +56,18 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
     /** 띄우는 화면(운행 결과)이 아래에서 떠오를 때 시작 배율. */
     val presentScale: Float get() = 0.96f
 
-    /** 같은 자리 교체에서 들어오는 쪽 시작 배율(나가는 쪽은 `quick`으로 먼저 사라진다). */
+    /** 같은 자리 교체에서 들어오는 쪽 시작 배율. */
     val swapScale: Float get() = 0.98f
+
+    /**
+     * 같은 자리 교체(fade-through): 나가는 쪽은 아주 빨리 사라지고(`swapOut`, 응답 ≈ 0.15 s) 들어오는 쪽은 90 ms 뒤에
+     * `smooth`로 떠오른다(`swapIn`) — 옛 내용과 새 내용이 겹쳐 읽히지 않는다(프레임 검토 2026-11-10: 겹치면 412.6과 0.0이 포개져 보였다).
+     */
+    fun <T> swapOut(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else spring(dampingRatio = 1f, stiffness = SWAP_OUT_STIFFNESS, visibilityThreshold)
+
+    fun <T> swapIn(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
+        if (isStatic) snap() else DelayedSpec(SWAP_DELAY_MS, smooth(visibilityThreshold))
 
     fun <T> snappy(): FiniteAnimationSpec<T> = if (isStatic) snap() else spring(dampingRatio = 0.85f, stiffness = 700f)
 
@@ -95,6 +106,8 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
         private const val QUICK_STIFFNESS = 700f
         private const val BOUNCY_DAMPING = 0.55f
         private const val BOUNCY_STIFFNESS = 600f
+        private const val SWAP_OUT_STIFFNESS = 1_600f
+        private const val SWAP_DELAY_MS = 90
 
         val Standard = MotionTokens(isStatic = false, ambient = true)
         val Static = MotionTokens(isStatic = true, ambient = true)

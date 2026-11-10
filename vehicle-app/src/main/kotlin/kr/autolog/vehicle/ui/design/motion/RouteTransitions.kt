@@ -46,8 +46,8 @@ fun <S> AnimatedContentTransitionScope<S>.routeTransform(
             (EnterTransition.None togetherWith (slideOutVertically(offset) { dismissDropPx } + fadeOut(motion.quick())))
                 .apply { targetContentZIndex = -1f } // 내려가는 화면이 위
         NavTransition.FADE_THROUGH ->
-            (fadeIn(motion.smooth()) + scaleIn(motion.smooth(), initialScale = motion.swapScale)) togetherWith
-                fadeOut(motion.quick())
+            (fadeIn(motion.swapIn()) + scaleIn(motion.swapIn(), initialScale = motion.swapScale)) togetherWith
+                fadeOut(motion.swapOut())
         NavTransition.NONE -> EnterTransition.None togetherWith ExitTransition.None
     }
 }

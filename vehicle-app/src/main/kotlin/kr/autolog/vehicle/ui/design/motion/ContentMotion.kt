@@ -34,7 +34,8 @@ import kr.autolog.vehicle.ui.design.Space
 // 화면·컴포넌트는 AnimatedContent·animate*AsState를 직접 쓰지 않고 이 도우미만 쓴다 — 모양과 스프링이 한곳에서 정해진다.
 
 /**
- * **같은 자리 교체**: [target]이 바뀌면 옛 내용은 `quick`으로 사라지고 새 내용은 0.98→1 + 8 dp 아래에서 떠오르며(`smooth`) 나타난다.
+ * **같은 자리 교체**: [target]이 바뀌면 옛 내용은 아주 빨리 사라지고(`swapOut`) 새 내용은 90 ms 뒤 0.98→1 + 8 dp 아래에서
+ * 떠오르며(`swapIn`) 나타난다 — 둘이 겹쳐 읽히지 않는다.
  * 크기가 다르면 크기도 `smooth`로 맞춘다. [contentKey]가 같으면(같은 종류의 내용) 움직이지 않는다.
  */
 @Composable
@@ -53,10 +54,10 @@ fun <S> FadeThrough(
         modifier = modifier,
         transitionSpec = {
             (
-                fadeIn(motion.smooth()) +
-                    scaleIn(motion.smooth(), initialScale = motion.swapScale) +
-                    slideInVertically(motion.smooth(IntOffset.VisibilityThreshold)) { rise }
-                ) togetherWith fadeOut(motion.quick()) using
+                fadeIn(motion.swapIn()) +
+                    scaleIn(motion.swapIn(), initialScale = motion.swapScale) +
+                    slideInVertically(motion.swapIn(IntOffset.VisibilityThreshold)) { rise }
+                ) togetherWith fadeOut(motion.swapOut()) using
                 SizeTransform(clip = false) { _, _ -> motion.smooth(IntSize.VisibilityThreshold) }
         },
         contentAlignment = contentAlignment,

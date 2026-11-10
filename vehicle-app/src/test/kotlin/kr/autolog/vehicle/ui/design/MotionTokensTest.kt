@@ -1,7 +1,9 @@
 package kr.autolog.vehicle.ui.design
 
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SnapSpec
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.VectorConverter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -34,5 +36,19 @@ class MotionTokensTest {
             assertTrue(m.quick<Float>() is SnapSpec<*>)
             assertTrue(m.bouncy<Float>() is SnapSpec<*>)
         }
+    }
+
+    @Test
+    fun `같은 자리 교체 — 나가는 쪽은 아주 빨리, 들어오는 쪽은 90 ms 늦게 smooth로`() {
+        val m = MotionTokens.Standard
+        val out = m.swapOut<Float>() as SpringSpec<Float>
+        assertTrue(out.stiffness > (m.quick<Float>() as SpringSpec<Float>).stiffness)
+        val vector = m.swapIn<Float>().vectorize(Float.VectorConverter)
+        val start = AnimationVector1D(0f)
+        val end = AnimationVector1D(1f)
+        val still = AnimationVector1D(0f)
+        assertEquals(0f, vector.getValueFromNanos(80_000_000L, start, end, still).value) // 90 ms 전엔 그대로
+        assertTrue(vector.getValueFromNanos(200_000_000L, start, end, still).value > 0f)
+        assertTrue(MotionTokens.Static.swapIn<Float>() is SnapSpec<*>)
     }
 }
