@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -170,6 +171,17 @@ fun CloseButton(
     modifier: Modifier = Modifier,
     label: String = stringResource(R.string.action_close),
 ) = RoundIconButton(Icons.Rounded.Close, label, onClick, modifier)
+
+/**
+ * 뒤로(<) — 보조 화면(주유·운행 기록·운행기록부 …) 머리 줄 왼쪽(D-30). `RoundIconButton`과 같은 모양.
+ * 팝업은 뒤로가 아니라 오른쪽 위 닫기([CloseButton])로 끝낸다.
+ */
+@Composable
+fun BackButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.action_back),
+) = RoundIconButton(Icons.Rounded.ArrowBackIosNew, label, onClick, modifier)
 
 /**
  * 아이콘 하나짜리 동그란 버튼(닫기 X, 달 이동 ◀ ▶). 보이는 원 `iconLg`(48 dp, `surface3`), 터치 영역 `touchMin`(76 dp).

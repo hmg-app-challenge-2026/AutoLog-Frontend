@@ -326,7 +326,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | **Result** (운행 결과, D-27·D-28) | 콘텐츠 폭 반반: 운행 거리·시간과 운행 목적 소제목을 같은 높이에서 시작하고, 두 칸 전체를 세로 가운데보다 32 dp 위에 둔다. 각 소제목 아래 내용 여백은 공통 12 dp에 16 dp를 더한다. 거리·시간과 경로 사이 간격은 높이가 넉넉한 차량 화면에서 112 dp, 작은 창에서 48 dp. 분류 결과는 두 칸 아래 가운데에 큰 글씨로 표시하고, 그 아래 버튼 3개([계속 기록하기] · [수정하기] · [메인 화면으로 · n초])가 콘텐츠 폭 전체를 쓴다. 맨 위 가장자리 남은 시간 막대 | 운행 거리·시간과 경로를 48 dp 간격으로 전폭에 쌓고, 운행 목적은 스크롤 영역에 표시. 분류 결과는 아래 가운데, 버튼은 한 줄 고정 | 넓은 창 순서를 세로 한 칸에 표시하고(두 섹션 사이 48 dp) 분류 결과 아래 버튼 두 줄 |
 
 - 주 버튼은 스크롤 영역 밖 **하단 고정**. 스크롤해야 보이는 주 버튼을 만들지 않는다.
-- **오른쪽 위는 예약 자리**(운전자 배지). 화면의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 비운다 — 배지가 실제로 잰 폭이 들어온다. 화면이 배지 폭을 숫자로 가정하지 않는다.
+- **오른쪽 위 운전자 배지는 Home에만**(D-30). Home의 맨 위 줄은 `padding(end = LocalTopEndReserved.current)`로 배지 자리를 비운다 — 배지가 실제로 잰 폭이 들어온다(배지가 없는 화면은 0). 보조 화면은 그 자리까지 내용에 쓴다.
 - 스크롤 영역에 더 볼 내용이 있으면 그 가장자리를 `Modifier.verticalScrollFade(state, space.7)`로 흐린다. 잘린 글자가 "깨짐"이 아니라 "더 있음"으로 읽힌다.
 - 창 크기가 바뀔 때 레이아웃 전환: 주차 중 `motion.layout`, Peek에서는 즉시.
 - 시스템 UI가 겹칠 수 있으므로 핵심 정보는 창 가장자리에서 24 dp 안쪽에 두지 않는다.
@@ -446,7 +446,7 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `HeroMetric` | 숫자(`hero`/`heroSmall`, tnum) + 단위(`headline`, `textTertiary`) + 아래 라벨(`body`, `textSecondary`). 값이 없으면 숫자 대신 상태 문장 |
 | `StatusLine` | 화면 맨 위 상태 한 줄. **배경 없는 점(12 dp) + 글자**: `● 기록 중 · 35분 경과`. 점 색이 상태(기록 중 `success`, 대기 `textTertiary`), 글자 `label` 본문색, 보조(`detail`)는 `body` 회색. 알약 배경이 없어 주인공 숫자와 경쟁하지 않는다. 누를 수 없다(Home·Peek 공용) |
 | `DockTile` | 화면 맨 아래 동작. 아이콘 네모 + 그 아래 이름. 네모는 WIDE 112 dp, TALL 96 dp, NARROW 88 dp이고 아이콘은 48 dp. 이름은 WIDE·TALL `label` 34 sp, NARROW `caption` 28 sp. 좁은 창의 긴 동작 이름은 어절 사이에 줄바꿈을 둔다. 터치 영역은 네모 + 이름 칸 전체. 4칸 등분(`weight`) 한 줄. `emphasized` = 같은 자리에서 상태가 바뀐 주 동작(네모 `accentFill`, 이름 `accent`) |
-| `DriverBadge` | 화면 오른쪽 위 고정(넷플릭스식, 스펙 7.1.1·D-19). 네모 아바타(`avatarChip` 48 dp) + "○○님"(`label`). 미선택이면 `IconAvatar`(사람) + "운전자 선택"(`accent`). FULL은 누르면 운전자 선택, Peek은 표시만. 모달이 뜨면 숨는다. 운전자 이름은 앱 전체에서 **이 자리에만** 보인다 운전자 선택 · 운행 결과 화면에는 두지 않는다(`FullApp.showsDriverBadge` 한곳) |
+| `DriverBadge` | 화면 오른쪽 위 고정(넷플릭스식, 스펙 7.1.1·D-19). 네모 아바타(`avatarChip` 48 dp) + "○○님"(`label`). 미선택이면 `IconAvatar`(사람) + "운전자 선택"(`accent`). FULL은 누르면 운전자 선택, Peek은 표시만. 모달이 뜨면 숨는다. 운전자 이름은 앱 전체에서 **이 자리에만** 보인다 **Home에만 둔다**(D-30, 2026-11-10 사용자 결정) — 운행 결과·주유·운행 기록·운행기록부·설정·운전자 선택에는 없다(`FullApp.showsDriverBadge` 한곳). 정차 중 Peek은 표시만 하는 배지를 따로 얹는다 |
 | `IconAvatar` | 아바타와 같은 모양(`avatarShape` = 크기의 20% 모서리)의 아이콘 네모, `surface2` 바탕, `textSecondary` 아이콘. 사람 대신 동작·자리표시를 나타낼 때 |
 | `ActionTile` | `ProfileTile`과 같은 격자·크기의 동작 타일: `IconAvatar` + 아래 동작 이름(`label`, `textSecondary`, 가운데, 두 줄까지). `[+ 새 운전자 추가]`·`[··· 다른 사람]`. 사람 타일과 같은 뼈대(`TileFrame`)를 공유한다 |
 | `SectionHeader` | 한 화면 안 영역의 소제목("이번 달 운행 정보", "최근 운행 기록"). 보통 `section` 38 sp, `dense`(좁은 창 운행 결과)는 `sectionFine` 30 sp. `textSecondary`, 아래 `space.3`. 데이터 값과 카드 안 목록 항목은 소제목보다 클 수 있다 |
@@ -454,9 +454,10 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | `TripListRow` | 운행 한 건 목록 줄(Home 최근 운행 기록, 이력). `surface1`, `radius.md`, 위 경로(`label`, 한 줄) · 아래 날짜·거리·목적(`caption`, `textSecondary`). 목적이 없으면 끝이 "목적 미입력" — **색으로 재촉하지 않는다**(D-26). 줄 전체가 터치 대상, 끝에 ›  `extra` = 아래 줄 밑에 붙는 내용(운행 기록 조회의 "운전자 지정" 후보처럼 그 줄에서 바로 끝낼 일), 그 안의 버튼은 줄 탭과 따로 눌린다 |
 | `ModalCard` | **앱의 유일한 팝업 모양**(D-21). 화면 가운데 둥근 카드: `radius.xl`, 바탕 `surfaceRaised`(다크 `surface2` / 라이트 `surface1`), `outline` 머리카락 테두리(1 dp), 그림자 없음, 뒤 `scrim`. 기본 최대 폭 640 dp(목록·두 칸은 960 dp), 화면 가장자리에서 `space.6`. 안쪽 `space.6`. 내용은 넘치면 스크롤 + 가장자리 흐림, **결정 버튼은 `footer`(하단 고정)**. 등장: scrim 투명도 + 카드 0.94→1 배율(`motion.standard`). 키보드가 올라오면 같이 올라간다. 바깥 탭은 삼키고 닫지 않는다(입력이 날아가지 않게). 단계가 FULL에서 내려가면 즉시 닫힘. 아래에 붙는 시트는 쓰지 않는다. **제목·설명 문구는 가운데 정렬** — 직접 `Text`를 쓰지 않고 `ModalTitle`(`headline`)·`ModalText`(기본 `body`·`textSecondary`, 강조 시 style·color만 바꿈)를 쓴다. **취소·닫기는 모두 오른쪽 위 X**(`onClose` → `CloseButton`) — 하단 [취소]·[닫기] 버튼은 두지 않는다. 반드시 골라야 하는 결정 팝업(복구 첫 단계 등)은 X 없이 선택지로만 끝난다. 제목이 있으면 `title`로 X와 같은 머리 줄 가운데에 둔다(iOS 시트 배치). 앞 화면에서 무엇을 펼쳤는지 분명하면 제목을 두지 않는다(같은 정보 반복 금지) X가 닫기 이상의 뜻이면(놓친 운행의 "무시") `closeLabel`로 접근성 이름을 그 뜻으로 바꾼다 |
 | `CloseButton` | 닫기 X. 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 영역 76 dp. 접근성 이름 "닫기" |
-| `RoundIconButton` | 아이콘 하나짜리 동그란 버튼 — `CloseButton`(X)과 같은 모양: 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 76 dp. 달 이동 ◀ ▶. 비활성이면 아이콘 `textTertiary`·안 눌림. `label`은 접근성 이름 |
-| `PeriodSwitcher` | 달 이동 **◀ 2026년 11월 ▶** — `RoundIconButton` 둘 + 가운데 `periodTitle`. 미래 달이면 ▶ 비활성. 운행 기록 조회·운행기록부 내보내기가 같이 쓴다 |
-| `ScreenHeader` | 보조 화면 맨 위 머리 줄: 가운데 제목(`headerTitle`, 두 줄까지) + 왼쪽 X. 넓은 창은 배지와 같은 줄 — 제목 양옆을 배지 폭만큼 똑같이 비워 가운데를 지키며 겹치지 않는다. 좁은·세로 창은 배지 아래 줄로 내리고 양옆은 X 폭만 |
+| `BackButton` | 뒤로(<, `ArrowBackIosNew`) — `RoundIconButton`과 같은 모양. **보조 화면 머리 줄 왼쪽**(D-30). 팝업은 뒤로가 아니라 오른쪽 위 X(`CloseButton`)로 끝낸다 |
+| `RoundIconButton` | 아이콘 하나짜리 동그란 버튼 — `CloseButton`(X)·`BackButton`(<)이 쓰는 모양: 보이는 원 48 dp(`surface3`) + 아이콘 28 dp(`textSecondary`), 터치 76 dp. 비활성이면 아이콘 `textTertiary`·안 눌림. `label`은 접근성 이름 |
+| `PeriodSwitcher` | 달 이동 **‹ 2026년 11월 ›** — 화살표와 달이 **한 캡슐** 안에: `surface1` 면 + `outline` 머리카락 테두리, 끝이 둥근 알약(높이 76 dp). 화살표는 테두리·바탕 없는 굵은 꺾쇠(`icon` 36 dp, `accent`), 터치 76 dp. 가운데 `periodTitle`. 미래 달이면 › `textTertiary`·안 눌림. 머리 줄의 동그란 뒤로 버튼(회색 원 + 얇은 <)과 모양·색을 다르게 해 헷갈리지 않게(2026-11-10). 운행 기록 조회·운행기록부 내보내기가 같이 쓴다 |
+| `ScreenHeader` | 보조 화면(주유·운행 기록·운행기록부 …) 맨 위 머리 줄: **왼쪽 뒤로(<) + 가운데 제목**(`headerTitle`, 두 줄까지). 배지가 Home에만 있어 모든 창 크기에서 맨 위 한 줄 — 제목 양옆을 뒤로 버튼 폭(76 dp)만큼 똑같이 비워 화면 가운데를 지킨다 |
 | `ConfirmDialog` | 제목(`headline`) + 설명 1~2줄 + 버튼 2개(위험 동작이면 `DangerButton`). 되돌리기 어려운 동작에만 |
 | `InputField` | **채움형**: 라벨(`caption`, `textSecondary`) 위, 칸은 `surface3` 바탕·`radius.md`·높이 76 dp·테두리 없음, 초점이면 3 dp `accent` 링. 값 `body`, 자리표시(`textTertiary`)는 "예: 홍길동"처럼 예시로. 잠금이면 `surface2` + `textTertiary` + "지금은 입력할 수 없어요". 텍스트 입력은 최후의 수단 |
 | `NumericKeypad` | 3×4 키, 키 96 dp, 키 사이 `space.4`. 입력값은 위에 `heroSmall`로 표시 |
@@ -564,3 +565,5 @@ M3 컴포넌트를 쓸 때 색이 어긋나지 않도록 `AutoLogTheme`이 `Colo
 | 1.25 | 2026-11-10 | 코드 품질 정리(동작·모양 같음 — 스크린샷 130장 중 124장 바이트 동일, 나머지는 QR): 창 크기별 글자 분기 7곳을 `AutoLogTheme.windowType` 역할 표 한 곳으로, 운행 결과 섹션 공통 규칙(넓은 창 소제목 아래 +16 dp)을 `ResultSection` 하나로, 리터럴 `800.dp` → `Size.spaciousHeight`. `RouteFlow`의 쓰지 않는 `dense` 모드 삭제. 주유 QR이 자체 비트맵 대신 공용 `QrImage`(오류 정정 M · 둥근 모서리) |
 | 1.26 | 2026-11-10 | 운행 기록 조회(스펙 7.8) **List** 배치 추가. `RoundIconButton`(CloseButton이 같은 것을 씀)·`TripListRow`의 `extra` 칸·`ScreenHeader`(보조 화면 머리 줄 공용)·글자 역할 `periodTitle`. 운행 결과 카드 사후 확인 모드(D-29): 카운트다운 막대 없음, 제목 "11월 7일 19:34 운행", 오른쪽 버튼 [닫기] |
 | 1.27 | 2026-11-10 | 운행기록부 내보내기(스펙 7.7) **Form + Action** 배치. `PeriodSwitcher`(운행 기록 조회와 공용)·`CheckRow`(`ChoiceRow`와 같은 틀)·글자 역할 `headerTitle`. `ScreenHeader`: 긴 제목이 X·배지와 겹치던 문제 — 넓은 창은 양옆 대칭 여백, 세로 창도 배지 아래 줄로 |
+| 1.28 | 2026-11-10 | **운전자 배지는 Home에만**, 보조 화면 머리 줄은 **왼쪽 뒤로(<)**, 팝업만 오른쪽 위 X(D-30, 사용자 결정). `BackButton` 추가. 배지가 빠져 `ScreenHeader`가 좁은·세로 창에서도 맨 위 한 줄(배지 아래로 내리던 76 dp를 내용에 돌려줌) |
+| 1.29 | 2026-11-10 | `PeriodSwitcher`를 캡슐 하나(면 + 테두리 알약 안에 accent 굵은 꺾쇠 ‹ › + 달)로 — 동그란 회색 원 둘이던 모양이 머리 줄 뒤로(<) 버튼과 똑같아 헷갈렸다(사용자 피드백) |

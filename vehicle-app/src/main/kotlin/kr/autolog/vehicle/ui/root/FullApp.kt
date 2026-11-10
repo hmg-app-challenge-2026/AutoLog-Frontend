@@ -71,10 +71,11 @@ fun FullApp(graph: AppGraph) {
 }
 
 /**
- * 오른쪽 위 운전자 배지를 얹는 화면인가(디자인 언어 11장 DriverBadge). 배지를 빼는 화면은 여기 한곳에 적는다:
- * 운전자 선택(배지가 여는 화면 자체) · 운행 결과(D-27 — 게임 결과처럼 결과 하나에 집중, 제목이 가운데).
+ * 오른쪽 위 운전자 배지를 얹는 화면인가(디자인 언어 11장 DriverBadge) — **Home 하나뿐**(D-30, 2026-11-10 사용자 결정).
+ * 운전자는 Home에서 보고 바꾸는 것이고, 보조 화면(운행 결과·주유·운행 기록·운행기록부·설정)은 그 자리를 내용에 쓴다.
+ * 정차 중 Peek은 FullApp 밖(AutoLogRoot)에서 표시만 하는 배지를 따로 얹는다.
  */
-private fun Route.showsDriverBadge(): Boolean = this != Route.ProfilePicker && this !is Route.TripResult
+private fun Route.showsDriverBadge(): Boolean = this == Route.Home
 
 @Composable
 private fun RouteContent(route: Route) {
