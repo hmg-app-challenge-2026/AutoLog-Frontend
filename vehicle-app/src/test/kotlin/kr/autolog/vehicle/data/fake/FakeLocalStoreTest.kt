@@ -1,9 +1,13 @@
-package kr.autolog.vehicle.data.interim
+package kr.autolog.vehicle.data.fake
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.core.ConnectionState
 import kr.autolog.vehicle.core.PurposeDetail
+import kr.autolog.vehicle.core.RegisterResult
+import kr.autolog.vehicle.core.ReportBuildResult
+import kr.autolog.vehicle.data.upload.UploadResult
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue

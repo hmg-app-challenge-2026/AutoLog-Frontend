@@ -1,9 +1,12 @@
-package kr.autolog.vehicle.data.interim
+package kr.autolog.vehicle.data.fake
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.core.ConnectionState
+import kr.autolog.vehicle.core.DeviceApi
+import kr.autolog.vehicle.core.RegisterResult
 
 /** 앱 A DeviceApi 가짜. [registered]면 사내 서버에 연결된 상태로 시작한다. */
 class FakeDeviceApi(private val clock: AppClock, registered: Boolean = true) : DeviceApi {

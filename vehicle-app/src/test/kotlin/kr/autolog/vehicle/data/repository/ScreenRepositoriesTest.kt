@@ -7,7 +7,7 @@ import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.ConfirmResult
 import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.core.PurposeDetail
-import kr.autolog.vehicle.data.interim.containsEpoch
+import kr.autolog.vehicle.data.fake.containsEpoch
 import kr.autolog.vehicle.fake.FakeReceiptApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

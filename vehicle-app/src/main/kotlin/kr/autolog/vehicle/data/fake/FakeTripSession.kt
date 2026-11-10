@@ -1,4 +1,4 @@
-package kr.autolog.vehicle.data.interim
+package kr.autolog.vehicle.data.fake
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -9,7 +9,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.DriverSource
+import kr.autolog.vehicle.core.InputMode
+import kr.autolog.vehicle.core.LiveTrip
+import kr.autolog.vehicle.core.MissedTrip
 import kr.autolog.vehicle.core.PurposeDetail
+import kr.autolog.vehicle.core.RecoveryChoice
+import kr.autolog.vehicle.core.SessionState
+import kr.autolog.vehicle.core.StartResult
+import kr.autolog.vehicle.core.StopReason
+import kr.autolog.vehicle.core.TripRow
+import kr.autolog.vehicle.core.TripSessionApi
+import kr.autolog.vehicle.core.UploadState
+import kr.autolog.vehicle.core.VehicleMotion
 
 /** 기어 P 자동 종료 대기 (사용자 결정 2026-11-09, 스펙 D-18). 실제 값은 앱 A 소유. */
 const val GEAR_P_WAIT_MS = 5_000L
@@ -64,8 +75,14 @@ class FakeTripSession(
     }
 
     /** 지금 끝난 운행이든 지난 운행이든 확정한다(앱 A: 모든 운행 처리). */
-    override suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode) {
-        store?.confirm(tripId, detail, note)
+    override suspend fun confirmPurpose(
+        tripId: String,
+        detail: PurposeDetail,
+        note: String?,
+        inputMode: InputMode,
+        destinationLabel: String?,
+    ) {
+        store?.confirm(tripId, detail, note, destinationLabel)
         val s = _state.value as? SessionState.PendingReview ?: return
         if (s.trip.tripId == tripId) _state.value = SessionState.Idle
     }

@@ -4,10 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kr.autolog.vehicle.core.MailApi
 import kr.autolog.vehicle.core.MailResult
 import kr.autolog.vehicle.core.RecipientInfo
+import kr.autolog.vehicle.core.ReportApi
+import kr.autolog.vehicle.core.ReportBuildResult
 import kr.autolog.vehicle.core.ReportFile
 import kr.autolog.vehicle.core.SettingsApi
-import kr.autolog.vehicle.data.interim.ReportApi
-import kr.autolog.vehicle.data.interim.ReportBuildResult
 import java.time.YearMonth
 
 /** 운행기록부 만들기·보내기(스펙 7.7, F-21·22). */

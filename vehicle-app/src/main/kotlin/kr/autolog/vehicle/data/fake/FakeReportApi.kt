@@ -1,7 +1,10 @@
-package kr.autolog.vehicle.data.interim
+package kr.autolog.vehicle.data.fake
 
 import kotlinx.coroutines.flow.first
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.core.LocalStore
+import kr.autolog.vehicle.core.ReportApi
+import kr.autolog.vehicle.core.ReportBuildResult
 import kr.autolog.vehicle.core.ReportFile
 import java.io.File
 import java.time.YearMonth

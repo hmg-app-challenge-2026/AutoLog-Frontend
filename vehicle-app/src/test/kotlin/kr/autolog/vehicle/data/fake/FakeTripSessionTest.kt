@@ -1,4 +1,4 @@
-package kr.autolog.vehicle.data.interim
+package kr.autolog.vehicle.data.fake
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -7,7 +7,11 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.core.InputMode
 import kr.autolog.vehicle.core.PurposeDetail
+import kr.autolog.vehicle.core.SessionState
+import kr.autolog.vehicle.core.StopReason
+import kr.autolog.vehicle.core.VehicleMotion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

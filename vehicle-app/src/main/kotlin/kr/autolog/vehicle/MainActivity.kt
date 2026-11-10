@@ -1,35 +1,58 @@
 package kr.autolog.vehicle
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import kr.autolog.vehicle.core.DeepLink
 import kr.autolog.vehicle.di.AppGraph
-import kr.autolog.vehicle.nav.DeepLinkKeys
+import kr.autolog.vehicle.di.runtimePermissions
 import kr.autolog.vehicle.nav.deepLinkRoute
 import kr.autolog.vehicle.ui.root.AutoLogRoot
 
+/**
+ * 앱의 유일한 Activity. 실제 앱은 그래프(= 백엔드 `AutoLog.create`)를 만들기 전에 런타임 권한을 묻는다 — 권한이 있어야 좌표·알림이
+ * 붙은 채로 조립된다(백엔드 `AutoLog` 주석). 거절해도 그 기능만 빠지고 앱은 뜬다. 데모는 물을 권한이 없어 바로 뜬다.
+ */
 class MainActivity : ComponentActivity() {
     private val graph: AppGraph get() = (application as AutoLogApp).graph
+
+    /** 그래프를 만들고 화면을 띄웠는가. 그 전에 온 알림 Intent는 [pendingIntent]에 두었다가 띄울 때 적용한다. */
+    private var started = false
+    private var pendingIntent: Intent? = null
+
+    private val askPermissions =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { start() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         // 재생성(창 크기 변경 등)에는 같은 알림 Intent를 다시 적용하지 않는다
-        if (savedInstanceState == null) openDeepLink(intent)
+        if (savedInstanceState == null) pendingIntent = intent
+        val missing = runtimePermissions().filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isEmpty()) start() else askPermissions.launch(missing.toTypedArray())
+    }
+
+    private fun start() {
+        if (started) return
+        started = true
+        pendingIntent?.let(::openDeepLink)
+        pendingIntent = null
         setContent { AutoLogRoot(graph = graph, onRequestBackground = { moveTaskToBack(true) }) }
     }
 
-    /** 앱이 떠 있을 때 알림을 누르면 여기로 온다(스펙 6.10). */
+    /** 앱이 떠 있을 때 알림을 누르면 여기로 온다(스펙 6.10). 아직 권한을 묻는 중이면 띄울 때 적용한다. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        openDeepLink(intent)
+        if (started) openDeepLink(intent) else pendingIntent = intent
     }
 
-    private fun openDeepLink(intent: Intent?) {
+    private fun openDeepLink(intent: Intent) {
         val route =
-            deepLinkRoute(intent?.getStringExtra(DeepLinkKeys.ROUTE), intent?.getStringExtra(DeepLinkKeys.TRIP_ID))
+            deepLinkRoute(intent.getStringExtra(DeepLink.KEY_ROUTE), intent.getStringExtra(DeepLink.KEY_TRIP_ID))
         route?.let(graph.navigator::handleDeepLink)
     }
 }

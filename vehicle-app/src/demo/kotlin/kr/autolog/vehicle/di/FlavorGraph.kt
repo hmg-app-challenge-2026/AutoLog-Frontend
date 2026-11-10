@@ -18,3 +18,6 @@ fun createAppGraph(app: Application): AppGraph {
         ({ DemoPanelOverlay(scenario) })
     }
 }
+
+/** 데모는 실제 SDK·알림을 쓰지 않으므로 받을 런타임 권한이 없다. */
+fun runtimePermissions(): List<String> = emptyList()

@@ -11,9 +11,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kr.autolog.vehicle.TestAppGraph
 import kr.autolog.vehicle.common.AppClock
-import kr.autolog.vehicle.data.interim.MissedTrip
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.MissedTrip
+import kr.autolog.vehicle.core.SessionState
+import kr.autolog.vehicle.core.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import org.junit.After
 import org.junit.Assert.assertEquals

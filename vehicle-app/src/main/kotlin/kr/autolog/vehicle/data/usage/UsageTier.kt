@@ -1,6 +1,6 @@
 package kr.autolog.vehicle.data.usage
 
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.VehicleMotion
 
 /** 스펙 1.1. 순서 = 제한이 강한 순(ordinal이 작을수록 제한적). */
 enum class UsageTier { BACKGROUND, PEEK, FULL }
