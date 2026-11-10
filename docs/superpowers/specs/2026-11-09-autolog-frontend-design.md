@@ -122,7 +122,7 @@ AutoLog는 **운전하는 동안 쓰는 앱이 아니다.** 기록은 차가 백
 | Backend `app/` | placeholder `MainActivity` 1개뿐. 이 리포의 `vehicle-app/`이 대체한다 |
 | Backend `web/` | `web/admin` 빈 골격(React 18.3.1 · TS 5.6 · Vite 6), `web/camera` 빈 파일. 이 리포의 `web/`이 대체한다 |
 | 앱 B 계약 (구현·Fake 있음) | `ContextApi` · `PurposeEngine` · `VoiceApi` · `ReceiptApi` · `MailApi` · `SettingsApi` — `backend/vehicle-core/src/main/kotlin/kr/autolog/vehicle/core/Contracts.kt` |
-| 앱 A 계약 (없음) | `TripSessionApi` · `LocalStore` · `ReportApi` · `DeviceApi` — `Contracts.kt`에 `TODO(A)`만 있다. → 6.6 interim |
+| 앱 A 계약 | `TripSessionApi` · `LocalStore` · `ReportApi` · `DeviceApi` — 2026-11-09엔 `TODO(A)`만 있어 interim 초안으로 개발, **2026-11-10 `c3883db`로 실구현 머지·연결 완료**(6.6) |
 | relay API | 차량 `/v1/devices`·`/v1/inbox`·`/v1/inbox/{id}/ack`·`/v1/qr-tokens`, 카메라 `POST /r/{code}/receipt?t=`(multipart `image`), 관리자 `/admin/vehicles|users|places|schedules|recipients`(CRUD + CSV import), 인증 `X-Admin-Token` 헤더 |
 | 일정 | 11.14 3인 통합 → 11.15 1차 제출 → 12.03–04 시연 |
 
@@ -442,7 +442,8 @@ nav/
   Navigator.kt                백스택 + 주행 규칙
 data/
   repository/                 6.5 표의 인터페이스와 구현
-  interim/                    앱 A 계약 초안 + Fake (6.6) — A가 머지하면 삭제
+  fake/                       데모·테스트용 앱 A 가짜 (6.6)
+  upload/                     사내 서버 업로드 자리표시 계약 — R-4가 오면 삭제
 ui/
   design/                     테마, 토큰, 모션, 공용 컴포넌트 (design-language.md)
   root/AutoLogRoot.kt         UsageTier에 따라 Peek / 전체 앱 분기, Navigator 상태 → 화면, 잠금 CompositionLocal 제공
@@ -506,51 +507,27 @@ class HomeViewModel(
 
 | Repository (인터페이스) | 감싸는 계약 | 화면 | 비고 |
 |---|---|---|---|
-| `SessionRepository` | `TripSessionApi`(A, interim) | Home, Peek, TripResult, ProfilePicker | 운행 상태·시작/종료·자동 종료 카운트다운·목적 확정·운전자 지정·놓친 운행·복구. 화면에는 자기 값 타입(`TripSession`·`ActiveTrip`·`AutoEndReason`·`RecoveryAction`, 놓친 운행은 `missedKm`)만 내보내고, interim `SessionState`에서의 변환은 구현 안 한곳(`toTripSession`) |
+| `SessionRepository` | `TripSessionApi`(A) | Home, Peek, TripResult, ProfilePicker | 운행 상태·시작/종료·자동 종료 카운트다운·목적 확정·운전자 지정·놓친 운행·복구. 화면에는 자기 값 타입(`TripSession`·`ActiveTrip`·`AutoEndReason`·`RecoveryAction`, 놓친 운행은 `missedKm`)만 내보내고, interim `SessionState`에서의 변환은 구현 안 한곳(`toTripSession`) |
 | `VehicleUsageRepository` | `TripSessionApi.motion`(기어·움직임) + AAOS `CarUxRestrictionsManager` | Root | `val tier: StateFlow<UsageTier>` (6.9) |
-| `ProfileRepository` | `PurposeEngine.orderedUsers`·`unassignedTrips`, `SettingsApi.users`·`addUser`, interim 운전자 선택 | ProfilePicker, Home 상단 칩 | |
+| `ProfileRepository` | `PurposeEngine.orderedUsers`·`unassignedTrips`, `SettingsApi.users`·`addUser`, `TripSessionApi.selectDriver`·`currentDriver` | ProfilePicker, Home 상단 칩 | |
 | `ContextRepository` | `ContextApi` | Home | 목적지 |
-| `TripRepository` | `LocalStore.trips`(A, interim) | Home, History | |
-| `TripResultRepository` | `LocalStore.trip`(A, interim), `TripSessionApi.confirmPurpose`, `PurposeEngine.suggest`, `DefaultPurposePolicy` | TripResult | 큰 분류 → 세부 목적(`detailFor`)은 여기 한곳(D-27) |
+| `TripRepository` | `LocalStore.trips`(A) | Home, History | |
+| `TripResultRepository` | `LocalStore.trip`(A), `TripSessionApi.confirmPurpose`, `PurposeEngine.suggest`, `DefaultPurposePolicy` | TripResult | 큰 분류 → 세부 목적(`detailFor`)은 여기 한곳(D-27) |
 | `VoiceRepository` | `VoiceApi` | FuelEntry(이번 범위 밖, D-20) | `available=false`면 마이크 버튼 숨김 |
-| `ReceiptRepository` | `ReceiptApi`, `LocalStore.receiptInbox`(A, interim) | ReceiptQr, FuelEntry | 입력 창이 넘긴 초안 하나를 출처에 따라 `confirm`(영수증) 또는 `saveFuel`(직접 입력)로 보낸다 — 화면은 저장 경로를 모른다 |
-| `ReportRepository` | `ReportApi`(A, interim), `MailApi.send`·`smtpConfigured` | Report | |
-| `SettingsRepository` | `SettingsApi`, `MailApi.saveSmtp`, `DeviceApi`(A, interim) | Settings | |
-| `UploadRepository` | `UploadApi`(A·B, interim, 8장) | Settings, History | 사내 서버 전송 상태 |
+| `ReceiptRepository` | `ReceiptApi`, `LocalStore.receiptInbox`(A) | ReceiptQr, FuelEntry | 입력 창이 넘긴 초안 하나를 출처에 따라 `confirm`(영수증) 또는 `saveFuel`(직접 입력)로 보낸다 — 화면은 저장 경로를 모른다 |
+| `ReportRepository` | `ReportApi`(A), `MailApi.send`·`smtpConfigured` | Report | |
+| `SettingsRepository` | `SettingsApi`, `MailApi.saveSmtp`, `DeviceApi`(A) | Settings | |
+| `UploadRepository` | `UploadApi`(프론트 `data/upload` 자리표시 — 백엔드 계약 없음 R-4, 8장) | Settings, History | 사내 서버 전송 상태 |
 
 Repository는 **interface + `Default*` 구현** 한 쌍이다. 테스트에서는 `Fake*Repository`(test 소스셋)를 쓴다.
 
-### 6.6 앱 A 계약의 공백 — `data/interim/`
+### 6.6 앱 A 계약 — 연결 완료 (2026-11-10)
 
-앱 A의 `TripSessionApi`·`LocalStore`·`ReportApi`·`DeviceApi`와 사내 서버용 `UploadApi`는 아직 없다. 화면 개발을 막지 않기 위해 **Backend 기술명세 8.2 스케치를 따라 초안을 이 리포에 만든다.**
+앱 A 계약(`TripSessionApi`·`LocalStore`·`ReportApi`·`DeviceApi`)이 Backend `core`에 들어왔다(`c3883db`). 이 리포의 초안(`data/interim/`)은 지웠고 화면 Repository는 `core` 타입을 쓴다. 초안과 실제의 차이는 `confirmPurpose(…, destinationLabel)` 인자 하나뿐이었다.
 
-```kotlin
-// data/interim/InterimContracts.kt — 앱 A 계약이 머지되면 이 파일을 지운다
-interface TripSessionApi {
-    val state: StateFlow<SessionState>        // Idle / Recording(trip, liveKm, lastSavedAt) / StopCandidate(trip, reason, deadlineAt) / PendingReview(trip, suggestion) / NeedsRecovery(trip, extraKm)
-    val motion: StateFlow<VehicleMotion?>      // MOVING / STOPPED(기어≠P, 멈춤) / PARKED(기어 P). null = 판정 불가 → BACKGROUND
-    val missedTrip: StateFlow<MissedTrip?>     // F-10 배너
-    val currentDriver: StateFlow<String?>      // 선택된 운전자 userId (null = 나중에 선택)
-    suspend fun selectDriver(userId: String?)
-    suspend fun startSession(): StartResult
-    suspend fun finalize()                     // [기록 종료] — StopCandidate에서도 즉시 종료
-    suspend fun resume()                       // [계속 기록] — StopCandidate → Recording, 카운트다운 취소
-    suspend fun confirmPurpose(tripId: String, detail: PurposeDetail, note: String?, inputMode: InputMode)
-    suspend fun assignDriver(tripId: String, userId: String, source: DriverSource)
-    suspend fun acceptMissedTrip(); suspend fun ignoreMissedTrip()
-    suspend fun resolveRecovery(choice: RecoveryChoice)   // RECORD / CONTINUE / DELETE
-}
-interface LocalStore { fun trips(month: YearMonth): Flow<List<TripRow>>; val receiptInbox: Flow<List<ReceiptPayload>> }
-interface ReportApi  { suspend fun build(month: YearMonth): ReportBuildResult }      // → core.ReportFile
-interface DeviceApi  { val connection: StateFlow<ConnectionState>; suspend fun register(serverUrl: String, code: String): RegisterResult }
-interface UploadApi  { val status: StateFlow<UploadStatus>; suspend fun uploadNow(): UploadResult }   // 8장
-```
-
-- `startSession`은 Idle **또는 PendingReview**에서 시작할 수 있다. 목적 확인을 미룬("나중에") 운행은 저장소에 "목적 확인 필요"로 남고 새 운행이 시작된다 — 목적을 안 골랐다고 다음 운행이 기록되지 않으면 안 된다(가짜 세션이 Idle에서만 시작해 미룬 뒤 다음 운행이 기록되지 않던 버그를 고치며 명시, 2026-11-09).
-- 타입(`SessionState`, `TripRow`, `MissedTrip` …)도 같은 파일에 둔다. 값 타입은 `core/ContractTypes.kt`에 있는 것(`PurposeDetail`, `DriverSource`, `ReportFile`, `Suggestion`)을 재사용한다.
-- `StopCandidate.reason` = `GEAR_P` / `NO_MOVEMENT` / `NAVI_ARRIVED` / `USER_REQUEST`. `deadlineAt`(epoch millis)은 **자동 종료 시각**이고 앱 A의 세션이 유일한 시계다. 화면은 `deadlineAt − now`를 보여 줄 뿐 타이머를 따로 돌리지 않는다. 대기 시간은 이유별로 다르다: **`GEAR_P` = 5초**(`T_GEAR_P_SEC`, 사용자 결정 2026-11-09), `NO_MOVEMENT`·`NAVI_ARRIVED` = 180초(Backend `T_STOP_SEC`). 상수는 앱 A 소유.
-- Fake: `FakeTripSession`(시작하면 1초마다 0.1 km 증가, 23.4 km에서 기어 P → StopCandidate, 데모 패널로 `motion` 전환), `FakeLocalStore`, `FakeReportApi`, `FakeDeviceApi`, `FakeUploadApi`.
-- **이 초안을 앱 A에게 contract PR 제안으로 전달한다**(12장). A의 실제 시그니처가 다르면 interim을 지우고 **Repository 구현만** 고친다. ViewModel·화면은 Repository 인터페이스만 보므로 바뀌지 않아야 한다. 바뀐다면 Repository 경계가 잘못된 것이다.
+- 데모·테스트 가짜는 `data/fake/`(프론트 소유 — 데모 조작이 있는 `FakeTripSession` 등). 사내 서버 업로드는 백엔드 계약이 없어(R-4) `data/upload/`에 자리표시 계약과 실제 앱용 `UnavailableUploadApi`(꺼짐)를 둔다.
+- 연결 지도 · 확인한 정책 · **연결하지 못했거나 어긋난 것(G-01~G-08)** · DB 목업 넣기 계획: `docs/integration/backend-link.md`.
+- 화면 규칙은 그대로: ViewModel·화면은 Repository 인터페이스만 본다. `core` 서비스 인터페이스를 `ui/`에서 import하지 않는다(CONVENTIONS 1장).
 
 ### 6.7 AppGraph와 flavor
 
@@ -566,8 +543,8 @@ interface AppGraph {
 
 | flavor | 조립 | 용도 |
 |---|---|---|
-| `demo` | `DemoAppGraph`: Backend `fake/`의 B Fake + `data/interim`의 A Fake. **데모 컨트롤 패널** 포함 | 일반 에뮬레이터, Preview, Roborazzi, 시연 영상 백업 |
-| `vehicle` | `VehicleAppGraph`: Backend가 제공할 팩토리 `AutoLog.create(context)`(12장 요청 R-1)에서 실구현을 받는다. 팩토리가 오기 전까지는 Fake로 컴파일만 된다 | Pleos 에뮬레이터·실차 |
+| `demo` | `FakeAppGraph`: Backend `fake/`의 B Fake + 프론트 `data/fake`의 A Fake. **데모 컨트롤 패널** 포함. 매니페스트에서 백엔드 기록 서비스·부팅 수신기를 뺀다 | 일반 에뮬레이터, Preview, Roborazzi, 시연 영상 백업 |
+| `vehicle` | `RealAppGraph`: `AutoLog.create(context)`(R-1)의 실구현 위에 화면 Repository. **목업 없음**(업로드만 `UnavailableUploadApi`). `MainActivity`가 런타임 권한(알림·Pleos 좌표)을 받은 뒤 처음 꺼낼 때 조립 — 포그라운드 서비스 시작이 허용되는 시점 | Pleos 에뮬레이터·실차 |
 
 **데모 컨트롤 패널 (demo 전용)**: 화면 왼쪽 위 구석을 길게 누르면 열리는 팝업(`ModalCard`). `주행·정차·주차 전환`, `기어 P(자동 종료 시작)`, `+1 km`, `내비 도착`, `영수증 도착(정상·불확실·실패)`, `놓친 운행 +15 km`, `앱 강제 종료 후 복구`, `서버 끊김`을 누를 수 있다. 시연 영상 촬영과 VHAL 없이 상태를 재현하는 데 쓴다. `vehicle` 소스셋에는 없다.
 
@@ -799,12 +776,12 @@ Home은 **상태 4가지 × 레이아웃 3단계**다. 테슬라처럼 차량 �
 
 Home 하단 타일 [설정]으로 들어온다. 머리 줄 "설정"(왼쪽 뒤로, D-30).
 
-**배치(Master–Detail)** — WIDE: 왼쪽 섹션 목록(`NavRow`: 아이콘 · 이름 · 지금 상태 한 줄 — 들어가 보지 않아도 무엇이 비었는지 보인다) + 오른쪽 상세(처음엔 차량 연결). NARROW(분할 한 칸)도 같다. TALL: 섹션 목록 → 누르면 상세(머리 줄 제목이 섹션 이름, 뒤로·시스템 뒤로 = 목록으로). 경로(`Route.Settings`)는 하나, 안쪽 상태로 전환한다.
+**배치(Master–Detail)** — WIDE: 왼쪽 섹션 목록(`NavRow`: 아이콘 · 이름 · 지금 상태 한 줄 — 들어가 보지 않아도 무엇이 비었는지 보인다) + 오른쪽 상세(처음엔 차량 정보). NARROW(분할 한 칸)도 같다. TALL: 섹션 목록 → 누르면 상세(머리 줄 제목이 섹션 이름, 뒤로·시스템 뒤로 = 목록으로). 경로(`Route.Settings`)는 하나, 안쪽 상태로 전환한다.
 
 섹션(위에서 아래, 목록 줄의 요약):
 
-1. **차량 연결**(요약 "12가3456 · 연결됨") — 상태 카드(연결됨 `success` / 연결 안 됨 / 서버에 연결할 수 없어요 `warning` + 차량 번호 · 서버 주소) + [연결 코드 입력](연결 안 됨) / [다시 연결]. 팝업: 서버 주소(프리셋 = 지금 주소, 없으면 `https://`) + 연결 코드 6칸 + `NumericKeypad` → [연결](`DeviceApi.register`). 실패하면 팝업 안에 원천 사유, 성공하면 팝업이 닫히고 "차량을 연결했어요".
-2. **사내 서버**(요약 "전송 대기 2건") — 서버 주소 · 상태 · 전송 대기 N건 · 마지막 전송(오늘 09:24) + 마지막 오류 + [지금 전송](`UploadApi.uploadNow`). 차량을 연결하기 전엔 "차량을 먼저 연결해 주세요" + [차량 연결로]. 8장.
+1. **차량 정보**(요약 "12가3456 · 연결됨" — 2026-11-10 "차량 연결"에서 이름 바꿈, 사용자 지시) — 상태 카드(연결됨 `success` / 연결 안 됨 / 서버에 연결할 수 없어요 `warning` + 차량 번호 · 서버 주소) + [연결 코드 입력](연결 안 됨) / [다시 연결]. 팝업: 서버 주소(프리셋 = 지금 주소, 없으면 `https://`) + 연결 코드 6칸(`CodeField` — 칸을 누르면 시스템 키보드, 서버 코드 `[2-9A-HJ-NP-Z]{6}`. 소문자로 쳐도 대문자로 들어가고 0·1·I·O·기호·7번째 글자는 들어가지 않는다, 규칙은 `ConnectCode.normalize` 한곳) → [연결](`DeviceApi.register`). 실패하면 팝업 안에 원천 사유, 성공하면 팝업이 닫히고 "차량을 연결했어요".
+2. **회사 정보**(요약 "전송 대기 2건" — 2026-11-10 "사내 서버"에서 이름 바꿈, 사용자 지시) — 서버 주소 · 상태 · 전송 대기 N건 · 마지막 전송(오늘 09:24) + 마지막 오류 + [지금 전송](`UploadApi.uploadNow`). 차량을 연결하기 전엔 "차량을 먼저 연결해 주세요" + [차량 정보로]. 8장.
 3. **메일 계정**(요약 "메일 계정 연결됨/안 됨") — SMTP 서버 · 포트(숫자만) · 아이디(메일 주소) · 앱 비밀번호(항상 가림) + [연결 확인](`MailApi.saveSmtp`, 칸이 다 차야 활성). 성공하면 비밀번호 칸을 비운다(화면에 남기지 않는다). 실패는 `MailError`별 문구(운행기록부와 같은 `ui/mail/MailErrorText`).
 4. **받는 사람**(요약 "2명") — 회사 지정(서버 배포분 — 자물쇠, 아래 줄 앞 "회사 지정", 못 지움) 먼저 + 직접 추가분(오른쪽 지우기 → "○○을(를) 받는 사람에서 지울까요? 되돌릴 수 없어요" 1회 확인) + [받는 사람 추가](이메일 · 이름 선택).
 5. **직원**(요약 "3명") — 이름 순 목록(이름 / 회사 지정 · 부서 · 이메일) + [직원 추가](이름 · 부서 선택 · 이메일 선택). 차 안에서 추가한 직원은 origin=LOCAL.
@@ -844,7 +821,7 @@ Home 하단 타일 [설정]으로 들어온다. 머리 줄 "설정"(왼쪽 뒤�
 
 ### 8.4 일정
 
-D-12에 따라 11.15 이후. API가 오기 전에는 interim `FakeUploadApi`와 운영 웹 mock 데이터로 화면을 완성한다.
+D-12에 따라 11.15 이후. API가 오기 전에는 `data/fake/FakeUploadApi`(실제 앱은 `UnavailableUploadApi`)와 운영 웹 mock 데이터로 화면을 완성한다.
 
 ---
 
@@ -974,15 +951,17 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 
 | ID | 요청 | 누구 | 왜 | 언제까지 |
 |---|---|---|---|---|
-| R-1 | `vehicle-core`에 공개 팩토리 `AutoLog.create(context): AutoLogComponents`(모든 Contracts 구현을 조립해 돌려줌) | A·B | 앱은 `core`·`fake`만 import한다. 내부 클래스를 직접 생성할 수 없다 | 11.13 |
-| R-2 | 앱 A 계약(`TripSessionApi`, `LocalStore`, `ReportApi`, `DeviceApi`) — 이 리포 6.6 초안을 출발점으로 | A | 화면 개발 기준. 다르면 프론트가 Repository만 고친다 | 11.12 |
-| R-3 | 알림 딥링크 키 상수(`autolog.route`, `autolog.tripId`)를 `core`에 정의 | A | A의 알림과 프론트 Navigator가 같은 키를 써야 함 | 11.14 |
+| R-1 | ✅ 2026-11-10 `AutoLog.create` 머지, 연결 완료. `vehicle-core`에 공개 팩토리 `AutoLog.create(context): AutoLogComponents`(모든 Contracts 구현을 조립해 돌려줌) | A·B | 앱은 `core`·`fake`만 import한다. 내부 클래스를 직접 생성할 수 없다 | 11.13 |
+| R-2 | ✅ 2026-11-10 머지(초안과 차이 `destinationLabel` 하나). 앱 A 계약(`TripSessionApi`, `LocalStore`, `ReportApi`, `DeviceApi`) — 이 리포 6.6 초안을 출발점으로 | A | 화면 개발 기준. 다르면 프론트가 Repository만 고친다 | 11.12 |
+| R-3 | ✅ 2026-11-10 `core.DeepLink`. 알림 딥링크 키 상수(`autolog.route`, `autolog.tripId`)를 `core`에 정의 | A | A의 알림과 프론트 Navigator가 같은 키를 써야 함 | 11.14 |
 | R-4 | 사내 서버 취합: `UploadApi` 계약, `POST /v1/trips`, 서버 주소 런타임 설정, 운영 웹 조회 API(trips·expenses·summary·엑셀) | A·B | 기능명세 ② (8장) | 계약 11.20, API 11.27 |
 | R-5 | Backend `ops/` nginx 마운트를 Frontend 산출물로 변경 | 공동 | 9.3 | 11.27 |
 | R-6 | Backend `app/`·`web/` 삭제, CI `:app:assembleDebug` 제거, CONVENTIONS 1.2·기술명세 7·8장에 "화면은 AutoLog-Frontend" 반영 | 공동 | 같은 applicationId 앱이 두 곳에 있으면 혼란 | 11.30 |
-| R-7 | 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos Gear → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
+| R-7 | ✅ 2026-11-10 `TripSessionManager`. 사용 3단계·자동 종료 지원: ① `TripSessionApi.motion`(PARKED·STOPPED·MOVING, 판정 불가 null) ② `StopCandidate(reason, deadlineAt)` ③ 기어 P 즉시 StopCandidate(`deadlineAt` = P 시각 + **5초**) + Odometer 저장. 기어·시동 판정은 1.1.1 우선순위(Pleos Gear → AAOS `GEAR_SELECTION`/`CURRENT_GEAR` → `PARKING_BRAKE_ON` → `IGNITION_STATE` → 최후 규칙: 다음 시동 때 자동 확정, 거리 불변 60초 = 주차). `CAR_POWERTRAIN` 권한은 vehicle-core 매니페스트에 선언 ④ `TripRecordingService` 헤즈업 알림: 제목 "기록을 마칠까요?", 본문 거리, 카운트다운(`setUsesChronometer(true)`·`setChronometerCountDown(true)`·`setWhen(deadlineAt)`), 액션 [계속 기록]=`resume()` · [기록 종료]=`finalize()` ⑤ 주행 중 지속 알림 "기록 중 · 12.3 km · 목적지"(F-03 대체) | A | 1.1·7.2.1. 주행 중 앱 화면이 없으므로 P 순간에 사람이 보는 것은 알림이다 | 계약 11.12, 알림 11.14 |
 | R-8 | 직접 입력 주유 기록에 상호·유종 저장: `ReceiptApi.saveFuel`이 `VoiceFuel`(금액·리터·단가)만 받는다. 직접 입력 창(7.5)이 영수증 창과 같은 필드를 받으려면 상호(`station`)·유종(`fuelType`)·일시를 선택 인자로 추가 | B | 7.5, D-20. 없어도 동작한다(공통 필드만) | 11.13 |
-| R-9 | 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
+| R-9 | ✅ 2026-11-10 `LiveTrip.originLabel`. 운행 출발지 이름: `LiveTrip.originLabel`(등록 장소와 가까우면 그 이름, 아니면 동 단위 주소, 모르면 null). 지금은 interim에 프론트가 추가해 둠 | A | 7.0 Peek 경로(출발지 → 목적지) | 11.13 |
+| R-10 | 📨 2026-11-10 요청함(사용자 결정, 요청서 `docs/integration/requests/R-10-vehicle-id.md`). 차량 id를 계약으로: `DeviceApi.vehicleId: StateFlow<String?>`(추천, 또는 `ConnectionState.Registered`·`Unreachable`에 필드) — `orderedUsers`·`suggest`·`unassignedTrips`가 받는 값 | A | 배차 기반 운전자 순서·배차 목적 추천(G-02). 받으면 `RealAppGraph.vehicleId()` 한 줄만 바꾼다 | 11.13 |
+| R-11 | (선택) 디버그 전용 시드 계약 `DebugSeedApi` — 데모 운행·비용 이력을 앱 A 규칙으로 넣기 | A | 시연 DB 준비(`docs/integration/backend-link.md` 5.5) | 제안 2026-11-10 |
 
 ---
 
@@ -1028,7 +1007,7 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 용어 | 뜻 |
 |---|---|
 | 계약(Contracts) | `backend/vehicle-core/.../core/Contracts.kt`의 인터페이스. 화면과 로직의 경계 |
-| interim | 앱 A 계약이 오기 전 이 리포가 임시로 정한 인터페이스와 Fake |
+| interim | 앱 A 계약이 오기 전 이 리포가 임시로 정한 인터페이스와 Fake(2026-11-10 실계약 연결로 삭제 — 가짜는 `data/fake`) |
 | 주행 / 정차 / 주차 | 움직이는 중 / 기어 P가 아니고 멈춤(신호 대기 등) / 기어 P (1.1) |
 | `UsageTier` | `BACKGROUND`(주행, 화면 없음) · `PEEK`(정차, 읽기 전용 패널) · `FULL`(주차, 전체 앱) |
 | Peek | 정차 중에만 보이는 읽기 전용 상태 패널(7.0) |
@@ -1066,3 +1045,8 @@ cd web/admin && npm run lint && npm test -- --run && npm run build
 | 1.9 | 2026-11-10 | 운행 결과 [계속 기록하기] → [기록 이어가기](홈 [기록 시작]·[기록 종료]와 같은 말) |
 | 1.10 | 2026-11-10 | 7.3 저장 완료 화면(체크 애니메이션 · "운행 기록을 저장했어요" · [확인], 체크를 다 그린 뒤 1초 뒤 자동으로 닫힘) |
 | 1.11 | 2026-11-10 | 모션 다시 설계(디자인 언어 1.45~): 화면 전환 방향(앞으로·뒤로·띄우기·같은 자리, `navTransitionOf`), 팝업 닫힘(`ModalHost`), 화면 안 교체·펼침·선택, 정차·주차 전환 페이드. 모두 스프링. V-18 추가 |
+| 1.12 | 2026-11-10 | 6.6 앱 A 계약 연결 완료(interim 삭제, `data/fake`·`data/upload`), 6.7 vehicle = `RealAppGraph`(`AutoLog.create`, 런타임 권한 뒤 조립), 12장 R-1·2·3·7·9 완료, R-10·R-11 제안. 연결 기록 `docs/integration/backend-link.md` |
+| 1.13 | 2026-11-10 | 7.9 연결 코드 입력 `NumericKeypad` → `CodeKeypad`(서버 코드에 글자가 섞여 숫자판으로는 등록 불가 — G-01, 사용자 결정 ①). R-10 요청함. G-03~G-08 보류(사용자 결정) |
+| 1.14 | 2026-11-10 | 7.9 연결 코드 입력 `CodeKeypad` → 키보드 입력 칸(사용자 지시 — 같은 팝업의 서버 주소도 키보드라 입력 방식을 하나로). 소문자는 대문자로 |
+| 1.15 | 2026-11-10 | 7.9 연결 코드는 6칸 상자 그대로 + 키보드 입력(`CodeField`, 사용자 지시) |
+| 1.16 | 2026-11-10 | 7.9 설정 섹션 이름: 차량 연결 → **차량 정보**, 사내 서버 → **회사 정보**(사용자 지시). [차량 연결로] → [차량 정보로]. 팝업 제목 "차량 연결"은 동작 이름이라 그대로 |

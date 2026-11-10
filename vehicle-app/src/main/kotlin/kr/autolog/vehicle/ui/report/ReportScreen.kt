@@ -28,6 +28,7 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
+import kr.autolog.vehicle.ui.design.components.ButtonNote
 import kr.autolog.vehicle.ui.design.components.CheckRow
 import kr.autolog.vehicle.ui.design.components.PeriodSwitcher
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
@@ -163,7 +164,7 @@ private fun ServerLine(upload: ServerUploadUi) {
 @Composable
 private fun StepMessage(state: ReportUiState) {
     // 단계가 바뀌면 한 줄이 펼쳐지거나 그 자리에서 바뀌거나 접힌다
-    ExpandSwap(stepMessage(state)) { (text, color) -> Text(text, style = AutoLogTheme.type.body, color = color) }
+    ExpandSwap(stepMessage(state), Modifier.fillMaxWidth()) { (text, color) -> ButtonNote(text, color = color) }
 }
 
 @Composable

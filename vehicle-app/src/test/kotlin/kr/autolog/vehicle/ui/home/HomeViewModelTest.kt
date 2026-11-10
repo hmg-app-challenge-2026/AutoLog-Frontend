@@ -7,13 +7,14 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kr.autolog.vehicle.TestAppGraph
 import kr.autolog.vehicle.common.AppClock
-import kr.autolog.vehicle.data.interim.MissedTrip
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.MissedTrip
+import kr.autolog.vehicle.core.SessionState
+import kr.autolog.vehicle.core.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -70,14 +71,18 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `기록 종료를 누르면 바로 끝난다`() = runTest {
+    fun `기록 종료를 누르면 5초 종료 대기에 들어간다`() = runTest {
         val g = graph()
         val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
         g.trip.startSession()
-        g.trip.setMotion(VehicleMotion.PARKED)
 
         vm.onAction(HomeAction.EndNow)
 
+        assertTrue(g.trip.state.value is SessionState.StopCandidate)
+        advanceTimeBy(4_000)
+        assertTrue(g.trip.state.value is SessionState.StopCandidate)
+        advanceTimeBy(1_000)
+        runCurrent()
         assertTrue(g.trip.state.value is SessionState.PendingReview)
     }
 

@@ -5,9 +5,9 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kr.autolog.vehicle.common.AppClock
-import kr.autolog.vehicle.data.interim.FakeTripSession
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.SessionState
+import kr.autolog.vehicle.core.VehicleMotion
+import kr.autolog.vehicle.data.fake.FakeTripSession
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

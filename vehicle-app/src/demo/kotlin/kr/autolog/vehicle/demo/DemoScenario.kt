@@ -5,9 +5,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
-import kr.autolog.vehicle.data.interim.FakeTripSession
-import kr.autolog.vehicle.data.interim.MissedTrip
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.MissedTrip
+import kr.autolog.vehicle.core.VehicleMotion
+import kr.autolog.vehicle.data.fake.FakeTripSession
 
 /**
  * 스펙 6.7 데모 패널의 동작. VHAL 없이 시연 영상을 찍는다.

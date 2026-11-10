@@ -3,7 +3,7 @@ package kr.autolog.vehicle.data.usage
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.VehicleMotion
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

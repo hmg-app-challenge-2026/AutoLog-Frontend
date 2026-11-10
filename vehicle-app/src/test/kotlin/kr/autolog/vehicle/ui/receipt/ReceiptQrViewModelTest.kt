@@ -32,10 +32,15 @@ class ReceiptQrViewModelTest {
     }
 
     @Test
-    fun `기다리는 영수증이 있으면 QR 없이 곧바로 그 영수증 입력 창으로 바꾼다`() = runTest {
-        val (g, _) = open(emptyInbox = false)
+    fun `기존 영수증이 있어도 먼저 QR 화면을 보여 준다`() = runTest {
+        val (g, vm) = open(emptyInbox = false)
 
-        assertEquals(listOf(Route.Home, Route.FuelEntry("r-1")), g.navigator.backStack.value)
+        assertEquals(listOf(Route.Home, Route.ReceiptQr), g.navigator.backStack.value)
+        assertEquals(false, vm.uiState.value.loading)
+
+        g.store.pushReceipt(FakeReceiptApi.SAMPLE_UNSURE)
+
+        assertEquals(listOf(Route.Home, Route.FuelEntry("r-2")), g.navigator.backStack.value)
     }
 
     @Test

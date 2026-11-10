@@ -1,4 +1,4 @@
-package kr.autolog.vehicle.data.interim
+package kr.autolog.vehicle.data.fake
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,14 +7,17 @@ import kotlinx.coroutines.flow.map
 import kr.autolog.shared.ReceiptPayload
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.common.AppZone
+import kr.autolog.vehicle.core.LocalStore
 import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.core.PurposeDetail.BRANCH_MOVE
 import kr.autolog.vehicle.core.PurposeDetail.CLIENT_VISIT
 import kr.autolog.vehicle.core.PurposeDetail.COMMUTE_IN
 import kr.autolog.vehicle.core.PurposeDetail.FIELD_WORK
-import kr.autolog.vehicle.data.interim.UploadState.DONE
-import kr.autolog.vehicle.data.interim.UploadState.FAILED
-import kr.autolog.vehicle.data.interim.UploadState.PENDING
+import kr.autolog.vehicle.core.TripRow
+import kr.autolog.vehicle.core.UploadState
+import kr.autolog.vehicle.core.UploadState.DONE
+import kr.autolog.vehicle.core.UploadState.FAILED
+import kr.autolog.vehicle.core.UploadState.PENDING
 import kr.autolog.vehicle.fake.FakeReceiptApi
 import java.time.Instant
 import java.time.YearMonth
@@ -51,9 +54,19 @@ class FakeLocalStore(clock: AppClock, seed: Boolean = true) : LocalStore {
         rows.value = rows.value.filterNot { it.tripId == row.tripId } + row
     }
 
-    fun confirm(tripId: String, detail: PurposeDetail, note: String?) {
-        rows.value =
-            rows.value.map { if (it.tripId == tripId) it.copy(purpose = detail, note = note ?: it.note) else it }
+    /** 목적 확정. [destinationLabel]은 목적지 없이 끝난 운행에서 고른 도착지(실구현 `TripSessionManager.confirmPurpose`와 같은 규칙). */
+    fun confirm(tripId: String, detail: PurposeDetail, note: String?, destinationLabel: String? = null) {
+        rows.value = rows.value.map {
+            if (it.tripId == tripId) {
+                it.copy(
+                    purpose = detail,
+                    note = note ?: it.note,
+                    destinationLabel = destinationLabel ?: it.destinationLabel,
+                )
+            } else {
+                it
+            }
+        }
     }
 
     fun assignDriver(tripId: String, userId: String) {

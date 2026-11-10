@@ -1,5 +1,6 @@
 package kr.autolog.vehicle.nav
 
+import kr.autolog.vehicle.core.DeepLink
 import kr.autolog.vehicle.data.usage.UsageTier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -8,9 +9,9 @@ import org.junit.Test
 class DeepLinkTest {
     @Test
     fun `알림 extra — 운행 결과는 운행 id가 있어야 하고 모르는 경로는 무시`() {
-        assertEquals(Route.TripResult("t-1"), deepLinkRoute(DeepLinkKeys.ROUTE_TRIP_RESULT, "t-1"))
-        assertNull(deepLinkRoute(DeepLinkKeys.ROUTE_TRIP_RESULT, null))
-        assertNull(deepLinkRoute(DeepLinkKeys.ROUTE_TRIP_RESULT, " "))
+        assertEquals(Route.TripResult("t-1"), deepLinkRoute(DeepLink.ROUTE_REVIEW, "t-1"))
+        assertNull(deepLinkRoute(DeepLink.ROUTE_REVIEW, null))
+        assertNull(deepLinkRoute(DeepLink.ROUTE_REVIEW, " "))
         assertNull(deepLinkRoute("unknown", "t-1"))
         assertNull(deepLinkRoute(null, null))
     }

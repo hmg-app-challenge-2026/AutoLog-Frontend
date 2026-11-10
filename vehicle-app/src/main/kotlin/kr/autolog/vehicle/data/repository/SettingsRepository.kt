@@ -6,20 +6,20 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kr.autolog.vehicle.core.ConnectionState
+import kr.autolog.vehicle.core.DeviceApi
 import kr.autolog.vehicle.core.MailApi
 import kr.autolog.vehicle.core.MailResult
 import kr.autolog.vehicle.core.RecipientInfo
+import kr.autolog.vehicle.core.RegisterResult
 import kr.autolog.vehicle.core.SettingsApi
 import kr.autolog.vehicle.core.SettingsResult
 import kr.autolog.vehicle.core.SmtpConfig
 import kr.autolog.vehicle.core.SyncResult
 import kr.autolog.vehicle.core.UserInfo
-import kr.autolog.vehicle.data.interim.ConnectionState
-import kr.autolog.vehicle.data.interim.DeviceApi
-import kr.autolog.vehicle.data.interim.RegisterResult
-import kr.autolog.vehicle.data.interim.UploadApi
-import kr.autolog.vehicle.data.interim.UploadResult
-import kr.autolog.vehicle.data.interim.UploadStatus
+import kr.autolog.vehicle.data.upload.UploadApi
+import kr.autolog.vehicle.data.upload.UploadResult
+import kr.autolog.vehicle.data.upload.UploadStatus
 
 /** 설정(스펙 7.9, F-24·F-01·8장). 화면은 이 인터페이스만 본다. */
 interface SettingsRepository {

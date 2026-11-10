@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.runBlocking
 import kr.autolog.vehicle.TestAppGraph
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

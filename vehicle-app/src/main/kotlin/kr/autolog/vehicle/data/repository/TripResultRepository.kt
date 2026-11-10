@@ -5,15 +5,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.common.AppZone
+import kr.autolog.vehicle.core.InputMode
+import kr.autolog.vehicle.core.LocalStore
 import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.core.PurposeEngine
+import kr.autolog.vehicle.core.SessionState
 import kr.autolog.vehicle.core.TripFacts
-import kr.autolog.vehicle.data.interim.InputMode
-import kr.autolog.vehicle.data.interim.LocalStore
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.TripRow
-import kr.autolog.vehicle.data.interim.TripSessionApi
+import kr.autolog.vehicle.core.TripRow
+import kr.autolog.vehicle.core.TripSessionApi
 import java.time.Instant
 
 /**

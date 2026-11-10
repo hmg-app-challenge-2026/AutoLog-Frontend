@@ -39,6 +39,7 @@ import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
+import kr.autolog.vehicle.ui.design.components.ButtonNote
 import kr.autolog.vehicle.ui.design.components.ChoiceRow
 import kr.autolog.vehicle.ui.design.components.EdgeCountdownBar
 import kr.autolog.vehicle.ui.design.components.PrimaryButton
@@ -117,7 +118,7 @@ private fun ResultBody(state: TripResultUiState, onAction: (TripResultAction) ->
         when {
             state.loading -> Unit
             state.notFound -> {
-                Text(stringResource(R.string.result_not_found), style = AutoLogTheme.type.body, color = c.textSecondary)
+                ButtonNote(stringResource(R.string.result_not_found))
                 Spacer(Modifier.weight(1f))
                 PrimaryButton(
                     stringResource(R.string.result_home),

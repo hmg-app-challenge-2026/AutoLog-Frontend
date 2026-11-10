@@ -12,7 +12,8 @@
 |---|---|---|
 | `vehicle-app/` · `web/` · `docs/` | 프론트 | 이 리포에서 자유롭게 고친다 |
 | `backend/` (submodule) | 앱 A·B | **이 리포에서 고치지 않는다.** 필요하면 Backend에 PR |
-| `vehicle-app/.../data/interim/` | 프론트(임시) | 앱 A 계약이 머지되면 삭제한다. 새 코드가 interim 타입에 의존하지 않게 Repository로 감싼다 |
+| `vehicle-app/.../data/fake/` | 프론트 | 데모·테스트용 앱 A 가짜(데모 조작 — 거리 늘리기·놓친 운행·복구 — 포함). 실제 앱(vehicle flavor)은 쓰지 않는다 |
+| `vehicle-app/.../data/upload/` | 프론트(임시) | 사내 서버 업로드 자리표시 계약. 백엔드 계약(R-4)이 오면 삭제한다 |
 
 - `ai.pleos.*` import 금지(스펙 6.1).
 - `ui/` 패키지는 `data/repository`의 인터페이스만 쓴다. `kr.autolog.vehicle.core`의 서비스 인터페이스를 import하지 않는다(값 enum은 가능).
@@ -37,9 +38,10 @@
 - 창 크기에 따라 달라지는 글자는 `AutoLogTheme.windowType.<역할>`(`ui/design/WindowType.kt`). 화면·컴포넌트에서 `if (LocalWindowLayout.current == NARROW) type.a else type.b`로 글자를 고르지 않는다 — 새 역할이 필요하면 그 표에 한 줄 더한다.
 - 입력 칸이 여러 개인 화면은 칸 정의(이름·단위·입력 방법·계약 키)를 enum 하나에 모은다(예: `ui/receipt/FuelField.kt`). 칸마다 `when`을 여러 곳에 두지 않는다.
 - ViewModel·Reducer는 화면 문구를 모른다. 사람에게 보일 이름·오류는 sealed 타입(예: `FuelTripLabel`, `FuelEntryError`)으로 내보내고 화면이 `strings.xml`로 바꾼다.
-- 화면 하나의 상태 계산은 `XxxReducer.kt`의 순수 함수(`reduceXxx`)로 두고 Repository 값 타입만 입력으로 받는다. `data/interim` 타입은 `ui/`에 들어오지 않는다(스펙 6.6).
+- 화면 하나의 상태 계산은 `XxxReducer.kt`의 순수 함수(`reduceXxx`)로 두고 Repository 값 타입만 입력으로 받는다. `data/fake`·`data/upload` 타입은 `ui/`에 들어오지 않는다(스펙 6.6).
 - 색·글자·간격·모양·모션은 **반드시 `AutoLogTheme` 토큰**. 리터럴 `Color(0xFF…)`, `16.dp`, `24.sp`를 화면 코드에 쓰지 않는다(토큰 정의 파일 제외).
 - 모션은 `ui/design/motion/`의 도우미로만(디자인 언어 8.2): 팝업은 `ModalHost`로 감싸고(닫힘 모션), 같은 자리 교체 `FadeThrough`, 달 이동 `DirectionalContent`, 생겼다 사라지는 것 `ExpandVisibility`·`ExpandSwap`, 선택 `animateSelectColor`. 화면 코드에 `AnimatedContent`·`animate*AsState`·`spring(...)`·`tween(...)`을 직접 쓰지 않는다. 화면 전환 모양은 `FullApp`이 스택 변화로 정한다 — 화면은 Navigator만 부른다.
+- **버튼 바로 위 설명글은 가운데** — 화면은 `ButtonNote`, 팝업 안은 `ModalText`(2026-11-10 사용자 지시). `Text`를 버튼 위에 왼쪽 정렬로 두지 않는다.
 - 문자열은 `strings.xml`. 화면 코드에 한국어 리터럴을 쓰지 않는다(Preview·테스트 제외).
 - TypeScript(web/admin): ESLint 기본 + `strict: true`. 컴포넌트 PascalCase, 훅 `useXxx`, API 함수 동사형.
 
@@ -50,7 +52,7 @@
 | ViewModel | 화면마다 1개 이상. 정상·오류·잠금 상태 각 1개 이상 |
 | 디자인 토큰 | 토큰을 바꾸면 `ContrastTest` 통과 필수 |
 | 스크린샷 | 화면을 추가·변경하면 `./gradlew :vehicle-app:recordRoborazziDemoDebug`로 로컬에 기록해 검토한다. 파일은 창 크기별 폴더 `src/test/screenshots/{wide,narrow}/<이름>_<dark|light>.png`(`captureAll`이 정한다). **실제 Pleos 화면 두 크기만** 찍는다(2026-11-10 사용자 지시 — 근거 없는 비율은 지움): `wide/` = 앱 하나가 앱 영역 전체(Pleos Connect v2.1.0 에뮬레이터 2560×1268 dp), `narrow/` = 1:1 분할 한 칸(1280×1268 dp, Pleos Window Policy 기본 1:1). 둘 다 밀도 1.0이라 에뮬레이터와 같은 픽셀이다. **현재는 리포에 커밋하지 않는다**(`.gitignore`, 2026-11-09 사용자 결정 — 로컬 검토용). 그래서 CI는 `verifyRoborazzi`(기준 이미지와 비교 — 기준이 없으면 모든 스크린샷 테스트가 "original file was not found"로 실패)가 아니라 `recordRoborazzi`로 찍기만 하고, 캡처는 Actions 결과물 `screenshots`로 올린다(리뷰어가 내려받아 본다). 화면이 그려지다 죽는 문제는 잡지만 픽셀 회귀는 잡지 못한다. 기준 이미지를 커밋하기로 바꾸면 `.gitignore`에서 빼고 CI를 `verifyRoborazzi`로 되돌린 뒤 이 행을 고친다 |
-| 컴포넌트 갤러리 | `ui/design/components/` 컴포넌트를 추가·변경하면 `GalleryScreenshotTest`(components·components_tiles·components_forms·components_modal)도 같이 고친다. 갤러리는 지금 컴포넌트 목록과 같아야 한다. UI를 바꾸면 `src/test/screenshots/`를 지우고 전부 다시 기록한다(옛 캡처를 남기지 않는다) |
+| 컴포넌트 갤러리 | `ui/design/components/` 컴포넌트를 추가·변경하면 `GalleryScreenshotTest`(components·components_tiles·components_forms·components_keypads·components_modal)도 같이 고친다. 갤러리는 지금 컴포넌트 목록과 같아야 한다. UI를 바꾸면 `src/test/screenshots/`를 지우고 전부 다시 기록한다(옛 캡처를 남기지 않는다) |
 | 웹 | 폼·API 오류 문구 테스트 |
 
 테스트 이름은 백틱 문장: ``fun `주행이 시작되면 보조 화면을 모두 닫는다`()``.

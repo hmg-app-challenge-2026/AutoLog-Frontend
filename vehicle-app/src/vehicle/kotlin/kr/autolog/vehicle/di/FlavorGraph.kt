@@ -1,18 +1,33 @@
 package kr.autolog.vehicle.di
 
+import android.Manifest
 import android.app.Application
+import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.core.AutoLog
 import kr.autolog.vehicle.data.usage.AndroidCarUxSource
 
 /**
- * 실차·Pleos 에뮬레이터용. 지금은 CarUxRestrictions만 실제이고 나머지는 Fake다.
- * 스펙 R-1(`AutoLog.create(context)`)·R-2(앱 A 계약)가 머지되면 여기서 실구현으로 바꾼다.
+ * 실차·Pleos 에뮬레이터용 — 백엔드 실구현(`AutoLog.create`)과 실제 CarUxRestrictions로 조립한다. 목업 데이터 없음.
+ * `AutoLog.create`는 앱이 화면에 있을 때(Activity `onCreate`) 불러야 포그라운드 서비스를 시작할 수 있다 — `MainActivity`가
+ * [runtimePermissions]를 받은 뒤 처음으로 그래프를 꺼낼 때 이 함수가 불린다(`AutoLogApp.graph`, 백엔드 `AutoLog` 주석).
  */
 fun createAppGraph(app: Application): AppGraph {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val carUx = AndroidCarUxSource(app).also { it.start() }
-    return FakeAppGraph(scope, AppClock.System, carUx, vehicleId = "veh-1")
+    return RealAppGraph(AutoLog.create(app), carUx, scope)
 }
+
+/**
+ * 조립 전에 받을 런타임 권한(백엔드 `AutoLog` 주석): 알림(Android 13+) · Pleos 좌표.
+ * 거절해도 앱은 뜬다 — 그 기능만 빠진다(알림 안 보임, 출발·도착 좌표 없음). 운행 기록·거리는 그대로.
+ */
+fun runtimePermissions(): List<String> = buildList {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+    add(FUSED_LOCATION)
+}
+
+/** `ai.pleos.playground.location.fused.constant.PleosPermission.FUSED_LOCATION`(화면은 ai.pleos.*를 import하지 않는다). */
+private const val FUSED_LOCATION = "pleos.car.permission.FUSED_LOCATION"

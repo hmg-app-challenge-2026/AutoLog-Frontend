@@ -111,6 +111,8 @@ class GalleryScreenshotTest {
             PeriodSwitcher(YearMonth.of(2026, 11), canGoNext = false, onPrev = {}, onNext = {})
             InputField(label = "서버 주소", value = "https://autolog.acme.co.kr", onValueChange = {})
             InputField(label = "이름", value = "", onValueChange = {}, placeholder = "예: 홍길동")
+            CodeField(label = "연결 코드 6자리", value = "7KQ3", length = 6, onValueChange = {})
+            ButtonNote("네트워크에 연결하지 못했어요. 연결되면 다시 보내 주세요", color = AutoLogTheme.colors.danger)
             ChoiceRow("일반 업무", selected = true, onClick = {})
             ChoiceRow("출퇴근", selected = false, onClick = {})
             ChoiceRow("개인 용무", selected = false, onClick = null) // 보기 전용
@@ -118,7 +120,14 @@ class GalleryScreenshotTest {
             ConfidenceRow("수량", "4.0 L", 0.41, onClick = {})
             ConfidenceRow("금액", null, null, onClick = {})
             QrImage("https://autolog.example/r/abcd1234?t=demo", Space.s9 * 2)
-            NumericKeypad(onDigit = {}, onDelete = {}, allowDecimal = false)
+        }
+    }
+
+    /** 숫자판(금액·리터) — 3×4 키가 커서 forms 캡처와 따로 찍는다. 차량 연결 코드는 키보드로 넣는다(CodeField — forms). */
+    @Test
+    fun keypads() = captureAll("components_keypads", gallerySize) {
+        Column(Modifier.padding(Space.s6), verticalArrangement = Arrangement.spacedBy(Space.s6)) {
+            NumericKeypad(onDigit = {}, onDelete = {}, allowDecimal = true)
         }
     }
 

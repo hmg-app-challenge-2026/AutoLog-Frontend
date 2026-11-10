@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.MailResult
 import kr.autolog.vehicle.core.SmtpConfig
+import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.data.repository.Outcome
 import kr.autolog.vehicle.data.repository.SettingsRepository
 import kr.autolog.vehicle.nav.Navigator
@@ -50,16 +51,6 @@ class SettingsViewModel(
             SettingsAction.Back -> navigator.pop()
             SettingsAction.StartRegister ->
                 openDialog(SettingsDialog.Register(registerPreset(settings.link.value)), SettingsTask.REGISTER)
-            is SettingsAction.RegisterKey -> editRegisterCode {
-                if (it.length <
-                    REGISTER_CODE_LENGTH
-                ) {
-                    it + action.digit
-                } else {
-                    it
-                }
-            }
-            SettingsAction.RegisterDelete -> editRegisterCode { it.dropLast(1) }
             SettingsAction.UploadNow -> run(SettingsTask.UPLOAD) { settings.uploadNow().toResult() }
             is SettingsAction.EditMail -> local.update { it.copy(mail = it.mail.edit(action.field, action.value)) }
             SettingsAction.SaveMail -> saveMail()
@@ -84,11 +75,6 @@ class SettingsViewModel(
     private fun openDialog(dialog: SettingsDialog, task: SettingsTask) =
         local.update { it.copy(dialog = dialog, results = it.results - task) }
 
-    private fun editRegisterCode(change: (String) -> String) = local.update { l ->
-        val d = l.dialog as? SettingsDialog.Register ?: return@update l
-        l.copy(dialog = d.copy(code = change(d.code)))
-    }
-
     private fun saveMail() {
         val form = local.value.mail
         if (!form.complete) return
@@ -107,7 +93,7 @@ class SettingsViewModel(
     private fun submitDialog() {
         when (val d = local.value.dialog) {
             is SettingsDialog.Register -> {
-                if (d.code.length != REGISTER_CODE_LENGTH || d.serverUrl.isBlank()) return
+                if (!ConnectCode.isComplete(d.code) || d.serverUrl.isBlank()) return
                 run(SettingsTask.REGISTER) { settings.register(d.serverUrl, d.code).toResult() }
             }
             is SettingsDialog.AddRecipient -> {
@@ -154,7 +140,12 @@ private fun MailForm.edit(field: MailField, value: String) = when (field) {
 }
 
 private fun SettingsDialog.edit(field: DialogField, value: String): SettingsDialog = when (this) {
-    is SettingsDialog.Register -> if (field == DialogField.SERVER_URL) copy(serverUrl = value) else this
+    is SettingsDialog.Register -> when (field) {
+        DialogField.SERVER_URL -> copy(serverUrl = value)
+        // 키보드로 친 소문자는 대문자로, 서버가 쓰지 않는 글자는 들어가지 않는다(G-01)
+        DialogField.CONNECT_CODE -> copy(code = ConnectCode.normalize(value))
+        else -> this
+    }
     is SettingsDialog.AddRecipient -> when (field) {
         DialogField.EMAIL -> copy(email = value)
         DialogField.NAME -> copy(name = value)
@@ -164,7 +155,7 @@ private fun SettingsDialog.edit(field: DialogField, value: String): SettingsDial
         DialogField.NAME -> copy(name = value)
         DialogField.DEPT -> copy(dept = value)
         DialogField.EMAIL -> copy(email = value)
-        DialogField.SERVER_URL -> this
+        else -> this
     }
     is SettingsDialog.RemoveRecipient -> this
 }

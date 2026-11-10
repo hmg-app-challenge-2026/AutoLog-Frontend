@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kr.autolog.vehicle.TestAppGraph
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.VehicleMotion
 import kr.autolog.vehicle.nav.Route
 import kr.autolog.vehicle.screenshot.recordMotionFrames
 import org.junit.Rule

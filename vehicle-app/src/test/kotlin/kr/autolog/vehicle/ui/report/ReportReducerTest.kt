@@ -50,15 +50,19 @@ class ReportReducerTest {
     }
 
     @Test
-    fun `사내 서버가 연결돼 있을 때만 자동 전송 안내 — 마지막 전송 시각은 서울 시간`() {
+    fun `사내 서버가 연결돼 있고 업로드가 켜져 있을 때만 자동 전송 안내 — 마지막 전송 시각은 서울 시간`() {
         assertNull(reduce().serverUpload)
 
         val linked = ServerLink.Linked("12가3456", "https://autolog.example", lastSyncAt = null)
+        val on = noUpload.copy(enabled = true)
         val at = 1_794_446_640_000 // 2026-11-12 10:24 KST
-        assertEquals(
-            ServerUploadUi("10:24"),
-            reduce(link = linked, upload = noUpload.copy(lastUploadAt = at)).serverUpload,
-        )
-        assertEquals(ServerUploadUi(null), reduce(link = linked).serverUpload)
+        assertEquals(ServerUploadUi("10:24"), reduce(link = linked, upload = on.copy(lastUploadAt = at)).serverUpload)
+        assertEquals(ServerUploadUi(null), reduce(link = linked, upload = on).serverUpload)
+    }
+
+    @Test
+    fun `서버에 연결돼 있어도 업로드 계약이 없으면(실제 앱 지금) 자동 전송 안내를 하지 않는다`() {
+        val linked = ServerLink.Linked("12가3456", "https://autolog.example", lastSyncAt = null)
+        assertNull(reduce(link = linked, upload = noUpload).serverUpload)
     }
 }

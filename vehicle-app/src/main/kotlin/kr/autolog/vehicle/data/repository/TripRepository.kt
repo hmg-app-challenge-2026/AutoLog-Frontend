@@ -3,11 +3,11 @@ package kr.autolog.vehicle.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kr.autolog.vehicle.core.LocalStore
 import kr.autolog.vehicle.core.PurposeCategory
 import kr.autolog.vehicle.core.SettingsApi
-import kr.autolog.vehicle.data.interim.LocalStore
-import kr.autolog.vehicle.data.interim.TripRow
-import kr.autolog.vehicle.data.interim.UploadState
+import kr.autolog.vehicle.core.TripRow
+import kr.autolog.vehicle.core.UploadState
 import java.time.YearMonth
 
 /** 이력·최근 운행·월 요약(스펙 7.2·7.7·7.8). */

@@ -48,7 +48,8 @@ internal fun reduceReport(
     },
     step = step,
     smtpConfigured = smtpConfigured,
-    serverUpload = if (link is ServerLink.Linked) {
+    // 업로드가 실제로 켜져 있을 때만 — 서버에 연결만 돼 있고 전송 계약이 없으면(실제 앱 지금, G-04) "자동 전송돼요"는 사실이 아니다
+    serverUpload = if (link is ServerLink.Linked && upload.enabled) {
         ServerUploadUi(upload.lastUploadAt?.let { Instant.ofEpochMilli(it).atZone(AppZone).format(TIME) })
     } else {
         null

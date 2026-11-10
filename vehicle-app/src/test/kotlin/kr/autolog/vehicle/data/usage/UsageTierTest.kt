@@ -1,6 +1,6 @@
 package kr.autolog.vehicle.data.usage
 
-import kr.autolog.vehicle.data.interim.VehicleMotion
+import kr.autolog.vehicle.core.VehicleMotion
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

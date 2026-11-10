@@ -5,15 +5,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kr.autolog.vehicle.common.throttleLatest
 import kr.autolog.vehicle.core.DriverSource
-import kr.autolog.vehicle.data.interim.LiveTrip
-import kr.autolog.vehicle.data.interim.RecoveryChoice
-import kr.autolog.vehicle.data.interim.SessionState
-import kr.autolog.vehicle.data.interim.StartResult
-import kr.autolog.vehicle.data.interim.StopReason
-import kr.autolog.vehicle.data.interim.TripSessionApi
+import kr.autolog.vehicle.core.LiveTrip
+import kr.autolog.vehicle.core.RecoveryChoice
+import kr.autolog.vehicle.core.SessionState
+import kr.autolog.vehicle.core.StartResult
+import kr.autolog.vehicle.core.StopReason
+import kr.autolog.vehicle.core.TripSessionApi
 
 /**
- * 화면이 보는 운행 세션(스펙 6.5·6.6 경계). 앱 A 계약(지금은 interim `SessionState`)이 바뀌어도 이 타입은 유지된다 —
+ * 화면이 보는 운행 세션(스펙 6.5·6.6 경계). 앱 A 계약(core `SessionState`)이 바뀌어도 이 타입은 유지된다 —
  * 바뀌는 것은 [DefaultSessionRepository]의 변환뿐. 화면에 필요한 값만 담는다.
  */
 sealed interface TripSession {
@@ -57,6 +57,8 @@ interface SessionRepository {
 
     suspend fun endNow()
 
+    suspend fun requestStop()
+
     suspend fun keepRecording()
 
     suspend fun assignDriver(tripId: String, userId: String)
@@ -82,6 +84,8 @@ class DefaultSessionRepository(private val api: TripSessionApi) : SessionReposit
     }
 
     override suspend fun endNow() = api.finalize()
+
+    override suspend fun requestStop() = api.requestStop()
 
     override suspend fun keepRecording() = api.resume()
 

@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
@@ -24,7 +26,7 @@ import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 
-/** 디자인 언어 11장 NumericKeypad: 3×4, 키 96 dp, 간격 16 dp. 키보드 대신 숫자를 넣는다(연결 코드·금액·리터). */
+/** 디자인 언어 11장 NumericKeypad: 3×4, 키 96 dp, 간격 16 dp. 키보드 대신 숫자를 넣는다(금액·리터). */
 @Composable
 fun NumericKeypad(
     onDigit: (Char) -> Unit,
@@ -37,45 +39,51 @@ fun NumericKeypad(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Space.s4)) {
         rows.forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
-                row.forEach { d -> Key(keyWidth, { onDigit(d) }) { KeyText(d.toString()) } }
+                row.forEach { d -> KeypadKey({ onDigit(d) }, Modifier.width(keyWidth)) { KeyText(d.toString()) } }
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Space.s4)) {
             if (allowDecimal) {
-                Key(keyWidth, {
-                    onDigit('.')
-                }) { KeyText(".") }
+                KeypadKey({ onDigit('.') }, Modifier.width(keyWidth)) { KeyText(".") }
             } else {
                 Spacer(Modifier.size(keyWidth, Size.iconButton))
             }
-            Key(keyWidth, { onDigit('0') }) { KeyText("0") }
-            val delete = stringResource(R.string.keypad_delete)
-            Key(keyWidth, onDelete) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.Backspace,
-                    contentDescription = delete,
-                    tint = AutoLogTheme.colors.textPrimary,
-                    modifier = Modifier.size(Size.icon),
-                )
-            }
+            KeypadKey({ onDigit('0') }, Modifier.width(keyWidth)) { KeyText("0") }
+            KeypadKey(onDelete, Modifier.width(keyWidth)) { DeleteGlyph() }
         }
     }
 }
 
+/** 키 글자. */
 @Composable
 private fun KeyText(text: String) =
     Text(text, style = AutoLogTheme.type.headline, color = AutoLogTheme.colors.textPrimary)
 
+/**
+ * 키 하나(높이 `iconButton` 96 dp, `radius.lg`, `surface3`). 폭은 [modifier]가 정한다.
+ * 키패드는 팝업 안에 놓이므로 팝업 면(`surfaceRaised` — 다크는 `surface2`)보다 한 단계 밝은 `surface3` — 같은 색이면 다크에서 키 경계가 사라진다.
+ */
 @Composable
-private fun Key(width: Dp, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun KeypadKey(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
-        Modifier
-            .size(width, Size.iconButton)
+        modifier
+            .height(Size.iconButton)
             .tappable(onClick)
             .clip(RoundedCornerShape(Radius.lg))
-            .background(AutoLogTheme.colors.surface2),
+            .background(AutoLogTheme.colors.surface3),
         contentAlignment = Alignment.Center,
     ) { content() }
+}
+
+/** 지우기 키 안의 ⌫ 아이콘. */
+@Composable
+private fun DeleteGlyph() {
+    Icon(
+        Icons.AutoMirrored.Rounded.Backspace,
+        contentDescription = stringResource(R.string.keypad_delete),
+        tint = AutoLogTheme.colors.textPrimary,
+        modifier = Modifier.size(Size.icon),
+    )
 }
 
 /** 키 하나를 반영한 새 문자열. 소수점은 한 번만, 앞자리 0은 하나만, 최대 [maxLength]자. */

@@ -3,7 +3,7 @@ package kr.autolog.vehicle.data.repository
 import kr.autolog.vehicle.core.PurposeDetail
 import kr.autolog.vehicle.core.ReportFile
 
-// 화면(ui/)이 쓰는 Repository 값 타입. interim·core 서비스 계약이 바뀌어도 이 타입은 유지한다(스펙 6.6).
+// 화면(ui/)이 쓰는 Repository 값 타입. core 서비스 계약이 바뀌어도 이 타입은 유지한다(스펙 6.6).
 
 /** 성공·실패만 있는 동작 결과. [reason]은 화면에 그대로 보여 줄 수 있는 문장. */
 sealed interface Outcome {

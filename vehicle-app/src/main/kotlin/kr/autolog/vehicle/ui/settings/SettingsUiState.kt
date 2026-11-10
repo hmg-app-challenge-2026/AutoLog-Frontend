@@ -7,7 +7,6 @@ import kr.autolog.vehicle.ui.trips.TripWhen
 enum class SettingsSection { VEHICLE, SERVER, MAIL, RECIPIENTS, STAFF, AUTOMATION, SYNC, ABOUT }
 
 /** 연결 코드 자릿수(앱 A `DeviceApi.register` 규칙). */
-const val REGISTER_CODE_LENGTH = 6
 
 /**
  * 설정 화면 상태(스펙 7.9, F-24·F-01·8장). 저장소 값은 [reduceSettings]가 표시용으로 바꾸고,
@@ -96,7 +95,7 @@ sealed interface SettingsDialog {
 }
 
 /** 팝업 입력 칸 이름 — 칸 하나를 바꾸는 액션을 하나로 쓰기 위해. */
-enum class DialogField { SERVER_URL, EMAIL, NAME, DEPT }
+enum class DialogField { SERVER_URL, CONNECT_CODE, EMAIL, NAME, DEPT }
 
 enum class MailField { HOST, PORT, USERNAME, PASSWORD }
 
@@ -110,10 +109,6 @@ sealed interface SettingsAction {
     data object Back : SettingsAction
 
     data object StartRegister : SettingsAction
-
-    data class RegisterKey(val digit: Char) : SettingsAction
-
-    data object RegisterDelete : SettingsAction
 
     data object UploadNow : SettingsAction
 
