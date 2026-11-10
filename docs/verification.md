@@ -4,12 +4,12 @@
 
 | ID | 결과 | 환경 | 날짜 | 메모 |
 |---|---|---|---|---|
-| V-01 | | 맥 에뮬레이터 | | FormFactorConsole 프리셋별 dp·DPI·px |
+| V-01 | 일부 — 기본 디스플레이 2560×1440 px · 밀도 1.0(160 dpi) · 앱 영역 ≈ 2560×1268 dp(상태 표시줄 76 px · 하단 바 96 px 제외) → WIDE. **FormFactorConsole 프리셋(12.9″ Portrait 등)과 분할 화면 한 칸의 dp는 아직** | 맥 에뮬레이터(Pleos Connect v2.1.0, API 34) | 2026-11-10 | `docs/screenshots/font-size/pleos-*.png`(2560×1440) 캡처에서 잼: 여백 `Space.s7` 48 dp = 48 px, `Size.dockIcon` 112 dp = 112 px |
 | V-02 | 성공 — `includeBuild("backend") { dependencySubstitution { substitute(module("kr.autolog:vehicle-core")).using(project(":vehicle-core")) } }` 그대로 동작. 대안(include) 불필요 | WSL | 2026-11-09 | `:backend:vehicle-core` 태스크로 빌드됨 |
 | V-03 | | 맥 에뮬레이터 | | |
 | V-04 | | 맥 에뮬레이터 | | |
 | V-05 | 지원 — Asta Sans GSUB 기능 목록에 `tnum` 있음(aalt·calt·ccmp·frac·fwid·liga·ordn·sinf·ss01·subs·sups·tnum·vert·vrt2) | WSL | 2026-11-09 | `fontFeatureSettings = "tnum"` 그대로 사용 |
-| V-06 | | 맥 에뮬레이터 | | |
+| V-06 | 일부 — 에뮬레이터는 1 sp = 1 px(밀도 1.0). 실제 mm는 차량 패널의 물리 크기에 달려 에뮬레이터로는 정하지 못한다. 대신 사용자가 에뮬레이터에서 PR #4 글자 크기(title 44 · body 34 · caption 28 · fine 22 sp)를 보고 괜찮다고 확인 | 맥 에뮬레이터(Pleos Connect v2.1.0) | 2026-11-10 | 실차 패널 크기를 알게 되면 mm로 다시 계산 |
 | V-07 | | 실차 | | |
 | V-08 | | 맥 에뮬레이터 | | |
 | V-09 | 정상 — Roborazzi 1.32.2 + Robolectric 4.14.1(SDK 34, NATIVE)에서 Asta Sans 한글·숫자 렌더링 확인(`components_tall_*.png`) | WSL | 2026-11-09 | **무한 애니메이션(CircularProgressIndicator 등)이 화면에 있으면 캡처 1장당 약 3분 대기** → 스크린샷에는 로딩 회전을 넣지 않는다 |
