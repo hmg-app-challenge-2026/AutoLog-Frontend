@@ -23,6 +23,7 @@ import kr.autolog.vehicle.ui.design.AutoLogTheme
 import kr.autolog.vehicle.ui.design.LocalDrivingLocked
 import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.LocalKeyboardLocked
+import kr.autolog.vehicle.ui.design.LocalVehicleMoving
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
 
 /** FULL 진입 직후 오조작 방지(디자인 언어 12장). */
@@ -57,6 +58,7 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
             CompositionLocalProvider(
                 LocalInputLocked provides (driving || entryGuard),
                 LocalDrivingLocked provides driving,
+                LocalVehicleMoving provides (tier == UsageTier.BACKGROUND),
                 LocalKeyboardLocked provides noKeyboard,
             ) {
                 Box(

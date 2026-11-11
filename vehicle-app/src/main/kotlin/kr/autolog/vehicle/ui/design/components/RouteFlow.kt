@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalVehicleMoving
 import kr.autolog.vehicle.ui.design.Size
 import kr.autolog.vehicle.ui.design.Space
 import kotlin.math.abs
@@ -56,7 +57,8 @@ private const val GLOW_SPREAD = 1.2f
  * 위계: 섹션 소제목 → **목적지**(`title`, 두 줄까지) → 출발지(`title`, 회색).
  * 출발지는 보통 굵기와 보조색, 목적지는 굵은 기본색으로 구분한다.
  * 화살표는 하이브리드 회생 제동 표시처럼 갈매기(⌄) 3개에 빛이 위에서 아래로 주기적으로 흐른다([MotionTokens.flowPeriodMs]).
- * 반복 모션은 [kr.autolog.vehicle.ui.design.MotionTokens.ambient]일 때만 — 꺼지면 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
+ * **흐름은 차가 달리는 동안만**(`LocalVehicleMoving`, D-32) — 주차·정차 중이거나 반복 모션이 꺼졌으면
+ * ([kr.autolog.vehicle.ui.design.MotionTokens.ambient]) 위→아래로 짙어지는 정지 그림(방향은 그대로 읽힌다).
  * [origin]이 null이면 출발지·화살표 없이 도착 점과 목적지만. 목적지를 아직 모르면 [destinationColor]로 흐리게 안내 문구를 넣는다.
  * [live] = 지금 달리는 운행(흐르는 화살표). 끝난 운행(운행 결과·이력)은 false — 화살표 대신 ○와 ●를 잇는 가는 선(지도 앱 경로 요약처럼),
  * 흐름이 "진행 중"으로 잘못 읽히지 않게.
@@ -157,7 +159,7 @@ private fun FlowChevrons(scale: Float, modifier: Modifier = Modifier) {
     val motion = AutoLogTheme.motion
     val accent = AutoLogTheme.colors.accent
     val phase: State<Float> =
-        if (motion.ambient) {
+        if (routeFlows(motion.ambient, LocalVehicleMoving.current)) {
             rememberInfiniteTransition(label = "routeFlow").animateFloat(
                 initialValue = 0f,
                 targetValue = 1f,
@@ -188,6 +190,9 @@ private fun FlowChevrons(scale: Float, modifier: Modifier = Modifier) {
         }
     }
 }
+
+/** 화살표가 흐르는가: 반복 모션이 허용되고([ambient]) 차가 달리는 중([moving])일 때만(D-32). */
+internal fun routeFlows(ambient: Boolean, moving: Boolean): Boolean = ambient && moving
 
 /**
  * 갈매기 [index]의 투명도. 빛의 머리가 위(-0.5)에서 아래(CHEVRONS + 0.5)로 지나가며 가까운 갈매기를 밝힌다 — 마지막 뒤에 짧은 쉼.
