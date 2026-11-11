@@ -68,7 +68,7 @@
 |---|---|---|
 | 차속 신호 | `CarPropertyGateway.speedKph` — AAOS `PERF_VEHICLE_SPEED`(m/s → km/h, 1 Hz). Pleos SDK에 차속 공개 API가 없어서 | — |
 | 권한 `android.car.permission.CAR_SPEED` | `vehicle-core` 매니페스트에 선언, **런타임 권한** — 주석 "프론트가 요청한다". 없으면 차속 없이 계기판만으로 판단 | **연결** — vehicle `runtimePermissions()`에 추가. 조립(`AutoLog.create`) 때 리스너를 등록하므로 그 전에 받는다 |
-| `DrivingJudge` | 기어 P가 아니고 차속 > 3 km/h(`MOVING_SPEED_KPH`)면 바로 `MOVING` | 사용 3단계(Peek·전체 앱)가 더 빨리 주행으로 바뀐다 — 화면 코드는 그대로(`TripSessionApi.motion`) |
+| `DrivingJudge` | 기어 P가 아니고 차속 > 3 km/h(`MOVING_SPEED_KPH`)면 바로 `MOVING` | 사용 3단계(정차·주차)가 더 빨리 주행으로 바뀐다 — 화면 코드는 그대로(`TripSessionApi.motion`) |
 | `TripSessionManager.onSpeed` | 움직이는 속도면 `lastMovedAt` 갱신 · 운행이 없으면 자동 시작 · 종료 대기 중이면 **기어 P 대기만 빼고** 기록 재개(`resume`). 같은 속도로 달리는 동안은 틱마다 움직임 유지 | [기록 종료](`USER_REQUEST`) 5초 대기 중에 차가 3 km/h를 넘게 움직이면 기록이 이어진다 — 화면은 전체 앱이 주차에서만 보이므로 보통은 일어나지 않는다. 그때는 사용 단계가 주행으로 내려가 운행 결과 카드도 닫힌다(스펙 1.1·6.9) |
 | 거리 | 차속은 거리에 쓰지 않음(F-05) | 그대로 |
 | `scripts/emu.sh` | Pleos 에뮬레이터 가상 콘솔 도우미(setup·gear·speed·odo·state·log). setup이 `pm grant --user 10`으로 위치·알림·차속 권한을 준다 | 에뮬레이터 QA 때 쓸 수 있다(맥 경로 기본값 `~/Library/Android/sdk`) |
