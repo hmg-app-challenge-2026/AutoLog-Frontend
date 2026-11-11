@@ -54,6 +54,18 @@ class SettingsScreenshotTest {
         SettingsScreen(base.copy(section = SettingsSection.RECIPIENTS), onAction = {})
     }
 
+    /** 실제 앱의 차량 정보: 연결 카드 + 운행 기록 알약 권한 카드(권한 없음 · 이 차량에 권한 화면 없음 안내). */
+    @Test
+    fun vehicleOverlay() = captureAll("settings_vehicle_overlay") {
+        SettingsScreen(
+            base.copy(
+                section = SettingsSection.VEHICLE,
+                overlay = OverlayUi(allowed = false, settingsUnavailable = true),
+            ),
+            onAction = {},
+        )
+    }
+
     @Test
     fun register() = captureAll("settings_register") {
         SettingsScreen(

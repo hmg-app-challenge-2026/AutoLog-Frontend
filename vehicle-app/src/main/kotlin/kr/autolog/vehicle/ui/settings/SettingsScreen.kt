@@ -57,7 +57,7 @@ fun SettingsRoute() {
             .getOrNull().orEmpty()
         AppInfo(version, demo = graph.demoOverlay != null)
     }
-    val vm = viewModel { SettingsViewModel(graph.settings, graph.navigator, graph.clock, app) }
+    val vm = viewModel { SettingsViewModel(graph.settings, graph.navigator, graph.clock, app, graph.overlay) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     SettingsScreen(state, vm::onAction)
 }

@@ -71,7 +71,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `기록 종료를 누르면 5초 종료 대기에 들어간다`() = runTest {
+    fun `기록 종료를 누르면 자동 종료와 같은 5초 종료 대기에 들어가고 운행 결과가 열린다`() = runTest {
         val g = graph()
         val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
         g.trip.startSession()
@@ -81,6 +81,7 @@ class HomeViewModelTest {
         assertTrue(g.trip.state.value is SessionState.StopCandidate)
         advanceTimeBy(4_000)
         assertTrue(g.trip.state.value is SessionState.StopCandidate)
+        assertTrue(g.navigator.current is Route.TripResult) // 종료 대기 동안 카운트다운과 함께 열려 있다
         advanceTimeBy(1_000)
         runCurrent()
         assertTrue(g.trip.state.value is SessionState.PendingReview)

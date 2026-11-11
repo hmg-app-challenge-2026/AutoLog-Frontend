@@ -14,6 +14,7 @@ import kr.autolog.vehicle.core.MailResult
 import kr.autolog.vehicle.core.SmtpConfig
 import kr.autolog.vehicle.data.repository.ConnectCode
 import kr.autolog.vehicle.data.repository.Outcome
+import kr.autolog.vehicle.data.repository.OverlayPermissionRepository
 import kr.autolog.vehicle.data.repository.SettingsRepository
 import kr.autolog.vehicle.nav.Navigator
 
@@ -27,8 +28,14 @@ class SettingsViewModel(
     private val navigator: Navigator,
     private val clock: AppClock,
     private val app: AppInfo,
+    private val overlay: OverlayPermissionRepository,
 ) : ViewModel() {
-    private val local = MutableStateFlow(SettingsLocal(mailConnected = settings.smtpConfigured()))
+    private val local = MutableStateFlow(
+        SettingsLocal(
+            mailConnected = settings.smtpConfigured(),
+            overlay = if (overlay.supported) OverlayUi(allowed = overlay.isAllowed()) else null,
+        ),
+    )
 
     private val sources =
         combine(
@@ -42,7 +49,11 @@ class SettingsViewModel(
 
     val uiState: StateFlow<SettingsUiState> =
         combine(local, sources) { l, s -> reduceSettings(l, s, app, clock.nowMs()) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState(app = app))
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                SettingsUiState(app = app, overlay = local.value.overlay),
+            )
 
     fun onAction(action: SettingsAction) {
         when (action) {
@@ -69,6 +80,14 @@ class SettingsViewModel(
             }
             SettingsAction.SubmitDialog -> submitDialog()
             SettingsAction.DismissDialog -> local.update { if (it.running == null) it.copy(dialog = null) else it }
+            // 허용됐으면 "권한 화면 없음" 안내도 지운다
+            SettingsAction.RefreshOverlay -> local.update { l ->
+                l.copy(overlay = l.overlay?.let { OverlayUi(allowed = overlay.isAllowed(), it.settingsUnavailable) })
+            }
+            SettingsAction.OpenOverlaySettings -> {
+                val opened = overlay.openSettings()
+                local.update { l -> l.copy(overlay = l.overlay?.copy(settingsUnavailable = !opened)) }
+            }
         }
     }
 

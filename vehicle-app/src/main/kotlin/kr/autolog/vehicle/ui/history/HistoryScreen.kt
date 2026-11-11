@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
@@ -86,7 +85,9 @@ fun HistoryScreen(state: HistoryUiState, onAction: (HistoryAction) -> Unit, modi
             SecondaryButton(
                 stringResource(R.string.history_report),
                 onClick = { onAction(HistoryAction.OpenReport) },
-                modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth().align(Alignment.CenterHorizontally),
+                modifier = Modifier.widthIn(
+                    max = Size.listActionMaxWidth,
+                ).fillMaxWidth().align(Alignment.CenterHorizontally),
             )
         }
     }

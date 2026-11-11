@@ -55,8 +55,10 @@ interface SessionRepository {
 
     suspend fun startTrip(): Outcome
 
+    /** 기다리지 않고 끝낸다(운행 결과 [저장하기] — 종료 대기 중). */
     suspend fun endNow()
 
+    /** [기록 종료]: 자동 종료와 같은 5초 종료 대기에 들어간다 — 운행 결과 카드가 카운트다운과 함께 열린다(스펙 1.2, D-28). */
     suspend fun requestStop()
 
     suspend fun keepRecording()
