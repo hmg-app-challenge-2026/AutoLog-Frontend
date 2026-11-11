@@ -73,8 +73,8 @@ class NavMotionTest {
     }
 
     @Test
-    fun `주차에서 정차로 — 한 번 페이드`() {
+    fun `주차에서 정차로 — 같은 Home 그대로, 타일만 흐려진다`() {
         val graph = open(Route.Home)
-        compose.recordMotionFrames("tier_full_to_peek") { graph.trip.setMotion(VehicleMotion.STOPPED) }
+        compose.recordMotionFrames("tier_full_to_stopped") { graph.trip.setMotion(VehicleMotion.STOPPED) }
     }
 }

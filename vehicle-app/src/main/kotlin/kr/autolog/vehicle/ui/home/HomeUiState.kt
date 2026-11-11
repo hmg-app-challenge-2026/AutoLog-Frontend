@@ -22,6 +22,11 @@ data class HomeUiState(
     val origin: String? = null,
     val destination: String? = null,
     val elapsedMin: Int? = null,
+    /**
+     * 종료 대기 중이면 남은 초(움직임 없음 180초 · 내비 도착 · 기어 P · [기록 종료] 5초). 주차 중엔 운행 결과 카드가 덮어 보이지 않고,
+     * 정차 중(카드를 열지 않음)에 상태 줄이 "2분 41초 후 기록 종료"로 알린다 — 예전 정차 패널 ⑤ 줄(D-31).
+     */
+    val autoEndInSec: Int? = null,
     /** 대기 오른쪽 "최근 운행 기록", 최신 순 최대 [RECENT_TRIPS]건(D-25). 목적이 없으면 "목적 미입력" — 고치는 곳은 운행 기록 조회(D-26). */
     val recentTrips: List<TripRowUi> = emptyList(),
     val recoveryExtraKm: String? = null,

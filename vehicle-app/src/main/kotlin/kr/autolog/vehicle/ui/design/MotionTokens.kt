@@ -11,8 +11,8 @@ import androidx.compose.runtime.Immutable
 import kr.autolog.vehicle.ui.design.motion.DelayedSpec
 
 /**
- * 디자인 언어 8.2·8.4. [isStatic]은 tier != FULL(정차 Peek) 또는 시스템 "애니메이션 줄이기"일 때 — 화면 전환·등장 모션이 멈춘다.
- * [ambient]는 그와 별개인 **상태 표시용 반복 모션**(경로 화살표 흐름 등) 허용 여부. Peek에서도 켜지고,
+ * 디자인 언어 8.2·8.4. [isStatic]은 tier != FULL(정차·주행 — 같은 화면 읽기 전용, D-31) 또는 시스템 "애니메이션 줄이기"일 때 — 화면 전환·등장 모션이 멈춘다.
+ * [ambient]는 그와 별개인 **상태 표시용 반복 모션**(경로 화살표 흐름 등) 허용 여부. 정차 중에도 켜지고,
  * 시스템 "애니메이션 줄이기"이거나 스크린샷처럼 정지 화면이 필요할 때만 꺼진다.
  * 컴포넌트는 이 토큰만 쓰므로 단계가 바뀌면 자동으로 맞는 형태가 된다.
  */
@@ -55,17 +55,6 @@ class MotionTokens private constructor(val isStatic: Boolean, val ambient: Boole
 
     /** 띄우는 화면(운행 결과)이 아래에서 떠오를 때 시작 배율. */
     val presentScale: Float get() = 0.96f
-
-    /**
-     * 정차 ↔ 주차 전환 한 번의 페이드(디자인 언어 8.4 — 정차 화면 안은 움직이지 않지만 들어오고 나가는 순간 한 번은 허용).
-     * 정지형(`Static`, 정차)이어도 움직이고, 시스템 "애니메이션 줄이기"·스크린샷(`Still`)이면 즉시.
-     */
-    fun <T> tierFadeOut(): FiniteAnimationSpec<T> =
-        if (!ambient) snap() else spring(dampingRatio = 1f, stiffness = SWAP_OUT_STIFFNESS)
-
-    /** 나가는 화면이 먼저 사라진 뒤(90 ms) 들어온다 — 같은 자리 교체와 같은 순서. */
-    fun <T> tierFadeIn(): FiniteAnimationSpec<T> =
-        if (!ambient) snap() else DelayedSpec(SWAP_DELAY_MS, spring(dampingRatio = 1f, stiffness = QUICK_STIFFNESS))
 
     /** 같은 자리 교체에서 들어오는 쪽 시작 배율. */
     val swapScale: Float get() = 0.98f

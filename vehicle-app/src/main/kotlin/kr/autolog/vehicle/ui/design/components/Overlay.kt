@@ -55,8 +55,8 @@ val LocalModalCount = compositionLocalOf<MutableIntState?> { null }
  *   닫을 수 없는 팝업(반드시 골라야 하는 결정)은 onClose를 주지 않는다. X가 닫기 이상의 뜻이면(놓친 운행의 "무시")
  *   [closeLabel]로 접근성 이름을 그 뜻으로 바꾼다.
  * - [title]을 주면 X와 같은 머리 줄 가운데에 놓인다(iOS 시트 배치). X가 없는 팝업은 내용 첫 줄에 [ModalTitle]을 둬도 된다.
- * - 바깥 탭은 뒤 화면으로 새지 않게 삼킨다(클릭 의미론 없음 — Peek 입력 0개 검사에 걸리지 않는다). 닫기는 카드 안 버튼으로만.
- * 단계가 FULL에서 내려가면 루트가 화면째 지운다.
+ * - 바깥 탭은 뒤 화면으로 새지 않게 삼킨다(클릭 의미론 없음 — 정차 중 "눌리는 것" 검사에 걸리지 않는다). 닫기는 카드 안 버튼으로만.
+ * 단계가 FULL에서 내려가면 Navigator가 Home만 남기고, Home은 정차·주행 중 팝업을 띄우지 않는다(D-31).
  */
 @Composable
 fun ModalCard(

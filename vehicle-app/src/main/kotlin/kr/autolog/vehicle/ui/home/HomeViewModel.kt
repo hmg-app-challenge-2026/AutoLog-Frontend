@@ -45,10 +45,8 @@ class HomeViewModel(
             session.state
                 .map { it.resultTripId() }
                 .distinctUntilChanged()
-                .collect { id ->
-                    val route = id?.let { Route.TripResult(it) } ?: return@collect
-                    if (navigator.current != route) navigator.push(route)
-                }
+                // 정차·주행 중이면(정차 중 [기록 종료] 등) 다음 주차 때 연다 — 그 전에 기록이 다시 이어지면 지운다(D-31)
+                .collect { id -> navigator.showWhenParked(id?.let { Route.TripResult(it) }) }
         }
     }
 

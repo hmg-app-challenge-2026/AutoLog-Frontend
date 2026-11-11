@@ -43,13 +43,19 @@ class HomeReducerTest {
     }
 
     @Test
-    fun `종료 대기여도 Home은 기록 중 그대로 — 남은 시간은 운행 결과 카드가 보여 준다`() {
-        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.GEAR_P, deadlineAt = 5_000)
+    fun `종료 대기여도 Home은 기록 중 그대로 — 남은 초는 정차 중 상태 줄용으로만 계산한다`() {
+        val candidate = TripSession.AutoEnding(trip, 23.4, AutoEndReason.NO_MOVEMENT, deadlineAt = 163_000)
 
         val s = reduceHome(candidate, null, destination = "판교", now = 2_000)
 
         assertEquals(HomePhase.RECORDING_PARKED, s.phase)
         assertEquals("23.4", s.tripKm)
+        assertEquals(161, s.autoEndInSec) // 주차 중엔 운행 결과 카드가 덮는다
+    }
+
+    @Test
+    fun `기록 중이면 남은 초가 없다`() {
+        assertEquals(null, reduceHome(TripSession.Recording(trip, 1.0), null, null, now = 0).autoEndInSec)
     }
 
     @Test

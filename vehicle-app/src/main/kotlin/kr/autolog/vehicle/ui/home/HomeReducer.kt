@@ -5,6 +5,7 @@ import kr.autolog.vehicle.data.repository.HistoryItem
 import kr.autolog.vehicle.data.repository.MonthSummary
 import kr.autolog.vehicle.data.repository.TripSession
 import kr.autolog.vehicle.ui.design.formatKm
+import kr.autolog.vehicle.ui.design.remainingSeconds
 import kr.autolog.vehicle.ui.trips.toTripRowUi
 
 /**
@@ -35,6 +36,7 @@ internal fun reduceHome(
         // 종료 대기(AutoEnding)도 Home 뒤 배경은 기록 중 그대로 — 위에 운행 결과 카드가 열린다(D-28)
         is TripSession.Recording -> base.withTrip(HomePhase.RECORDING_PARKED, session.trip, session.liveKm, now)
         is TripSession.AutoEnding -> base.withTrip(HomePhase.RECORDING_PARKED, session.trip, session.liveKm, now)
+            .copy(autoEndInSec = remainingSeconds(session.deadlineAt, now))
         is TripSession.NeedsRecovery ->
             base.copy(phase = HomePhase.NEEDS_RECOVERY, recoveryExtraKm = formatKm(session.extraKm))
     }

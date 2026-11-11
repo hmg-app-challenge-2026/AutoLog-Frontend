@@ -1,11 +1,5 @@
 package kr.autolog.vehicle.ui.root
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,17 +20,19 @@ import kr.autolog.vehicle.data.usage.UsageTier
 import kr.autolog.vehicle.di.AppGraph
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalDrivingLocked
 import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.LocalKeyboardLocked
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
-import kr.autolog.vehicle.ui.peek.PeekRoute
 
 /** FULL 진입 직후 오조작 방지(디자인 언어 12장). */
 const val FULL_ENTRY_GUARD_MS = 300L
 
 /**
- * 스펙 6.9 2번: FULL → 전체 앱 / PEEK → Peek 패널만 / BACKGROUND → 물러남.
- * 입력 잠금 = tier != FULL 또는 FULL 진입 직후 300 ms.
+ * 스펙 6.9 2번·D-31: **화면은 하나**(전체 앱) — 주차·정차·주행이 같은 Home·같은 배치를 그린다. 단계는 잠금만 바꾼다:
+ * 주차(FULL) = 전부 · 정차(PEEK) = 읽기 전용(타일은 흐리게, [기록 종료]만 눌림) · 주행(BACKGROUND) = 같은 읽기 전용 화면 + 앱이 뒤로 물러남.
+ * 내려가면 Navigator가 Home만 남긴다. 입력 잠금 = tier != FULL 또는 FULL 진입 직후 300 ms.
+ * 예전엔 정차 때 별도 패널(Peek), 주행 때 빈 화면으로 통째로 바꿔 그려 단계가 바뀔 때마다 다른 앱처럼 보였다(2026-11-11 사용자 지시로 하나로).
  */
 @Composable
 fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
@@ -55,10 +51,12 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
             UsageTier.PEEK -> Unit
         }
     }
+    val driving = tier != UsageTier.FULL
     CompositionLocalProvider(LocalAppGraph provides graph) {
-        AutoLogTheme(staticMotion = tier != UsageTier.FULL) {
+        AutoLogTheme(staticMotion = driving) {
             CompositionLocalProvider(
-                LocalInputLocked provides (tier != UsageTier.FULL || entryGuard),
+                LocalInputLocked provides (driving || entryGuard),
+                LocalDrivingLocked provides driving,
                 LocalKeyboardLocked provides noKeyboard,
             ) {
                 Box(
@@ -66,27 +64,7 @@ fun AutoLogRoot(graph: AppGraph, onRequestBackground: () -> Unit) {
                         AutoLogTheme.colors.bg,
                     ).windowInsetsPadding(WindowInsets.safeDrawing),
                 ) {
-                    WindowLayoutHost {
-                        val motion = AutoLogTheme.motion
-                        // 주차 ↔ 정차는 한 번 페이드 — 나가는 화면이 먼저 빠진 뒤 들어온다. 주행(BACKGROUND)으로 갈 땐 화면을 바로 비운다
-                        AnimatedContent(
-                            targetState = tier,
-                            transitionSpec = {
-                                if (initialState == UsageTier.BACKGROUND || targetState == UsageTier.BACKGROUND) {
-                                    EnterTransition.None togetherWith ExitTransition.None
-                                } else {
-                                    fadeIn(motion.tierFadeIn()) togetherWith fadeOut(motion.tierFadeOut())
-                                }
-                            },
-                            label = "tier",
-                        ) { shown ->
-                            when (shown) {
-                                UsageTier.FULL -> FullApp(graph)
-                                UsageTier.PEEK -> PeekRoute() // 정차: 운전자 배지 없음(D-30 — 대기 중 Home에만)
-                                UsageTier.BACKGROUND -> Unit
-                            }
-                        }
-                    }
+                    WindowLayoutHost { FullApp(graph) }
                     graph.demoOverlay?.invoke()
                 }
             }

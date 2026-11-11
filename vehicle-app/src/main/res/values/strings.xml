@@ -7,10 +7,7 @@
     <string name="distance_unavailable">계기판 거리를 읽지 못했어요</string>
     <string name="badge_scheduled">배차</string>
     <string name="badge_recent">최근</string>
-    <string name="peek_no_destination">목적지 없음 — 도착 후 물어볼게요</string>
-    <string name="peek_auto_end">멈춰 있으면 %1$s 후 기록이 자동 종료돼요</string>
-    <string name="peek_no_trip">기록 중인 운행이 없어요</string>
-    <string name="peek_no_trip_hint">출발하면 자동으로 기록해요</string>
+    <string name="route_no_destination">목적지 없음 — 도착 후 물어볼게요</string>
     <string name="picker_title">운전자를 선택해주세요</string>
     <string name="picker_later">나중에 선택</string>
     <string name="picker_more">다른 사람</string>
@@ -23,12 +20,12 @@
     <string name="status_ready">대기 중</string>
     <string name="status_recording">기록 중</string>
     <string name="home_status_elapsed">%1$d분 경과</string>
+    <string name="home_status_auto_end">%1$s 후 기록 종료</string>
     <string name="home_month_meta">%1$d회 운행 · 업무 %2$s km</string>
     <string name="home_month_loading">이번 달 기록을 불러오는 중</string>
     <string name="section_month_trip">이번 달 운행 정보</string>
     <string name="section_distance">주행 거리</string>
     <string name="section_route">운행 경로</string>
-    <string name="section_odometer">누적 거리</string>
     <string name="section_recent_trips">최근 운행 기록</string>
     <string name="recent_empty">아직 운행 기록이 없어요</string>
     <string name="trip_route">%1$s → %2$s</string>
