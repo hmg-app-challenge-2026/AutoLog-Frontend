@@ -68,6 +68,7 @@ class FakeTripSession(
         finalizeNow()
     }
 
+    /** 앱 A 계약의 "5초 종료 대기" — 화면은 쓰지 않는다([기록 종료]는 [finalize]로 바로 끝낸다, 스펙 1.2). */
     override suspend fun requestStop() {
         val s = _state.value as? SessionState.Recording ?: return
         startAutoEnd(s, StopReason.USER_REQUEST)

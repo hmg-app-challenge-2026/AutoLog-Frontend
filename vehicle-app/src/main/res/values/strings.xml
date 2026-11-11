@@ -101,6 +101,9 @@
     <string name="result_not_found">운행을 찾지 못했어요</string>
     <string name="trip_minutes">%1$d분</string>
     <string name="trip_hours_minutes">%1$d시간 %2$d분</string>
+    <!-- 운행 기록 알약(스펙 6.11): "12.3 km · 15분" -->
+    <string name="recording_pill_text">%1$s · %2$s</string>
+    <string name="recording_pill_a11y">운행 기록 중, %1$s</string>
     <string name="missed_title">놓친 운행</string>
     <string name="missed_body">앱이 꺼진 동안 %1$s km를 달렸어요</string>
     <string name="missed_add">운행으로 추가하기</string>
@@ -189,7 +192,7 @@
     <string name="settings_vehicle_hint">회사에서 받은 연결 코드로 이 차를 사내 서버에 연결해요</string>
     <string name="settings_recording_pill_on">주행 중 기록 표시 켜짐</string>
     <string name="settings_recording_pill_off">주행 중 기록 표시 권한 필요</string>
-    <string name="settings_recording_pill_hint">권한을 허용하면 내비 화면 위에 운행 거리와 시간을 표시해요</string>
+    <string name="settings_recording_pill_hint">권한을 허용하면 다른 앱(내비)을 보는 동안 화면 위에 운행 거리와 시간을 표시해요</string>
     <string name="settings_recording_pill_allow">화면 위 표시 권한 허용</string>
     <string name="settings_recording_pill_unavailable">이 차량은 권한 설정 화면을 제공하지 않아요. 운행 알림에서 기록 상태를 확인할 수 있어요.</string>
     <string name="settings_register">연결 코드 입력</string>

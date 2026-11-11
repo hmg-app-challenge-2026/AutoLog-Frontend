@@ -7,7 +7,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kr.autolog.vehicle.TestAppGraph
@@ -71,18 +70,14 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `기록 종료를 누르면 5초 종료 대기에 들어간다`() = runTest {
+    fun `기록 종료를 누르면 기다리지 않고 바로 끝난다`() = runTest {
         val g = graph()
         val vm = HomeViewModel(g.session, g.context, g.trips, g.navigator, g.clock)
         g.trip.startSession()
 
         vm.onAction(HomeAction.EndNow)
 
-        assertTrue(g.trip.state.value is SessionState.StopCandidate)
-        advanceTimeBy(4_000)
-        assertTrue(g.trip.state.value is SessionState.StopCandidate)
-        advanceTimeBy(1_000)
-        runCurrent()
+        // 5초 종료 대기(StopCandidate)를 거치지 않는다 — 사용자가 직접 끝냈다(스펙 1.2, 2026-11-11 사용자 확인)
         assertTrue(g.trip.state.value is SessionState.PendingReview)
     }
 

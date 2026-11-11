@@ -15,6 +15,7 @@ internal data class SettingsLocal(
     val dialog: SettingsDialog? = null,
     val running: SettingsTask? = null,
     val results: Map<SettingsTask, TaskResult> = emptyMap(),
+    val overlay: OverlayUi? = null,
 )
 
 /** 저장소 값 묶음(설정 화면이 구독하는 원천). */
@@ -56,6 +57,7 @@ internal fun reduceSettings(local: SettingsLocal, sources: SettingsSources, app:
         results = local.results,
         dialog = local.dialog,
         app = app,
+        overlay = local.overlay,
     )
 
 /** 연결 팝업을 열 때 서버 주소 칸의 처음 값: 지금 연결된 주소, 없으면 "https://"(스펙 7.9 — 마지막 주소 프리셋). */

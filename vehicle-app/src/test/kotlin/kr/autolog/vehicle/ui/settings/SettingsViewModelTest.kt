@@ -12,7 +12,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kr.autolog.vehicle.TestAppGraph
 import kr.autolog.vehicle.common.AppClock
+import kr.autolog.vehicle.data.repository.OverlayPermissionRepository
 import kr.autolog.vehicle.nav.Route
+import kr.autolog.vehicle.overlay.RecordingOverlay
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -26,10 +28,12 @@ class SettingsViewModelTest {
 
     @After fun tearDown() = Dispatchers.resetMain()
 
-    private fun TestScope.open(): Pair<TestAppGraph, SettingsViewModel> {
+    private fun TestScope.open(
+        overlay: OverlayPermissionRepository = RecordingOverlay.None,
+    ): Pair<TestAppGraph, SettingsViewModel> {
         val g = TestAppGraph(backgroundScope, AppClock { testScheduler.currentTime }, start = Route.Home)
         g.navigator.push(Route.Settings)
-        val vm = SettingsViewModel(g.settings, g.navigator, g.clock, AppInfo("0.1.0", demo = true))
+        val vm = SettingsViewModel(g.settings, g.navigator, g.clock, AppInfo("0.1.0", demo = true), overlay)
         backgroundScope.launch { vm.uiState.collect {} }
         return g to vm
     }
@@ -159,5 +163,47 @@ class SettingsViewModelTest {
         vm.onAction(SettingsAction.Back)
 
         assertEquals(Route.Home, g.navigator.current)
+    }
+
+    /** 시스템 권한 화면을 흉내 낸다: [screen]이 없으면 열지 못한다, 열면 사용자가 허용한 것으로. */
+    private class FakeOverlayPermission(var allowed: Boolean, private val screen: Boolean) :
+        OverlayPermissionRepository {
+        override val supported = true
+
+        override fun isAllowed() = allowed
+
+        override fun openSettings(): Boolean = screen
+    }
+
+    @Test
+    fun `데모 빌드에는 알약 권한 카드가 없다`() = runTest {
+        val (_, vm) = open()
+
+        assertNull(vm.uiState.value.overlay)
+    }
+
+    @Test
+    fun `권한 화면에서 허용하고 돌아오면 다시 확인해 켜짐으로 바뀐다`() = runTest {
+        val permission = FakeOverlayPermission(allowed = false, screen = true)
+        val (_, vm) = open(permission)
+        assertEquals(OverlayUi(allowed = false), vm.uiState.value.overlay)
+
+        vm.onAction(SettingsAction.OpenOverlaySettings)
+        permission.allowed = true
+        vm.onAction(SettingsAction.RefreshOverlay)
+
+        assertEquals(OverlayUi(allowed = true), vm.uiState.first { it.overlay?.allowed == true }.overlay)
+    }
+
+    @Test
+    fun `이 차량에 권한 화면이 없으면 그 사실을 알린다`() = runTest {
+        val (_, vm) = open(FakeOverlayPermission(allowed = false, screen = false))
+
+        vm.onAction(SettingsAction.OpenOverlaySettings)
+
+        assertEquals(
+            OverlayUi(allowed = false, settingsUnavailable = true),
+            vm.uiState.first { it.overlay?.settingsUnavailable == true }.overlay,
+        )
     }
 }

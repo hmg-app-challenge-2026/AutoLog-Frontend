@@ -17,6 +17,7 @@ import kr.autolog.vehicle.data.usage.CarUxSource
 import kr.autolog.vehicle.data.usage.DefaultVehicleUsageRepository
 import kr.autolog.vehicle.nav.Navigator
 import kr.autolog.vehicle.nav.Route
+import kr.autolog.vehicle.overlay.RecordingOverlay
 
 /**
  * 실제 앱 그래프(스펙 6.7, R-1) — 백엔드 조립 지점 `AutoLog.create`가 돌려준 [components](앱 A·B 실구현) 위에 화면 Repository를 얹는다.
@@ -28,6 +29,8 @@ class RealAppGraph(
     carUx: CarUxSource,
     scope: CoroutineScope,
     override val clock: AppClock = AppClock.System,
+    /** 운행 기록 알약(스펙 6.11). vehicle flavor가 `RecordingPill`을 넣는다. */
+    override val overlay: RecordingOverlay = RecordingOverlay.None,
 ) : AppGraph {
     override val navigator = Navigator(Route.ProfilePicker)
     override val session = DefaultSessionRepository(components.session)

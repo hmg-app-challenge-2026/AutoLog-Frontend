@@ -28,7 +28,15 @@ data class SettingsUiState(
     val results: Map<SettingsTask, TaskResult> = emptyMap(),
     val dialog: SettingsDialog? = null,
     val app: AppInfo = AppInfo("", demo = false),
+    /** 운행 기록 알약 권한 카드(차량 정보 섹션). null = 이 빌드에 알약이 없음(데모). */
+    val overlay: OverlayUi? = null,
 )
+
+/**
+ * 운행 기록 알약(스펙 6.11)의 화면 위 표시 권한. [settingsUnavailable] = [화면 위 표시 권한 허용]을 눌렀지만
+ * 이 차량에 시스템 권한 화면이 없었다(버튼 위에 안내 한 줄).
+ */
+data class OverlayUi(val allowed: Boolean, val settingsUnavailable: Boolean = false)
 
 /** 차량·사내 서버 연결(8장). [lastSync]는 마지막 동기화 시각. */
 sealed interface LinkUi {
@@ -83,7 +91,7 @@ sealed interface TaskResult {
 
 /** 설정의 팝업(모두 `ModalCard` — 오른쪽 위 X로 닫는다, D-30). */
 sealed interface SettingsDialog {
-    /** 차량 연결: 서버 주소 + 연결 코드 6자리(숫자판). */
+    /** 차량 연결: 서버 주소 + 연결 코드 6자리(`CodeField` — 키보드 입력, `ConnectCode` 규칙). */
     data class Register(val serverUrl: String, val code: String = "") : SettingsDialog
 
     data class AddRecipient(val email: String = "", val name: String = "") : SettingsDialog
@@ -132,4 +140,10 @@ sealed interface SettingsAction {
     data object SubmitDialog : SettingsAction
 
     data object DismissDialog : SettingsAction
+
+    /** 화면이 다시 보일 때(시스템 권한 화면에서 돌아옴) 화면 위 표시 권한을 다시 확인한다. */
+    data object RefreshOverlay : SettingsAction
+
+    /** [화면 위 표시 권한 허용] — 시스템 권한 화면을 연다. */
+    data object OpenOverlaySettings : SettingsAction
 }

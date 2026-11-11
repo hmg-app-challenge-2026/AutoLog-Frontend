@@ -6,9 +6,10 @@ import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kr.autolog.vehicle.RecordingPill
+import kr.autolog.vehicle.common.AppClock
 import kr.autolog.vehicle.core.AutoLog
 import kr.autolog.vehicle.data.usage.AndroidCarUxSource
+import kr.autolog.vehicle.overlay.RecordingPill
 
 /**
  * 실차·Pleos 에뮬레이터용 — 백엔드 실구현(`AutoLog.create`)과 실제 CarUxRestrictions로 조립한다. 목업 데이터 없음.
@@ -19,8 +20,8 @@ fun createAppGraph(app: Application): AppGraph {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val carUx = AndroidCarUxSource(app).also { it.start() }
     val components = AutoLog.create(app)
-    RecordingPill.start(app, components.session)
-    return RealAppGraph(components, carUx, scope)
+    val pill = RecordingPill(app, components.session, AppClock.System)
+    return RealAppGraph(components, carUx, scope, overlay = pill)
 }
 
 /**

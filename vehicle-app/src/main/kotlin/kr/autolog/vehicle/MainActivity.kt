@@ -3,6 +3,7 @@ package kr.autolog.vehicle
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,11 +44,29 @@ class MainActivity : ComponentActivity() {
         pendingIntent = null
         val appGraph = graph
         setContent { AutoLogRoot(graph = appGraph, onRequestBackground = { moveTaskToBack(true) }) }
-        window.decorView.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
-            RecordingPill.setAppArea(view)
-        }
-        window.decorView.post { RecordingPill.setAppArea(window.decorView) }
-        RecordingPill.requestPermissionIfAvailable(this)
+        // 운행 기록 알약(스펙 6.11): 이 화면이 보이는 동안은 숨기고, 창이 놓인 앱 영역 가운데를 알려 준다
+        appGraph.overlay.setAppVisible(true)
+        window.decorView.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ -> reportAppArea(view) }
+        window.decorView.post { reportAppArea(window.decorView) }
+        appGraph.overlay.askPermissionOnce()
+    }
+
+    // 그래프를 만들기 전(권한을 묻는 중)에는 건드리지 않는다 — 꺼내는 순간 백엔드가 조립된다
+    override fun onStart() {
+        super.onStart()
+        if (started) graph.overlay.setAppVisible(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (started) graph.overlay.setAppVisible(false)
+    }
+
+    private fun reportAppArea(view: View) {
+        if (!view.isAttachedToWindow || view.width == 0) return
+        val location = IntArray(2)
+        view.getLocationOnScreen(location)
+        graph.overlay.setAppAreaCenter(location[0] + view.width / 2)
     }
 
     /** 앱이 떠 있을 때 알림을 누르면 여기로 온다(스펙 6.10). 아직 권한을 묻는 중이면 띄울 때 적용한다. */
