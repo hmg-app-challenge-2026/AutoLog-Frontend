@@ -34,7 +34,7 @@
 - Kotlin: Backend CONVENTIONS 6장(ktlint, 이름, 단위 접미어)을 그대로 따른다. 커밋 전 `./gradlew ktlintFormat`.
 - Compose 파일 구성: 화면 하나 = `XxxRoute.kt`(ViewModel 연결) · `XxxScreen.kt`(순수 UI + Preview) · `XxxViewModel.kt` · `XxxUiState.kt`(UiState·Action·Effect).
 - Composable 이름은 PascalCase 명사, 파라미터 순서: 필수 데이터 → `onXxx` 콜백 → `modifier: Modifier = Modifier` (마지막).
-- **누를 수 있는 요소는 모두 `Modifier.tappable`**(`ui/design/components/Press.kt`)로 만든다. 입력 잠금(스펙 6.9)·누름 피드백·햅틱이 한곳에 있다 — `clickable`을 직접 쓰지 않는다.
+- **누를 수 있는 요소는 모두 `Modifier.tappable`**(`ui/design/components/Press.kt`)로 만든다. 입력 잠금(스펙 6.9)·누름 피드백·햅틱이 한곳에 있다 — `clickable`을 직접 쓰지 않는다. 정차·주행 중엔 화면이 그대로 남고 잠금만 걸린다(D-31) — 그때도 눌려야 하는 동작(지금은 [기록 종료] 하나)만 `whileDriving = true`.
 - 화면 바깥 여백은 `screenMargin()`(창 크기별 하나). 화면마다 `Space.s7`/`tallMargin`을 따로 고르지 않는다.
 - 창 크기에 따라 달라지는 글자는 `AutoLogTheme.windowType.<역할>`(`ui/design/WindowType.kt`). 화면·컴포넌트에서 `if (LocalWindowLayout.current == NARROW) type.a else type.b`로 글자를 고르지 않는다 — 새 역할이 필요하면 그 표에 한 줄 더한다.
 - 입력 칸이 여러 개인 화면은 칸 정의(이름·단위·입력 방법·계약 키)를 enum 하나에 모은다(예: `ui/receipt/FuelField.kt`). 칸마다 `when`을 여러 곳에 두지 않는다.
@@ -69,7 +69,7 @@
 - [ ] 소유 경계를 지켰다(`backend/` 미수정, 금지 import 없음)
 - [ ] 리터럴 색·크기 없이 토큰만 썼다
 - [ ] 스크린샷 4장(넓은 화면·분할 화면 × 2테마)을 로컬에 기록해 확인했다(커밋하지 않음)
-- [ ] 사용 3단계를 지켰다: 주차(FULL) 전용 화면이고, 정차면 Peek·주행이면 화면 없음으로 바뀐다 (스펙 1.1)
+- [ ] 사용 3단계를 지켰다: 주차(FULL) 전용 화면이고, 정차·주행이면 닫히고 Home만 읽기 전용으로 남는다 — 정차·주행 중에도 써야 하는 동작만 `tappable(whileDriving = true)` (스펙 1.1·D-31)
 - [ ] 조작 예산 안이다. 자동 진행에는 남은 시간과 1탭 취소가 있다 (스펙 1.2)
 - [ ] [디자인 언어 13장 체크리스트](docs/design-language.md#13-리뷰-체크리스트-화면-pr마다)를 통과했다
 - [ ] 맥 에뮬레이터 확인 여부를 PR에 적었다

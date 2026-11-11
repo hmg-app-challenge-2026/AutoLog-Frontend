@@ -1,5 +1,7 @@
 package kr.autolog.vehicle.ui.home
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -11,6 +13,8 @@ import kr.autolog.vehicle.screenshot.SampleDriver
 import kr.autolog.vehicle.screenshot.ShotDriver
 import kr.autolog.vehicle.screenshot.captureAll
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalDrivingLocked
+import kr.autolog.vehicle.ui.design.LocalInputLocked
 import kr.autolog.vehicle.ui.design.WindowLayoutHost
 import kr.autolog.vehicle.ui.trips.TripDay
 import kr.autolog.vehicle.ui.trips.TripRowUi
@@ -174,4 +178,18 @@ class HomeScreenshotTest {
 
     @Test
     fun recovery() = captureAll("home_recovery") { HomeScreen(recovery, onAction = {}) }
+
+    /** 정차 중(D-31): 같은 Home 읽기 전용 — 타일은 흐리게, [기록 종료]만 그대로. 상태 줄은 자동 종료까지 남은 시간. */
+    @Test
+    fun recordingStopped() = captureAll("home_recording_stopped") {
+        Stopped { HomeScreen(recording.copy(autoEndInSec = 161), onAction = {}) }
+    }
+
+    /** 정차 중 운행이 없을 때(D-31): 대기 Home 읽기 전용 — 놓친 운행 팝업도 주차할 때까지 띄우지 않는다. */
+    @Test
+    fun readyStopped() = captureAll("home_ready_stopped") { Stopped { HomeScreen(readyMissed, onAction = {}) } }
+
+    @Composable
+    private fun Stopped(content: @Composable () -> Unit) =
+        CompositionLocalProvider(LocalInputLocked provides true, LocalDrivingLocked provides true, content = content)
 }

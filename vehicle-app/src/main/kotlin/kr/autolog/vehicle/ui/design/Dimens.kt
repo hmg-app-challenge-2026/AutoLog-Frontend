@@ -36,7 +36,6 @@ object Size {
     val avatarPreviewTall = 160.dp // 같은 미리보기, 세로가 넉넉한 TALL
     val profileTileWide = 200.dp
     val profileTileNarrow = 160.dp
-    val peekMaxWidth = 960.dp // Peek 내용 최대 폭 — 2560 dp 차량 화면 가운데에서 목적지·상황 줄이 꺾이지 않게(560이면 "물어볼/게요")
     val sheetMaxWidth = 960.dp
     val successBadge = 200.dp // 완료 표시(SuccessCheck) 원 지름 — 2560×1268 차량 화면 가운데에서 한눈에
     val actionButtonMaxWidth = 480.dp // 한 줄에 같은 폭으로 놓는 행동 버튼 하나의 최대 폭(운행 결과) — 2560 dp에서 버튼이 넓대대하지 않게

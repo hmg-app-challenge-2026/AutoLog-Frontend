@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kr.autolog.vehicle.R
 import kr.autolog.vehicle.di.LocalAppGraph
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalDrivingLocked
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Space
 import kr.autolog.vehicle.ui.design.WindowLayout
@@ -29,6 +30,7 @@ import kr.autolog.vehicle.ui.design.components.ScrollColumn
 import kr.autolog.vehicle.ui.design.components.SectionHeader
 import kr.autolog.vehicle.ui.design.components.StatusLine
 import kr.autolog.vehicle.ui.design.components.TopLine
+import kr.autolog.vehicle.ui.design.durationText
 import kr.autolog.vehicle.ui.design.motion.FadeThrough
 import kr.autolog.vehicle.ui.design.screenMargin
 
@@ -114,10 +116,12 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
                 HomeDock(state, onAction)
             }
         }
-        ModalHost(visible = state.phase == HomePhase.NEEDS_RECOVERY) {
+        // 결정이 필요한 팝업은 주차 중에만(정차·주행 중엔 같은 Home을 읽기 전용으로 — D-31). 주차하면 그때 묻는다
+        val parked = !LocalDrivingLocked.current
+        ModalHost(visible = parked && state.phase == HomePhase.NEEDS_RECOVERY) {
             RecoveryDialog(state.recoveryExtraKm) { onAction(HomeAction.Recover(it)) }
         }
-        ModalHost(state.missedKm?.takeIf { state.phase == HomePhase.READY }) { missedKm ->
+        ModalHost(state.missedKm?.takeIf { parked && state.phase == HomePhase.READY }) { missedKm ->
             MissedTripDialog(
                 missedKm,
                 onAdd = { onAction(HomeAction.AcceptMissedTrip) },
@@ -127,7 +131,10 @@ fun HomeScreen(state: HomeUiState, onAction: (HomeAction) -> Unit, modifier: Mod
     }
 }
 
-/** 상태 줄: `● 대기 중` / `● 기록 중 · 35분 경과`. 점 색이 상태를 말한다(기록 중 초록, 대기 흐린 회색). */
+/**
+ * 상태 줄: `● 대기 중` / `● 기록 중 · 35분 경과` / 종료 대기면 `● 기록 중 · 2분 41초 후 기록 종료`.
+ * 점 색이 상태를 말한다(기록 중 초록, 대기 흐린 회색).
+ */
 @Composable
 private fun HomeStatus(state: HomeUiState) {
     val c = AutoLogTheme.colors
@@ -136,7 +143,8 @@ private fun HomeStatus(state: HomeUiState) {
         StatusLine(
             text = stringResource(R.string.status_recording),
             dot = c.success,
-            detail = stringResource(R.string.home_status_elapsed, state.elapsedMin ?: 0),
+            detail = state.autoEndInSec?.let { stringResource(R.string.home_status_auto_end, durationText(it)) }
+                ?: stringResource(R.string.home_status_elapsed, state.elapsedMin ?: 0),
         )
     } else {
         StatusLine(text = stringResource(R.string.status_ready), dot = c.textTertiary)

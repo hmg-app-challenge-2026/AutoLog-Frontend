@@ -1,6 +1,6 @@
 package kr.autolog.vehicle.nav
 
-/** 백스택의 모든 화면은 주차(FULL) 전용이다(스펙 6.10). Peek은 Route가 아니라 루트가 그리는 층. */
+/** 백스택의 모든 화면은 주차(FULL) 전용이다(스펙 6.10). 정차·주행 중엔 Home만 남아 읽기 전용으로 보인다(D-31). */
 sealed interface Route {
     data object ProfilePicker : Route
 

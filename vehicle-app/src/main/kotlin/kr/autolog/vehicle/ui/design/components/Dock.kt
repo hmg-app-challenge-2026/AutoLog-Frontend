@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import kr.autolog.vehicle.ui.design.AutoLogTheme
+import kr.autolog.vehicle.ui.design.LocalDrivingLocked
 import kr.autolog.vehicle.ui.design.LocalWindowLayout
 import kr.autolog.vehicle.ui.design.Radius
 import kr.autolog.vehicle.ui.design.Size
@@ -38,8 +39,11 @@ fun DockTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     emphasized: Boolean = false,
+    whileDriving: Boolean = false,
 ) {
     val c = AutoLogTheme.colors
+    // 정차·주행 중엔 같은 자리·같은 크기로 흐리게(눌리지 않음, D-31) — [whileDriving]인 타일만 그대로
+    val dimmed = LocalDrivingLocked.current && !whileDriving
     val layout = LocalWindowLayout.current
     val iconSize = when (layout) {
         WindowLayout.WIDE, WindowLayout.NARROW -> Size.dockIcon
@@ -48,15 +52,27 @@ fun DockTile(
     Column(
         modifier
             .widthIn(min = Size.touchMin)
-            .tappable(onClick)
+            .tappable(onClick, whileDriving = whileDriving)
             .clip(RoundedCornerShape(Radius.md)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Space.s2),
     ) {
         // 같은 자리에서 동작이 바뀌면([기록 시작] → [기록 종료]) 색은 교차하고 아이콘·이름은 그 자리에서 바뀐다
         val face by animateSelectColor(if (emphasized) c.accentFill else c.surface1)
-        val tint by animateSelectColor(if (emphasized) c.onAccent else c.accent)
-        val labelColor by animateSelectColor(if (emphasized) c.accent else c.textSecondary)
+        val tint by animateSelectColor(
+            when {
+                emphasized -> c.onAccent
+                dimmed -> c.textTertiary
+                else -> c.accent
+            },
+        )
+        val labelColor by animateSelectColor(
+            when {
+                emphasized -> c.accent
+                dimmed -> c.textTertiary
+                else -> c.textSecondary
+            },
+        )
         Box(
             Modifier
                 .size(iconSize)

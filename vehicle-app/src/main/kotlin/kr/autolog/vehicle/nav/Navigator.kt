@@ -17,6 +17,9 @@ class Navigator(start: Route = Route.ProfilePicker) {
     /** 주차가 아닐 때 들어온 딥링크 — 다음에 주차(FULL)가 되면 연다. */
     private var pendingDeepLink: Route? = null
 
+    /** 주차가 아닐 때 열려던 운행 결과 — 다음에 주차가 되면 연다([showWhenParked]). */
+    private var pendingParked: Route? = null
+
     val current: Route get() = _backStack.value.last()
 
     fun push(route: Route): Boolean {
@@ -57,8 +60,22 @@ class Navigator(start: Route = Route.ProfilePicker) {
     }
 
     /**
+     * "지금 주차면 바로, 아니면 다음 주차 때" 열 화면(운행 결과 — 정차 중 [기록 종료]·자동 종료로 끝난 운행, D-31).
+     * 주차면 맨 위에 쌓는다(이미 맨 위면 그대로). [route]가 null이면 기다리던 것을 지운다(그 운행이 다시 기록 중이 됐다 등).
+     */
+    fun showWhenParked(route: Route?) {
+        pendingParked = null
+        if (route == null) return
+        if (tier == UsageTier.FULL) {
+            if (current != route) push(route)
+        } else {
+            pendingParked = route
+        }
+    }
+
+    /**
      * FULL에서 내려가면 [Home]만 남긴다(스펙 6.9 3번). 올라올 때는 화면을 되살리지 않는다 —
-     * 단, 그사이 들어온 딥링크(사용자가 알림을 눌러 요청한 화면)는 연다.
+     * 단, 그사이 들어온 딥링크(사용자가 알림을 눌러 요청한 화면)는 연다. 딥링크가 없으면 기다리던 운행 결과([showWhenParked])를 연다.
      */
     fun onTierChanged(newTier: UsageTier) {
         if (newTier != UsageTier.FULL && (tier == UsageTier.FULL || _backStack.value != listOf(Route.Home))) {
@@ -67,8 +84,9 @@ class Navigator(start: Route = Route.ProfilePicker) {
         tier = newTier
         tierKnown = true
         if (newTier == UsageTier.FULL) {
-            pendingDeepLink?.let { _backStack.value = listOf(Route.Home, it) }
+            (pendingDeepLink ?: pendingParked)?.let { _backStack.value = listOf(Route.Home, it) }
             pendingDeepLink = null
+            pendingParked = null
         }
     }
 }

@@ -21,6 +21,18 @@ val LocalMotion = staticCompositionLocalOf { MotionTokens.Standard }
 val LocalInputLocked = compositionLocalOf { false }
 
 /**
+ * 주차가 아니다(정차·주행, tier != FULL — 스펙 1.1·D-31). 화면은 주차 때와 같지만 [LocalInputLocked]로 잠기고,
+ * 잠긴 동작은 흐리게 보인다. 예외: 주행 중에도 쓸 동작([기록 종료])은 `tappable(whileDriving = true)`로 연다.
+ */
+val LocalDrivingLocked = compositionLocalOf { false }
+
+/**
+ * 차가 달리는 중이다(tier = BACKGROUND). 기록 중 경로 화살표(`RouteFlow`)는 이때만 위→아래로 흐른다 — 주차·정차 중엔 멈춘 그림
+ * (2026-11-11 사용자 결정 D-32: 흐름은 "지금 움직이는 중"이라는 뜻이라 서 있을 때 흐르면 틀린 말이 된다).
+ */
+val LocalVehicleMoving = compositionLocalOf { false }
+
+/**
  * 사라지는 중인 화면·팝업 안인가(디자인 언어 8.1 — 나가는 화면은 누를 수 없다). [LocalInputLocked]와 달리 모양은 그대로 두고
  * 눌림만 막는다 — 버튼이 사라지는 동안 비활성 색으로 깜빡이지 않게. `tappable`이 읽는다.
  */

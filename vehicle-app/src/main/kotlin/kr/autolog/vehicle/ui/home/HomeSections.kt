@@ -26,7 +26,7 @@ import kr.autolog.vehicle.ui.trips.tripRouteText
  * - 대기: "이번 달 운행 정보"(누적 km + 보조 사실) · "최근 운행 기록"(최신 3건 목록, 누르면 운행 기록 조회).
  * - 기록 중: "주행 거리" · "운행 경로"(출발지 → 흐르는 화살표 → 목적지).
  * - 복구 중: 없음(팝업이 모든 정보를 말한다).
- * 소제목 문구는 Peek과 같은 `section_*`. 거리 숫자는 화면 폭에 따라 140/112/80 sp로 조정한다.
+ * 소제목 문구는 정보 종류마다 하나인 `section_*`. 정차·주행 중에도 같은 섹션을 그대로 보인다(D-31). 거리 숫자는 화면 폭에 따라 140/112/80 sp로 조정한다.
  */
 @Composable
 internal fun homeSections(state: HomeUiState, onAction: (HomeAction) -> Unit): List<HomeSection> = when (state.phase) {
@@ -50,7 +50,7 @@ private fun TripRoute(state: HomeUiState) {
     if (LocalWindowLayout.current == WindowLayout.NARROW) Spacer(Modifier.height(Space.s5))
     RouteFlow(
         origin = state.origin,
-        destination = state.destination ?: stringResource(R.string.peek_no_destination),
+        destination = state.destination ?: stringResource(R.string.route_no_destination),
         destinationColor = if (state.destination != null) c.textPrimary else c.textSecondary,
         textStyle = AutoLogTheme.windowType.homeRoute,
         markerScale = routeMarkerScale(),

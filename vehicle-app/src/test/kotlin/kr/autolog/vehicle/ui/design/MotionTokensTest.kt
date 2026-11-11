@@ -51,12 +51,4 @@ class MotionTokensTest {
         assertTrue(vector.getValueFromNanos(200_000_000L, start, end, still).value > 0f)
         assertTrue(MotionTokens.Static.swapIn<Float>() is SnapSpec<*>)
     }
-
-    @Test
-    fun `정차·주차 전환 페이드는 정차(Static)에서도 움직이고, 애니메이션 줄이기(Still)면 즉시`() {
-        assertTrue(MotionTokens.Static.tierFadeOut<Float>() is SpringSpec<*>)
-        assertTrue(MotionTokens.Static.tierFadeIn<Float>() !is SnapSpec<*>)
-        assertTrue(MotionTokens.Still.tierFadeOut<Float>() is SnapSpec<*>)
-        assertTrue(MotionTokens.Still.tierFadeIn<Float>() is SnapSpec<*>)
-    }
 }

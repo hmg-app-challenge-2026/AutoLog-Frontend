@@ -63,4 +63,39 @@ class NavigatorTest {
 
         assertEquals(listOf(Route.Home), nav.backStack.value)
     }
+
+    @Test
+    fun `정차 중 끝난 운행의 결과는 다음 주차 때 Home 위에 연다`() {
+        val nav = Navigator(Route.Home)
+        nav.onTierChanged(UsageTier.PEEK)
+
+        nav.showWhenParked(Route.TripResult("t-1"))
+        assertEquals(listOf(Route.Home), nav.backStack.value)
+        nav.onTierChanged(UsageTier.FULL)
+
+        assertEquals(listOf(Route.Home, Route.TripResult("t-1")), nav.backStack.value)
+    }
+
+    @Test
+    fun `주차 전에 기록이 다시 이어지면 기다리던 결과를 열지 않는다`() {
+        val nav = Navigator(Route.Home)
+        nav.onTierChanged(UsageTier.PEEK)
+        nav.showWhenParked(Route.TripResult("t-1"))
+
+        nav.showWhenParked(null)
+        nav.onTierChanged(UsageTier.FULL)
+
+        assertEquals(listOf(Route.Home), nav.backStack.value)
+    }
+
+    @Test
+    fun `주차 중이면 결과를 바로 쌓고, 이미 맨 위면 두 번 쌓지 않는다`() {
+        val nav = Navigator(Route.Home)
+        nav.onTierChanged(UsageTier.FULL)
+
+        nav.showWhenParked(Route.TripResult("t-1"))
+        nav.showWhenParked(Route.TripResult("t-1"))
+
+        assertEquals(listOf(Route.Home, Route.TripResult("t-1")), nav.backStack.value)
+    }
 }
