@@ -22,7 +22,7 @@
 
 | 화면 Repository | 계약 | 실구현(백엔드) | 상태 |
 |---|---|---|---|
-| `SessionRepository` | `TripSessionApi`([기록 종료] = `finalize`, `requestStop`은 안 씀 — 3.1) | `TripSessionManager` | 연결 |
+| `SessionRepository` | `TripSessionApi`([기록 종료] = `requestStop` 5초 종료 대기, 운행 결과 [저장하기] = `finalize` — 3.1) | `TripSessionManager` | 연결 |
 | `VehicleUsageRepository`(사용 3단계) | `TripSessionApi.motion` + AAOS `CarUxRestrictions` | `DrivingJudge` + 프론트 `AndroidCarUxSource` | 연결 |
 | `ProfileRepository` | `PurposeEngine.orderedUsers` · `SettingsApi.users/addUser` · `TripSessionApi.currentDriver` | `DefaultPurposeEngine` · `SettingsService` | 연결(배차 순서는 G-02) |
 | `ContextRepository` | `ContextApi.destination` | `GatewayContext`(NaviGateway) | 연결 |
@@ -57,9 +57,9 @@
 
 | 바뀐 것 | 내용 | 프론트 |
 |---|---|---|
-| `TripSessionApi.requestStop()` 추가 (`078c199`) | 기록 중 → 5초 종료 대기(`StopCandidate`, 이유 `USER_REQUEST`). 이 이유로 끝낸 운행은 **0 km여도 0.0 km로 남긴다**. 대기 중 기어 P가 들어와도 다시 세지 않는다 | **쓰지 않는다.** 2026-11-11 사용자 확인 — [기록 종료]는 기다리지 않고 바로(`finalize`). 프론트 가짜(`data/fake/FakeTripSession`)는 계약이라 구현만 둔다 |
-| `finalize()` 주석 | "종료 대기 화면·알림: 기다리지 않고 바로 끝낸다" | Home [기록 종료] · 운행 결과 [저장하기] 모두 `finalize` |
-| 0 km 운행 | `finishLocked`: 이동 없음(`DistancePolicy.NoMovement` = **1분 미만 그리고 0.3 km 미만**)이면 `DISCARDED`. 단 `USER_REQUEST` 종료 대기로 끝낸 것은 남김 | 화면은 `requestStop`을 안 쓰므로 "1분 미만·0.3 km 미만은 버림"만 일어난다. 1분 넘게 서 있다 끝낸 0.0 km 운행은 남는다 → G-09 |
+| `TripSessionApi.requestStop()` 추가 (`078c199`) | 기록 중 → 5초 종료 대기(`StopCandidate`, 이유 `USER_REQUEST`). 이 이유로 끝낸 운행은 **0 km여도 0.0 km로 남긴다**. 대기 중 기어 P가 들어와도 다시 세지 않는다 | **쓴다** — Home [기록 종료] = `requestStop`. 자동 종료와 같은 5초 대기 + 운행 결과 카드(2026-11-11 사용자 결정). 프론트 가짜(`data/fake/FakeTripSession`)도 같은 5초 대기 |
+| `finalize()` 주석 | "종료 대기 화면·알림: 기다리지 않고 바로 끝낸다" | 운행 결과 [저장하기](종료 대기 중 바로 끝내기) = `finalize`. 알림 [기록 종료]도 `finalize`(앱 A) |
+| 0 km 운행 | `finishLocked`: 이동 없음(`DistancePolicy.NoMovement` = **1분 미만 그리고 0.3 km 미만**)이면 `DISCARDED`. 단 `USER_REQUEST` 종료 대기로 끝낸 것은 남김 | **앱 A 정책을 그대로 따른다**(2026-11-11 사용자 결정): 자동 종료의 이동 없음은 버림, [기록 종료]로 끝낸 0 km는 결과 화면에서 볼 수 있게 남김. 1분 넘게 서 있다 끝낸 0.0 km 자동 종료 운행도 남는다 — G-09 |
 | `ContextApi.currentNaviLocation()` 추가 (`6add996`) | 운행 시작 때 내비 현재 위치를 출발지로: `originLabel` = 내비 주소(공백이면 null), 좌표 출처 `NAVI_CURRENT`. 내비 위치가 없으면 Fused 좌표(`freshFix`) | 화면은 그대로 — 출발지 이름은 `LiveTrip.originLabel`/`TripRow.originLabel`로 이미 받는다(R-9). 이제 등록 장소 이름 대신 **내비 주소**가 올 수 있어 길다 — 출발지는 Home 경로·목록 줄 모두 한 줄 말줄임(`RouteFlow`·`TripListRow`)이라 깨지지는 않지만 앞부분만 보인다(에뮬레이터에서 확인 필요) |
 
 ## 4. 연결하지 못했거나 정책이 어긋나는 것 — 기록만 (고치지 않음)
@@ -104,14 +104,13 @@
 - **현상:** `AutoLog.create`는 호출 스레드에서 `EncryptedSharedPreferences`(키스토어)·Room 빌더·게이트웨이 시작을 한다. 앱은 이를 `MainActivity`(메인 스레드)에서 부른다(백엔드가 정한 시점).
 - **영향:** 첫 화면이 조금 늦게 뜰 수 있다(키스토어 첫 접근 수백 ms). 맥 에뮬레이터에서 체감 확인.
 
-### G-09 0 km 운행이 남을 수 있다 — 📨 R-12 (2026-11-11 사용자 결정 "0 km는 모두 버린다")
-- **현상:** 앱 A는 1분 미만 **그리고** 0.3 km 미만인 운행만 버린다(`DistancePolicy.NoMovement`). 1분 넘게 서 있다가 끝낸 0.0 km 운행은 운행 기록·운행기록부에 남는다. 또 `requestStop`으로 끝낸 0 km 운행은 일부러 남긴다(화면은 안 씀).
-- **사용자 결정:** 자동 종료든 직접 끝낸 운행이든 0 km는 모두 버린다.
-- **바꾼 것:** 프론트는 `requestStop`을 쓰지 않게 되돌렸다(직접 끝낸 0 km를 일부러 남기는 경로가 없어짐). 나머지(1분 넘는 0.0 km)는 앱 A `DistancePolicy`/`finishLocked`를 바꿔야 한다 — 이 리포는 백엔드를 고치지 않으므로 **R-12**로 요청.
-- **화면 영향:** 버린 운행은 운행 결과 카드 없이 Home 대기로 돌아간다(앱 A가 `Idle`로). 프론트 데모 가짜는 이동 없음 규칙을 흉내 내지 않는다(데모에서 바로 끝내도 결과 카드가 뜬다).
+### G-09 0 km 운행이 남을 수 있다 — ✅ 앱 A 정책을 따른다 (2026-11-11 사용자 결정)
+- **현상:** 앱 A는 1분 미만 **그리고** 0.3 km 미만인 자동 종료 운행만 버린다(`DistancePolicy.NoMovement`). 1분 넘게 서 있다 끝낸 0.0 km 운행과 [기록 종료](`requestStop`)로 끝낸 0 km 운행은 남는다.
+- **결정:** 한때 "0 km는 모두 버린다"(R-12)를 검토했지만 앱 A 정책을 그대로 따르기로 했다. R-12 철회. 프론트는 바꾼 것 없음.
+- **참고:** 프론트 데모 가짜는 이동 없음 규칙을 흉내 내지 않는다(데모에서는 자동 종료든 [기록 종료]든 늘 결과 카드가 뜬다).
 
 ### G-07 계약은 있는데 화면이 일부러 쓰지 않는 것 (의도, 참고) — ⏸ 보류
-- `TripSessionApi.requestStop`(5초 종료 대기 — 3.1, 2026-11-11), `PurposeEngine.unassignedTrips`·`shouldProposePlace`·`registerClientPlace`(F-20 선택 화면 질문, F-17 거래처 등록), `VoiceApi.listenPurpose`·`listenFuel`(F-09·F-18 음성) — D-19·D-27·D-20 결정으로 화면에서 뺐다. 계약·구현은 남아 있어 되살리기 쉽다.
+- `PurposeEngine.unassignedTrips`·`shouldProposePlace`·`registerClientPlace`(F-20 선택 화면 질문, F-17 거래처 등록), `VoiceApi.listenPurpose`·`listenFuel`(F-09·F-18 음성) — D-19·D-27·D-20 결정으로 화면에서 뺐다. 계약·구현은 남아 있어 되살리기 쉽다.
 
 ### G-08 계약이 없는 화면 기능 (참고) — ⏸ 보류
 - 직원 지우기(설정) — `SettingsApi`에 없음. 운행기록부 보관함(F-24) — Room `reports` 테이블은 있으나 조회 계약이 없음.

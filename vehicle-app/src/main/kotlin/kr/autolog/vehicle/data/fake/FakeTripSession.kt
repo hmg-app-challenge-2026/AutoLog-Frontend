@@ -68,7 +68,7 @@ class FakeTripSession(
         finalizeNow()
     }
 
-    /** 앱 A 계약의 "5초 종료 대기" — 화면은 쓰지 않는다([기록 종료]는 [finalize]로 바로 끝낸다, 스펙 1.2). */
+    /** [기록 종료]: 기어 P와 같은 5초 종료 대기(이유 USER_REQUEST). 앱 A는 이렇게 끝낸 운행을 0 km여도 남긴다 — 가짜는 늘 남긴다. */
     override suspend fun requestStop() {
         val s = _state.value as? SessionState.Recording ?: return
         startAutoEnd(s, StopReason.USER_REQUEST)

@@ -56,7 +56,7 @@ class HomeViewModel(
         viewModelScope.launch {
             when (action) {
                 HomeAction.StartTrip -> session.startTrip()
-                HomeAction.EndNow -> session.endNow()
+                HomeAction.EndNow -> session.requestStop()
                 HomeAction.AcceptMissedTrip -> session.acceptMissedTrip()
                 HomeAction.IgnoreMissedTrip -> session.ignoreMissedTrip()
                 is HomeAction.Recover -> session.resolveRecovery(action.action)
