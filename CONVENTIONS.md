@@ -14,6 +14,7 @@
 | `backend/` (submodule) | 앱 A·B | **이 리포에서 고치지 않는다.** 필요하면 Backend에 PR |
 | `vehicle-app/.../data/fake/` | 프론트 | 데모·테스트용 앱 A 가짜(데모 조작 — 거리 늘리기·놓친 운행·복구 — 포함). 실제 앱(vehicle flavor)은 쓰지 않는다 |
 | `vehicle-app/.../data/upload/` | 프론트(임시) | 사내 서버 업로드 자리표시 계약. 백엔드 계약(R-4)이 오면 삭제한다 |
+| `vehicle-app/.../overlay/` · `src/vehicle/.../overlay/` | 프론트 | 운행 기록 알약(스펙 6.12). 경계·표시 규칙은 main, Android 창 구현(`RecordingPill`)은 vehicle flavor에만. 설정 화면은 `data/repository/OverlayPermissionRepository`로만 권한을 본다 |
 
 - `ai.pleos.*` import 금지(스펙 6.1).
 - `ui/` 패키지는 `data/repository`의 인터페이스만 쓴다. `kr.autolog.vehicle.core`의 서비스 인터페이스를 import하지 않는다(값 enum은 가능).
